@@ -4190,18 +4190,7 @@ pari_warn(warner, "Doesn't work properly with infinities");
 GEN
 rnormal(long prec)
 {
-	/*
-	pari_sp ltop = avma;
-	GEN pr = gen_0, u1 = gen_0, u2 = gen_0, p1 = gen_0;
-	pr = gmulsg(32, gceil(gdiv(gmulsg(getrealprecision(), glog(stoi(10), prec)), glog(int2n(32), prec))));
-	u1 = gshift(gmul(genrand(gpow(gen_2, pr, prec)), real_1(prec)), -gtos(pr));
-	u2 = gshift(gmul(genrand(gpow(gen_2, pr, prec)), real_1(prec)), -gtos(pr));
-	p1 = gmul(gsqrt(gmulsg(-2, glog(u1, prec)), prec), gcos(gmul(mulsr(2, mppi(prec)), u1), prec));
-	p1 = gerepileupto(ltop, p1);
-	return p1;
-	*/
-
-	if (rnormal_cached != 0) {
+	if (rnormal_cached) {
 		if (precision(rnormal_cached) != prec) {
 			gunclone(rnormal_cached);
 		} else {
@@ -4212,17 +4201,16 @@ rnormal(long prec)
 		}
 	}
 	pari_sp ltop = avma;
-	GEN u1, u2, ret, outside, inside;
+	GEN u1, u2, ret, outside, inside, cos_inside;
 	u1 = randomr(prec);
 	u2 = randomr(prec);
 	outside = sqrtr_abs(shiftr(mplog(u1), 1));
 	inside = mulrr(shiftr(mppi(prec), 1), u2);
+	cos_inside = mpcos(inside);
 	
-	// TODO: mpcos and mpsin use most of the same internal machinery;
-	// a single call to mpsc1 + some work would speed this up. Low priority.
-	ret = mulrr(outside, mpcos(inside));
+	ret = mulrr(outside, cos_inside);
 	rnormal_cached = gclone(ret);	// Cache for later use
-	ret = mulrr(outside, mpcos(inside));
+	ret = mulrr(outside, cos_inside);
 	ret = gerepileupto(ltop, ret);
 		return ret;
 }
