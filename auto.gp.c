@@ -4938,19 +4938,17 @@ longestProgression1(GEN v)
 long
 checkmult(GEN v, long verbose)
 {
-	pari_sp ltop = avma;
-	GEN f = gen_0;
-	long l1;	  /* lg */
 	if (!is_matvec_t(typ(v)))
 		pari_err(typeer, "checkmult");
 
 	// At the moment v[1] must be equal to 1; definitions vary but this seems
 	// sensible.
-	if (!gequalgs(gel(v, 1), 1)) {
-		avma = ltop;
+	if (!gequalgs(gel(v, 1), 1))
 		return 0;
-	}
-	l1 = lg(v);
+
+	pari_sp ltop = avma;
+	GEN f;
+	long l1 = lg(v);
 	
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	long n, l2;
@@ -4960,16 +4958,12 @@ checkmult(GEN v, long verbose)
 			continue;
 		f = Z_factor(stoi(n));
 		l2 = glength(gel(f, 1));
-{
-		pari_sp btop = avma;
 		long i, l4;
 		p3 = gen_1;
 		for (i = 1; i <= l2; ++i) {
 			l4 = gtos(gpow(gcoeff(f, i, 1), gcoeff(f, i, 2), FAKE_PREC));
 			p3 = gmul(p3, gel(v, l4));
-			p3 = gerepileupto(btop, p3);
 		}
-}
 		if (!gequal(gel(v, n), p3)) {
 			if (verbose)
 				pariprintf("Not multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
