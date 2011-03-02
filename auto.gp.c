@@ -121,9 +121,9 @@ GP;addhelp(bfile, "bfile(name, v, offset=1): If v is given, creates a b-file wit
 GP;install("dsum","G","dsum","./auto.gp.so");
 GP;addhelp(dsum, "dsum(n): Digit sum of n. Sloane's A007953.");
 // New \/
-GP;install("checkmult","lGD1,L,p","checkmult","./auto.gp.so");
+GP;install("checkmult","lGD1,L,","checkmult","./auto.gp.so");
 GP;addhelp(checkmult, "checkmult(v,{verbose=1}): Is the sequence v multiplicative?");
-GP;install("checkcmult","lGD1,L,p","checkcmult","./auto.gp.so");
+GP;install("checkcmult","lGD1,L,","checkcmult","./auto.gp.so");
 GP;addhelp(checkcmult, "checkcmult(v,{verbose=1}): Is the sequence v completely multiplicative?");
 GP;install("checkdiv","lGD1,L,","checkdiv","./auto.gp.so");
 GP;addhelp(checkdiv, "checkdiv(v,{verbose=1}): Is v a divisibility sequence?");
@@ -163,9 +163,9 @@ GP;install("dostuff","vG","dostuff","./auto.gp.so");
 
 
 //////////////////////////////////////////////////////////// New
-long checkmult(GEN v, long verbose/*=1*/, long prec);
-long checkcmult(GEN v, long verbose/*=1*/, long prec);
-long checkdiv(GEN v, long verbose/*=1*/);
+long checkmult(GEN v, long verbose);
+long checkcmult(GEN v, long verbose);
+long checkdiv(GEN v, long verbose);
 GEN solvePell(GEN n, long prec);
 GEN tetrMod(GEN a, GEN b, GEN M);
 GEN Engel(GEN x, long prec);
@@ -4936,147 +4936,136 @@ longestProgression1(GEN v)
 ////////////////////////////////////////////////////////////////////////////////////// Newcomers
 
 long
-checkmult(GEN v, long verbose/*=1*/, long prec)
+checkmult(GEN v, long verbose)
 {
-  pari_sp ltop = avma;
-  GEN f = gen_0;
-  long l1;	  /* lg */
-  if (!is_matvec_t(typ(v)))
-    pari_err(typeer, "checkmult");
-  if (!gequalgs(gel(v, 1), 1))
-  {
-    avma = ltop;
-    return 0;
-  }
-  /* definitions vary, but it's hard otherwise */
-  l1 = lg(v);
-  {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    long n, l2;
-    GEN p3 = gen_0;
-    for (n = 6; n < l1; ++n)
-    {
-      if (uisprimepower(n))
-        continue;
-      f = Z_factor(stoi(n));
-      l2 = glength(gel(f, 1));
-      {
-        pari_sp btop = avma;
-        long i, l4;
-        p3 = gen_1;
-        for (i = 1; i <= l2; ++i)
-        {
-          l4 = gtos(gpow(gcoeff(f, i, 1), gcoeff(f, i, 2), prec));
-          p3 = gmul(p3, gel(v, l4));
-          p3 = gerepileupto(btop, p3);
-        }
-      }
-      if (!gequal(gel(v, n), p3))
-      {
-        if (verbose)
-          pariprintf("Not multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
-        avma = ltop;
-        return 0;
-      }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepileall(btop, 2, &f, &p3);
-    }
-  }
-  avma = ltop;
-  return 1;
+	pari_sp ltop = avma;
+	GEN f = gen_0;
+	long l1;	  /* lg */
+	if (!is_matvec_t(typ(v)))
+		pari_err(typeer, "checkmult");
+
+	// At the moment v[1] must be equal to 1; definitions vary but this seems
+	// sensible.
+	if (!gequalgs(gel(v, 1), 1)) {
+		avma = ltop;
+		return 0;
+	}
+	l1 = lg(v);
+	
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	long n, l2;
+	GEN p3 = gen_0;
+	for (n = 6; n < l1; ++n) {
+		if (uisprimepower(n))
+			continue;
+		f = Z_factor(stoi(n));
+		l2 = glength(gel(f, 1));
+{
+		pari_sp btop = avma;
+		long i, l4;
+		p3 = gen_1;
+		for (i = 1; i <= l2; ++i) {
+			l4 = gtos(gpow(gcoeff(f, i, 1), gcoeff(f, i, 2), FAKE_PREC));
+			p3 = gmul(p3, gel(v, l4));
+			p3 = gerepileupto(btop, p3);
+		}
+}
+		if (!gequal(gel(v, n), p3)) {
+			if (verbose)
+				pariprintf("Not multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+			avma = ltop;
+			return 0;
+		}
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+			gerepileall(btop, 2, &f, &p3);
+	}
+	avma = ltop;
+	return 1;
 }
 
 
 long
-checkcmult(GEN v, long verbose/*=1*/, long prec)
+checkcmult(GEN v, long verbose)
 {
-  pari_sp ltop = avma;
-  GEN f = gen_0;
-  long l1;	  /* lg */
-  if (!is_matvec_t(typ(v)))
-    pari_err(typeer, "checkcmult");
-  if (!gequalgs(gel(v, 1), 1))
-  {
-	  /* definitions vary, but it's hard otherwise */
-    avma = ltop;
-    return 0;
-  }
-  
-  l1 = lg(v);
-  {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    long n, l2;
-    GEN p3 = gen_0;
-    for (n = 4; n < l1; ++n)
-    {
-      if (isprime(stoi(n)))
-        continue;
-      f = Z_factor(stoi(n));
-      l2 = glength(gel(f, 1));
-      {
-        pari_sp btop = avma;
-        long i, l4;
-        p3 = gen_1;
-        for (i = 1; i <= l2; ++i)
-        {
-          l4 = gtos(gcoeff(f, i, 1));
-          p3 = gmul(p3, gpow(gel(v, l4), gcoeff(f, i, 2), prec));
-          p3 = gerepileupto(btop, p3);
-        }
-      }
-      if (!gequal(gel(v, n), p3))
-      {
-        if (verbose)
-          pariprintf("Not completely multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
-        avma = ltop;
-        return 0;
-      }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepileall(btop, 2, &f, &p3);
-    }
-  }
-  avma = ltop;
-  return 1;
+	pari_sp ltop = avma;
+	GEN f = gen_0;
+	long l1;	  /* lg */
+	if (!is_matvec_t(typ(v)))
+		pari_err(typeer, "checkcmult");
+
+	// At the moment v[1] must be equal to 1; definitions vary but this seems
+	// sensible.
+	if (!gequalgs(gel(v, 1), 1)) {
+		avma = ltop;
+		return 0;
+	}
+
+	l1 = lg(v);
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	long n, l2;
+	GEN p3 = gen_0;
+	for (n = 4; n < l1; ++n) {
+		if (isprime(stoi(n)))
+			continue;
+		f = Z_factor(stoi(n));
+		l2 = glength(gel(f, 1));
+{
+		pari_sp btop = avma;
+		long i, l4;
+		p3 = gen_1;
+		for (i = 1; i <= l2; ++i) {
+			l4 = gtos(gcoeff(f, i, 1));
+			p3 = gmul(p3, gpow(gel(v, l4), gcoeff(f, i, 2), FAKE_PREC));
+			p3 = gerepileupto(btop, p3);
+		}
+	}
+	if (!gequal(gel(v, n), p3)) {
+		if (verbose)
+			pariprintf("Not completely multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+		avma = ltop;
+		return 0;
+	}
+	if (low_stack(st_lim, stack_lim(btop, 1)))
+		gerepileall(btop, 2, &f, &p3);
+	}
+	avma = ltop;
+	return 1;
 }
 
 
 long
 checkdiv(GEN v, long verbose/*=1*/)
 {
-  pari_sp ltop = avma;
-  long l1;	  /* lg */
-  if (!is_matvec_t(typ(v)))
-    pari_err(typeer, "checkdiv");
-  l1 = lg(v);
-  {
-    pari_sp btop = avma;
-    long n, l2;
-    long l3;	  /* lg */
-    for (n = 1; n < l1; ++n)
-    {
-      l2 = n + n;
-      l3 = lg(v);
-      {
-        pari_sp btop = avma;
-        GEN i = gen_0;
-        long l4 = n > 0;	  /* bool */
-        for (i = stoi(l2); l4?gcmpgs(i, l3-1) <= 0:gcmpgs(i, l3-1) >= 0; i = gaddgs(i, n))
-        {
-          if (!gequal0(gmod(gel(v, gtos(i)), gel(v, n))))
-          {
-            if (verbose)
-              pariprintf("Not a divisibility sequence: a(%ld) = %Ps does not divide a(%Ps) = %Ps.\n", n, gel(v, n), i, gel(v, gtos(i)));
-            avma = ltop;
-            return 0;
-          }
-          i = gerepileupto(btop, i);
-        }
-      }
-      avma = btop;
-    }
-  }
-  avma = ltop;
-  return 1;
+	pari_sp ltop = avma;
+	long l1;	  /* lg */
+	if (!is_matvec_t(typ(v)))
+		pari_err(typeer, "checkdiv");
+
+	l1 = lg(v);
+	pari_sp btop = avma;
+	long n, l2;
+	long l3;	  /* lg */
+	for (n = 1; n < l1; ++n) {
+		l2 = n + n;
+		l3 = lg(v);
+{
+		pari_sp btop = avma;
+		GEN i = gen_0;
+		long l4 = n > 0;	  /* bool */
+		for (i = stoi(l2); l4?gcmpgs(i, l3-1) <= 0:gcmpgs(i, l3-1) >= 0; i = gaddgs(i, n)) {
+			if (!gequal0(gmod(gel(v, gtos(i)), gel(v, n)))) {
+				if (verbose)
+					pariprintf("Not a divisibility sequence: a(%ld) = %Ps does not divide a(%Ps) = %Ps.\n", n, gel(v, n), i, gel(v, gtos(i)));
+				avma = ltop;
+				return 0;
+			}
+			i = gerepileupto(btop, i);
+		}
+}
+		avma = btop;
+	}
+	avma = ltop;
+	return 1;
 }
 
 
@@ -5085,52 +5074,45 @@ checkdiv(GEN v, long verbose/*=1*/)
 GEN
 solvePell(GEN n, long prec)
 {
-  pari_sp ltop = avma;
-  GEN myprec = gen_0, C = gen_0, k = gen_1, t = gen_0, x = gen_0, y = gen_0;
-  if (typ(n) != t_INT)
-    pari_err(typeer, "solvePell");
-  myprec = stoi(getrealprecision());
-  setrealprecision(125, &prec);
-  {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    while (1)
-    {
-      C = contfrac0(gsqrt(n, prec), NULL, 0);
-      {
-        pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-        GEN p1 = gen_0, p2 = gen_0;	  /* vec */
-        while (gcmpgs(k, glength(C)) <= 0)
-        {
-          {
-            long i;
-            p1 = cgetg(gtos(k)+1, t_VEC);
-            for (i = 1; gcmpsg(i, k) <= 0; ++i)
-              gel(p1, i) = gcopy(gel(C, i));
-          }
-          t = contfracback(p1, NULL);
-          x = numer(t);
-          y = denom(t);
-          if (gequal1(gsub(gsqr(x), gmul(n, gsqr(y)))))
-          {
-            setrealprecision(gtos(myprec), &prec);
-            p2 = cgetg(3, t_VEC);
-            gel(p2, 1) = gcopy(x);
-            gel(p2, 2) = gcopy(y);
-            p2 = gerepileupto(ltop, p2);
-            return p2;
-          }
-          k = gaddgs(k, 1);
-          if (low_stack(st_lim, stack_lim(btop, 1)))
-            gerepileall(btop, 6, &p1, &t, &x, &y, &p2, &k);
-        }
-      }
-      setrealprecision(2*getrealprecision(), &prec);
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepileall(btop, 5, &C, &t, &x, &y, &k);
-    }
-  }
-  avma = ltop;
-  return gen_0;
+	pari_sp ltop = avma;
+	GEN myprec = gen_0, C = gen_0, k = gen_1, t = gen_0, x = gen_0, y = gen_0;
+	if (typ(n) != t_INT)
+		pari_err(typeer, "solvePell");
+	myprec = stoi(getrealprecision());
+	setrealprecision(125, &prec);
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	while (1) {
+		C = contfrac0(gsqrt(n, prec), NULL, 0);
+{
+		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+		GEN p1 = gen_0, p2 = gen_0;	  /* vec */
+		while (gcmpgs(k, glength(C)) <= 0) {
+			long i;
+			p1 = cgetg(gtos(k)+1, t_VEC);
+			for (i = 1; gcmpsg(i, k) <= 0; ++i)
+				gel(p1, i) = gcopy(gel(C, i));
+			t = contfracback(p1, NULL);
+			x = numer(t);
+			y = denom(t);
+			if (gequal1(gsub(gsqr(x), gmul(n, gsqr(y))))) {
+				setrealprecision(gtos(myprec), &prec);
+				p2 = cgetg(3, t_VEC);
+				gel(p2, 1) = gcopy(x);
+				gel(p2, 2) = gcopy(y);
+				p2 = gerepileupto(ltop, p2);
+				return p2;
+			}
+			k = gaddgs(k, 1);
+			if (low_stack(st_lim, stack_lim(btop, 1)))
+				gerepileall(btop, 6, &p1, &t, &x, &y, &p2, &k);
+		}
+}
+		setrealprecision(2*getrealprecision(), &prec);
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+		gerepileall(btop, 5, &C, &t, &x, &y, &k);
+	}
+	avma = ltop;
+	return gen_0;
 }
 
 
