@@ -253,7 +253,7 @@ void fortwin(GEN ga, GEN gb, GEN code);
 void forbigprime(GEN ga, GEN gb, GEN code);
 void forbigprime_sieve(ulong a, ulong b, GEN code);
 void forthinprime(ulong a, ulong b, GEN code);
-GEN gtor(GEN x, const char* funcName, long prec);
+INLINE GEN gtor(GEN x, const char* funcName, long prec);
 void init_auto(void);
 /*End of prototype*/
 
@@ -365,7 +365,7 @@ consistency()
 }
 
 
-GEN
+INLINE GEN
 gtor(GEN x, const char* funcName, long prec)
 {
 	long t = typ(x);
@@ -798,11 +798,9 @@ uisprimepower(ulong n)
 INLINE long
 valu(ulong n)
 {
-//#ifdef __builtin_ctzll
 #if 1
 	return n ? __builtin_ctzll(n) : -1;
 #else
-pari_printf("Can't find __builtin_ctzll\n");
 	if (n == 0)
 		return -1;
 	long count = 0;
@@ -1737,7 +1735,6 @@ static ulong DS[] ={
 GEN
 dsum(GEN n)	  /* int */
 {
-	pari_sp ltop = avma;
 	if (typ(n) != t_INT)
 		pari_err(typeer, "dsum");
 	long nn = itou_or_0(n);
@@ -1751,6 +1748,7 @@ dsum(GEN n)	  /* int */
 		pari_err(overflower, "freaking giant number in dsum");
 		// TODO: Handle very large numbers that overflow ulong?
 	
+	pari_sp ltop = avma;
 	ulong s = 0;
 	GEN t, ret;
 	GEN thou = stoi(1000);
@@ -1830,12 +1828,11 @@ GEN
 ways2(GEN n)
 {
 	// TODO: Serious improvements available with incremental factoring
-	pari_sp ltop = avma;
-	GEN f, res = gen_1;
 	if (typ(n) != t_INT)
 		pari_err(arither1, "ways2");
-	/*sum(k=0,sqrtint(n>>1),issquare(n-k^2)) */
-	f = factor(oddres(n));
+
+	pari_sp ltop = avma;
+	GEN res = gen_1, f = factor(oddres(n));
 	long l1 = glength(gel(f, 1));
 	pari_sp btop = avma;
 	long i;
@@ -3264,24 +3261,20 @@ GEN
 digits(GEN x)
 {
 	pari_sp ltop = avma;
-	GEN p1;
 	long s = sizedigit(x) - 1;
-	if (gcmp(x, powis(stoi(10), s)) < 0)
-		p1 = stoi(s);
-	else
-		p1 = stoi(s + 1);
-	p1 = gerepileupto(ltop, p1);
-	return p1;
+	if (gcmp(x, powis(stoi(10), s)) >= 0)
+		s++;
+	avma = ltop;
+	return stoi(s);
 }
 
 
 GEN
 eps(long prec)
 {
-	pari_sp ltop = avma;
-	GEN res = shiftr(dbltor(1.), 1 - bit_accuracy(prec));
-	res = gerepileupto(ltop, res);
-	return res;
+	GEN ret = real_1(DEFAULTPREC);
+	setexpo(ret, 1 - bit_accuracy(prec));
+	return ret;
 }
 
 /******************************************************************************/
