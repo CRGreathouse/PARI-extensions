@@ -1189,18 +1189,6 @@ pari_printf("Can't find __builtin_ctzll\n");
 }
 
 
-// Assumes 64-bit
-// FIXME: Fails for large a
-ulong icbrt2(ulong a) {
-    ulong x = (ulong)cbrt((double)a);
-    if (x > 2642245 || x*x*x > a)
-        x--;
-    if ((x+1)*(x+1)*(x+1) <= a)
-		x++;
-    return x;
-}
-
-
 long
 isPowerful_small(ulong n)
 {
@@ -1667,9 +1655,9 @@ lpf(GEN n)
 long
 isTriangular(GEN n)
 {
-	pari_sp ltop = avma;
 	if (typ(n) != t_INT)
 		pari_err(arither1, "isTriangular");
+	pari_sp ltop = avma;
 	long ret = Z_issquare(addis(shifti(n, 3), 1));
 	avma = ltop;
 	return ret;
@@ -1678,11 +1666,11 @@ isTriangular(GEN n)
 
 long isHexagonal(GEN n)
 {
-	pari_sp ltop = avma;
 	if (typ(n) != t_INT)
 		pari_err(arither1, "isHexagonal");
 	if (signe(n) < 1)
 		return signe(n) == 0;	// 0 is hexagonal
+	pari_sp ltop = avma;
 	GEN root;
 	long ret = Z_issquareall(addis(shifti(n, 3), 1), &root);
 	if (ret)
@@ -1712,11 +1700,11 @@ long isHexagonal(GEN n)
 long
 isFibonacci(GEN n)		/* bool */
 {
-	pari_sp ltop = avma;
 	if (typ(n) != t_INT)
 		pari_err(arither1, "isFibonacci");
 	if (!is_bigint(n))
 		return isSmallFib(itos(n));
+	pari_sp ltop = avma;
 
 	// Good residue classes: 55, 76, 144, 199, 377, 521, 987, 1364, 2584, 3571, 6765, 9349, 17711, 24476, 46368, 64079, 121393, 167761, 317811, 439204, 832040, 1149851, 2178309, 3010349, 5702887, 7881196, 14930352, 20633239, 39088169, ...
 	long rem = smodis(n, 17711);
@@ -3720,8 +3708,6 @@ bfilein(char* name)
 #else
 		if (strlen(name) == 11 && name[0] == 'b' && name[1] >= '0' && name[1] <= '9' && name[2] >= '0' && name[2] <= '9' && name[3] >= '0' && name[3] <= '9' && name[4] >= '0' && name[4] <= '9' && name[5] >= '0' && name[5] <= '9' && name[6] >= '0' && name[6] <= '9' && name[7] == '.' && name[8] == 't' && name[9] == 'x' && name[10] == 't') {
 			char command[65];
-			//sprintf(command, "wget http://www.research.att.com/~njas/sequences/%s", name);
-			//sprintf(command, "wget http://oeis.org/classic/%s", name);
 			sprintf(command, "wget http://oeis.org/A%c%c%c%c%c%c/%s", name[1],name[2],name[3],name[4],name[5],name[6],name);
 			int result = system(command);
 			if (result == -1)
