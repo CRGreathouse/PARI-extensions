@@ -4927,37 +4927,47 @@ checkmult(GEN v, long verbose)
 	if (!is_matvec_t(typ(v)))
 		pari_err(typeer, "checkmult");
 
+	// I suppose [] is a multiplicative sequence... if nothing else guard
+	// against checking v[1] below.
+	long n, l1 = lg(v), l2;
+	if (l1 == 1)
+		return 1;
+	
 	// At the moment v[1] must be equal to 1; definitions vary but this seems
 	// sensible.
 	if (!gequalgs(gel(v, 1), 1))
 		return 0;
-
+		
 	pari_sp ltop = avma;
-	GEN f;
-	long l1 = lg(v);
-	
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-	long n, l2;
-	GEN p3 = gen_0;
+	GEN f, target;
+
+	// Require all arguments to be integers
+	for (n = 2; n < 6 && n < l1; ++n)
+		if (typ(gel(v, n)) != t_INT)
+			pari_err(arither1, "checkmult");
+			
 	for (n = 6; n < l1; ++n) {
+		if (typ(gel(v, n)) != t_INT)
+			pari_err(arither1, "checkmult");
 		if (uisprimepower(n))
 			continue;
 		f = Z_factor(stoi(n));
 		l2 = glength(gel(f, 1));
-		long i, l4;
-		p3 = gen_1;
-		for (i = 1; i <= l2; ++i) {
-			l4 = gtos(gpow(gcoeff(f, i, 1), gcoeff(f, i, 2), FAKE_PREC));
-			p3 = gmul(p3, gel(v, l4));
-		}
-		if (!gequal(gel(v, n), p3)) {
+		long i;
+		
+		// Set target = prod v[p^e] for each p^e || n
+		target = gen_1;
+		for (i = 1; i <= l2; ++i)
+			target = mulii(target, gel(v, itos(powii(gcoeff(f, i, 1), gcoeff(f, i, 2)))));
+		
+		// If v[n] is not equal to the target, the sequence is not multiplicative.
+		if (!gequal(gel(v, n), target)) {
 			if (verbose)
-				pariprintf("Not multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+				pari_printf("Not multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
 			avma = ltop;
 			return 0;
 		}
-		if (low_stack(st_lim, stack_lim(btop, 1)))
-			gerepileall(btop, 2, &f, &p3);
+		avma = ltop;
 	}
 	avma = ltop;
 	return 1;
@@ -4967,46 +4977,51 @@ checkmult(GEN v, long verbose)
 long
 checkcmult(GEN v, long verbose)
 {
-	pari_sp ltop = avma;
-	GEN f = gen_0;
-	long l1;	  /* lg */
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "checkcmult");
+		pari_err(typeer, "checkmult");
 
+	// I suppose [] is a (completely) multiplicative sequence... if nothing else
+	// guard against checking v[1] below.
+	long n, l1 = lg(v), l2;
+	if (l1 == 1)
+		return 1;
+	
 	// At the moment v[1] must be equal to 1; definitions vary but this seems
 	// sensible.
-	if (!gequalgs(gel(v, 1), 1)) {
-		avma = ltop;
+	if (!gequalgs(gel(v, 1), 1))
 		return 0;
-	}
+		
+	pari_sp ltop = avma;
+	GEN f, target;
 
-	l1 = lg(v);
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-	long n, l2;
-	GEN p3 = gen_0;
+	// Require all arguments to be integers
+	for (n = 2; n < 4 && n < l1; ++n)
+		if (typ(gel(v, n)) != t_INT)
+			pari_err(arither1, "checkmult");
+			
 	for (n = 4; n < l1; ++n) {
-		if (isprime(stoi(n)))
+		if (typ(gel(v, n)) != t_INT)
+			pari_err(arither1, "checkmult");
+		if (uisprime(n))
 			continue;
 		f = Z_factor(stoi(n));
 		l2 = glength(gel(f, 1));
-{
-		pari_sp btop = avma;
-		long i, l4;
-		p3 = gen_1;
-		for (i = 1; i <= l2; ++i) {
-			l4 = gtos(gcoeff(f, i, 1));
-			p3 = gmul(p3, gpow(gel(v, l4), gcoeff(f, i, 2), FAKE_PREC));
-			p3 = gerepileupto(btop, p3);
+		long i;
+		
+		// Set target = prod v[p^e] for each p^e || n
+		target = gen_1;
+		for (i = 1; i <= l2; ++i)
+			target = mulii(target, gel(v, itos(powii(gcoeff(f, i, 1), gcoeff(f, i, 2)))));
+		
+		// If v[n] is not equal to the target, the sequence is not
+		// completely multiplicative.
+		if (!gequal(gel(v, n), target)) {
+			if (verbose)
+				pari_printf("Not completely multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+			avma = ltop;
+			return 0;
 		}
-	}
-	if (!gequal(gel(v, n), p3)) {
-		if (verbose)
-			pariprintf("Not completely multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
 		avma = ltop;
-		return 0;
-	}
-	if (low_stack(st_lim, stack_lim(btop, 1)))
-		gerepileall(btop, 2, &f, &p3);
 	}
 	avma = ltop;
 	return 1;
