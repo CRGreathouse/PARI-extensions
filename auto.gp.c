@@ -3207,7 +3207,7 @@ toC(GEN n)
 		else if (equalim1(n))
 			pari_printf("gen_m1\n");
 		else
-			pari_err(alarmer, "can't handle negatives yet");
+			pari_err(alarmer, "can't handle negatives yet"); // white lie
 		return;
 	}
 	if (ispow2(n)) {
@@ -3220,7 +3220,7 @@ toC(GEN n)
 	// words: number of 32-bit words in n.
 #ifdef LONG_IS_64BIT
 	long words = (lgefint(n) - 2) << 1;
-	if ((ulong)*int_MSW(n) <= 4294967295ULL)
+	if ((ulong)*int_MSW(n) <= 0xFFFFFFFF)
 		words--;
 #else
 	long words = lgefint(n) - 2;
@@ -3234,12 +3234,14 @@ toC(GEN n)
 	}
 	if (words == 2)
 	{
-		pari_printf("uu32toi(%Ps, %Ps)\n", shifti(n, -32), gbitand(n, utoipos(4294967295ULL)));
+		pari_printf("uu32toi(%Ps, %Ps)\n", shifti(n, -32), remi2n(n, 32));
 		avma = ltop;
 		return;
 	}
 
-	/* Large numbers */
+	// Large numbers
+	// If efficiency mattered, walking through the binary representation
+	// would be far more efficient.
 	pari_printf("mkintn(%Ps", stoi(words));
 	long i = words - 1;
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
@@ -3249,7 +3251,7 @@ toC(GEN n)
 		pari_printf(", %Ps", t);
 		n = subii(n, shifti(t, i * 32));
 		if (low_stack(st_lim, stack_lim(btop, 1)))
-			gerepileall(btop, 2, &t, &n);
+			gerepileall(btop, 1, &n);
 	}
 	pari_printf(")\n");
 	avma = ltop;
