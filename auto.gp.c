@@ -4067,7 +4067,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 		avma = av;
 		return;
 	}
-	if (!a || a > b) {	// ga is positive, so if !a then ga is too large to fit in a word.
+	if (!a || a > b) {	// ga > gb
 		avma = av;
 		return;
 	}
@@ -4110,14 +4110,14 @@ for(i=1,20,check(random(10^5),random(10^5)))
 void
 sieve_block(ulong a, ulong b, char* sieve)
 {
-pari_printf("Sieving from %Ps to %Ps; maxprime = %Ps", utoi(a), utoi(b), utoi(maxprime()));
+//pari_printf("Sieving from %Ps to %Ps; maxprime = %Ps", utoi(a), utoi(b), utoi(maxprime()));
 	if (b < a) {
 		pari_warn(warner, "sieve_block called needlessly!");
 		return;
 	}
 	ulong lim = usqrtsafe(b);
 	ulong sz = (b - a + 2) >> 1;
-pari_printf("; size = %Ps\n", utoi(sz));
+//pari_printf("; size = %Ps\n", utoi(sz));
 	long p = 0;
 	
 	memset(sieve, 0, sz);
@@ -4168,8 +4168,10 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	else
 		chunk = (b - a) / tmp + 15;
 	chunk = minuu(chunk, avma - stack_lim(avma, 2));	// Don't take up more than 2/3 of the stack
-	chunk = ((chunk - 1) | 255) + 1;	// In whole bytes
-	ulong maxpos = chunk >> 4;	// Shift by 1 since only odds are considered; shift by 3 to convert from bits to bytes
+	
+	// chunk + 2 should be divisible by 16
+	chunk = (((chunk + 2)>>4)<<4) - 2;
+	ulong maxpos = (chunk + 2) >> 4;	// Shift by 1 since only odds are considered; shift by 3 to convert from bits to bytes
 	
 		if (DEBUGLEVEL>2) {
 		tmp = (b - a) / chunk + 1;
@@ -4177,7 +4179,9 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	}
 	
 	char* sieve = pari_malloc(chunk);
-	long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};	// A GEN representing a prime to be passed to the code; its value is in p[2].
+	
+	// A GEN representing a prime to be passed to the code; its value is in p[2].
+	long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 	push_lex((GEN)p,code);
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 
@@ -4247,10 +4251,10 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	// Handle the last chunk.	This tests the endpoint at every step.
 	if (b < a)
 		goto CLEANUP;
-pari_printf("L");
+//pari_printf("L");
 	sieve_block(a, b, sieve);	// Sieve the interval
 	int pos = 0;
-	chunk = b - a;	// TODO: Fencepost?  Looks OK, but keep an eye out.
+	chunk = b - a + 2;
 	for (; pos <= chunk; pos++) {
 		if (!sieve[pos])
 			continue;
