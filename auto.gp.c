@@ -4074,6 +4074,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 	
 	if (b < maxprime())
 	{
+		if (DEBUGLEVEL>3) fprintferr("Using precomputed primes up to %Ps...\n", gb);
 		forprime(ga, gb, code);
 		avma = av;
 		return;
@@ -4088,6 +4089,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 
 	if (a < maxprime())
 	{
+		if (DEBUGLEVEL>3) fprintferr("Using precomputed primes up to %lu...\n", maxprime());
 		forprime(ga, utoi(maxprime()), code);
 		avma = av;
 		if (loop_break())
@@ -4099,25 +4101,17 @@ forbigprime(GEN ga, GEN gb, GEN code)
 }
 
 
-// FIXME: There's some kind of fencepost/off-by-one/initialization bug here;
-// find its source and correct it.  It looks like it misses primes at the end of the range.
-// Possibly useful:
-/*
-check(a,b)=my(p=precprime(ceil(a)-1));forbigprime(q=a,b,if(q!=nextprime(p+1),print("** got "q", expected "nextprime(p+1)"\t",[a,b]));p=q);if(b>=a&p!=precprime(b),print("** got "q", expected "precprime(b)" (at end)\t",[a,b]))
-default(primelimit,1000)
-for(i=1,20,check(random(10^5),random(10^5)))
-*/
 void
 sieve_block(ulong a, ulong b, char* sieve)
 {
-//pari_printf("Sieving from %Ps to %Ps; maxprime = %Ps", utoi(a), utoi(b), utoi(maxprime()));
 	if (b < a) {
 		pari_warn(warner, "sieve_block called needlessly!");
 		return;
 	}
+    if (DEBUGLEVEL>3) fprintferr("Sieving from %lu to %lu; maxprime = %lu", a, b, maxprime());
 	ulong lim = usqrtsafe(b);
 	ulong sz = (b - a + 2) >> 1;
-//pari_printf("; size = %Ps\n", utoi(sz));
+	if (DEBUGLEVEL>3) fprintferr("; size = %lu\n", sz);
 	long p = 0;
 	
 	memset(sieve, 0, sz);
@@ -4175,7 +4169,7 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	
 		if (DEBUGLEVEL>2) {
 		tmp = (b - a) / chunk + 1;
-		fprintferr("Chunk size %ld (%.2f MB of %.2f MB free), splitting the work into ~%ld parts\n", chunk, (float)(maxpos * 9.53674316e-7), tmp);
+		fprintferr("Chunk size %lu (%.2f MB of %.2f MB free), splitting the work into ~%lu parts\n", chunk, (float)(maxpos * 9.53674316e-7), (float)((bot - avma) * 9.53674316e-7), tmp);
 	}
 	
 	char* sieve = pari_malloc(chunk);
@@ -4191,8 +4185,8 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 			break;
 		sieve_block(a, end, sieve);	// Sieve the interval
 		int pos = 0;
-		for (; pos < maxpos; pos++) {	// ********************
-			if (!sieve[pos])
+		for (; pos < maxpos; pos++) {
+			if (sieve[pos] == 0xFF)
 				continue;
 			if (!(sieve[pos]&1))
 			{
@@ -4251,12 +4245,21 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	// Handle the last chunk.	This tests the endpoint at every step.
 	if (b < a)
 		goto CLEANUP;
-//pari_printf("L");
+	if (DEBUGLEVEL>3) fprintferr("Last chunk: ");
 	sieve_block(a, b, sieve);	// Sieve the interval
+	if (DEBUGLEVEL>2) {
+		ulong final = b&1 ? b : b - 1;
+		ulong idx = (final - a) >> 4;
+		ulong shift = final - a - (idx << 4);
+		ulong mask = 1 << (shift >> 1);
+		fprintferr("Final candidate: %lu (index %lu, mask %lu: %lu + (%lu << 4) + %lu), sieve says this is %s\n", final, idx, mask, a, idx, shift, !(sieve[idx]&mask) ? "prime" : "composite");
+	}
+
+
 	int pos = 0;
 	chunk = b - a + 2;
 	for (; pos <= chunk; pos++) {
-		if (!sieve[pos])
+		if (sieve[pos] == 0xFF)
 			continue;
 		if (!(sieve[pos]&1))
 		{

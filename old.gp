@@ -603,6 +603,34 @@ addhelp(quad, "quad(a,b,c): Solves the quadratic equation ax^2 + bx + c in a sim
 \\ *                                    One-time use functions                                       *
 \\ ***************************************************************************************************
 
+\\ Related to A082794, etc.
+intminus(a,b)={
+	my(v);
+	for(i=1,#V,
+		v=V[i];
+		if(v[2]<=a|v[1]>=b,next);
+		if(a<=v[1]&b>=v[2],
+			V[i]=0
+		,
+			if(a<=v[1],
+				V[i]=[b,v[2]]
+			,
+				if(b>=v[2],
+					V[i]=[v[1],a]
+				,
+					V[i]=[v[1],a];
+					V=concat(V,[[b,v[2]]])
+				)
+			)
+		)
+	);
+	V=vecsort(V,lex,8);
+	if(#V & V[1]==0,V=vector(#V-1,i,V[i+1]));
+	V=vecsort(V,1);
+};
+go(N)=local(V=[[1,10]]);for(n=1,99,oV=V;intminus(N/n,(N+1)/n);intminus(10*N/n,10*(N+1)/n);intminus(100*N/n,100*(N+1)/n);if(V!=oV,print1(n"n, ")));V*1.
+
+
 A037053(n)={
 	my(N=10^(n+1),NN);
 	forstep(a=N,9*N,N,
