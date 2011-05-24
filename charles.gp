@@ -48,96 +48,6 @@ ff2(n)={
 	"?"
 };
 
-vn(lim, sz, sm=1)={
-	my(v=vectorsmall(sz,i,1));
-	forprime(p=3,p2,
-		b=znorder(Mod(2,p));
-		trap(,next,
-			a=znlog(2293,Mod(2,p))
-		);
-		if(Mod(2,p)^a!=2293, print("bad at "p);next);
-		a+=b*ceil((sm-a)/b);
-		forstep(n=a,sz,b,
-			v[n]=0
-		)
-	);
-	a=0;
-	for(i=sm,sz,if(v[i],a++;write("abc.txt", i)));
-	a
-};
-
-vk(lim,kmin,kmax,b,n,c=-1)={
-  my(v=vectorsmall(kmax,j,j>=kmin),start,vv,i=0);
-  forprime(p=2,lim,
-    trap(,next, \\ if p can't divide any of the members, just go on the next prime
-      start=lift(Mod(c,p)/Mod(b,p)^n); \\ start * b^n = c (mod p)
-    );
-    start += p*ceil((kmin-start)/p); \\ start >= kmin
-    forstep(j=start,kmax,p,
-      v[j]=0 \\ j * b^n = c (mod p)
-    )
-  );
-  vv=vector(sum(i=1,#v,v[i])); \\ vector for the numbers found, rather than 0/1
-  for(j=1,#v,if(v[j],vv[i++]=j)); \\ fill vector
-  vv \\ output
-};
-addhelp(vk, "vk(lim,kmin,kmax,b,n,{c=-1}): Returns those k with kmin <= k <= kmax for which k * b^n - c has no prime divisors up to lim.");
-
-
-sieve(nmin, nmax, lim)={
-	nmin=ceil(nmin);
-	nmax=floor(nmax);
-	if(nmin%2, nmin++);
-	if(nmax%2, nmax--);
-	if(nmax < nmin, return([]));
-	my(len=(nmax-nmin+2)>>1,v=vectorsmall(len,i,1),u,t,t1,t2,t3,j=0);
-	nmin -= 2;	\\ because the vectors are 1-based, not 0-based.
-	forprime(p=3,lim,
-		\\ v[i] is nmin + 2i; n is v[(n-nmin)>>1]
-
-		\\ Remove n such that n+1 is divisible by p
-		t = embiggen(3*p-1, 2*p, nmin + 2);
-		forstep(i=(t-nmin)>>1,(nmax-nmin)>>1,2*p,v[i]=0);
-
-		\\ Remove n such that n^2+1 is divisible by p
-		t = lift(sqrt(Mod(-1,p)^2));
-		t1 = p^2-t;
-		t = embiggen(t, 2*p^2, nmin + 2);
-		t1 = embiggen(t1, 2*p^2, nmin + 2);
-		forstep(i=(t-nmin)>>1,(nmax-nmin)>>1,2*p^2,v[i]=0);
-		forstep(i=(t1-nmin)>>1,(nmax-nmin)>>1,2*p^2,v[i]=0);
-
-		\\ Remove n such that n^4	+1 is divisible by p
-		t = lift(sqrt(Mod(t,p)^2));
-		t2 = p^4-t;
-		t1 = lift(sqrt(Mod(t1,p)^2));
-		t3 = p^4-t1;
-		t = embiggen(t, 2*p^4, nmin + 2);
-		t1 = embiggen(t1, 2*p^4, nmin + 2);
-		t2 = embiggen(t2, 2*p^4, nmin + 2);
-		t3 = embiggen(t3, 2*p^4, nmin + 2);
-		forstep(i=(t-nmin)>>1,(nmax-nmin)>>1,2*p^4,v[i]=0);
-		forstep(i=(t1-nmin)>>1,(nmax-nmin)>>1,2*p^4,v[i]=0);
-		forstep(i=(t2-nmin)>>1,(nmax-nmin)>>1,2*p^4,v[i]=0);
-		forstep(i=(t3-nmin)>>1,(nmax-nmin)>>1,2*p^4,v[i]=0);
-	);
-	for(i=1,#v,j+=v[i]);
-	u=vector(j);
-	j=0;
-	for(i=1,#v,
-		if(v[i],u[j++]=nmin+2*i)
-	);
-	u
-};
-
-\\ Returns the smallest N = n + mod*k such that N >= nmin
-embiggen(n, mod, nmin)={
-	if(n >= nmin,
-		n
-	,
-		n + floor((nmin - n)/mod + 1)*mod
-	)
-};
 
 \\ A176494 (without term 341)
 \\[2,3,1,1,2,1,2,1,2,4,1,3,2,1,2,4,4,1,3,2,1,3,2,4,3,2,1,2,1,2,47,2,6,1,8,1,3,5,2,4,4,1,6,1,2,1,5,5,2,1,2,4,1,8,4,6,8,1,3,2,1,4,7,2,1,2,9,791,4,1,2,8,3,9,5,2,4,3,2,3,8,1,6,1,3,2,4,3,2,1,2,4,3,2,3,2,9,6,1,5,7,4,4,8,1,3,4,4,16,1,3,9,2,1,5,6,1,2,8,4,1,5,2,6,3,14,3,8,3,5,9,2,3,11,2,3,2,7,6,636,1,6,1,2,1,4,5,2,1,2,11,2,1,2,291,2,3,8,3,2,6,4,7,2,10,4,3,11,5,2,10,1,6,1,3,4,1,6,1,3,35,2,1,2,4,4,3,5,5,6,1,8,3,6,4,6,3,5,2,8,4,1,3,5,12,6,1,2,8,1,3,2,1,2,4,1,3,6,6,8,3,5,8,9,2,1,2,4,3,2,1,3,5,10,1,2,1,2,4,6,6,3,5,11,2,4,3,2,3,2,587,2,6,1,2,12,1,3,4,39,9,2,1,9,2,1,4,6,1,6,3,7,5,17,11,17,2,1,9,6,6,3,4,7,11,2,1,2,1,4,10,10,8,6,1,4,1,14,8,3,9,2,1,2,3,7,4,1,8,11,6,4,6,1,2,1,4,10,1,4,1,3,2,1,4,3,9,93,2,22,3,4,1,2,3,4,1,2,3,11,"?",2,4,1,6,8,1,3,2,4,5,15,2,1,3,2,4,6,8,10,7,2,6,8,3,5,2,13,7,6,3,2,8,1,3,20,10,1,4,3,2,4,11,6,1,2,3,7,17,2,1,2,4,3,2,1,3,4,1,6,3,2,11,6,12,1,3,2,1,4,5,2,22,3,7,2,12,3,6,4,12,3,8,8,9,2,8,4,1,12,1,10,3,2,7,2,3,9,7,11,2,8,11,12,1,4,101,2,1,13,15,2,4,8,3,2,3,6,1,2,1,11,12,1,3,9,7,2,4,1,57,2,4,1,6,1,4,1,4,10,13,4,3,2,1,2,1,10,3,9,7,4,1,2,12,1,3,4,1,5,6,1,6,11,5,2,4,3,15,13,4,6,1,2,5,487,2,3,8,3,5,19,6,8,1,12,5,2,6,10,1,6,7,2,1,4,19,2,3,7,2,6,1,2,8,1,5,2,23,8,18,1,2,12,4,1,3,8,1,3,4,8,6,1,3,5,4,1,2,12,21,2,1,7,7,10,4,1,20,1,6,1,10,4,1,14,1,6,4,3,58091,6,1,8,3,9,4,6,10,8,6,1,5,11,2,4,4,10,1,10,11,5,2,1,2,6,1,9,15,4,3,11,9,7,4,1,2,16,1,3,13,4,4,130,6,6,1,3,2,10,3,5,2,1,2,4,1,381,2,5,7,10,4,16,5,5,4,10,1,2,10,3,11,4,1,2,11,9,5,2,4,1,6,1,4,6,3,15,2,6,144,1,3,5,5,12,10,7,2,3,8,3,7,7,2,1,2,6,6,8,1,4,22,12,349,8,11,2,10,6,12,12,3,5,2,1,5,7,2,1,3,6,6,1,2,6,1,2,4,1,3,2,15,5,7,2,3,6,5,4,1,3,2,1,2,1,4,5,5,2,3,6,4,15,2,1,3,7,2,3,6,4,6,3,11,5,2,12,1,3,2,4,1,8,1,4,6,13,2,4,9,10,6,7,2,12,3,5,2,4,7,45,5,4,1,6,8,3,6,1,6,3,5,14,6,1,2,3,7,2,3,6511,10,4,16464,1,3,4,8,1,6,4,8,8,3,5,4,4,1,3,9,9,4,3,5,7,56,1,11,2,3,6,34,3,35,2,1,4,4,1,3,2,8,3,7,103,4,24,1,29,7,4,1,6,1,3,4,5,2,10,1,4,1,34,1,8,5,2,1,2,3,4,8,108,1,4641,4,3,2,8,6,1,8,1,3,2,4,4,3,7,2,4,8,3,7,2,11,11,8,6,16,6,8,1,18,3,71,10,4,7,2,1,3,4,3,5,2,4,6,15,6,1,7,38,1,4,1,9,41,7,19,4,10,6,1,7,2,12,1,8,3,14,4,12,3,2,14,1,12,1,5,2,30,4,1,25,2,5,5,2,8,7,2,3,7,2,3,2,7,5,2,9,13,2,1,5,2,6,6,8,14,6,19,5,2,1,2,26,10,12];
@@ -171,6 +81,7 @@ primesin(P:pol)={
 	);
 	if (poldegree(P) > 2, error("Cannot be determined"));
 };
+
 
 ConjectureFEmp(a:int,b:int,c:int,lim=1e6)={
 	my(s=0,n=0,k);
@@ -327,63 +238,6 @@ forpseudo(ff)={
 	)
 };
 addhelp(forpseudo, "forpseudo(ff): Runs the command (closure) ff on each 2-pseudoprime up to 2^64.");
-
-
-writeSeq(name, ff, offset:int=1)={
-	my(n=offset,k,str1,str1a,str2,str2a,str3,str3a);
-	if (type(name) == "t_INT",
-		name = Vec(Str(name));
-		while(#name < 6, name = concat(["0"], name));
-		name = Str("A", concat(name))
-	,
-		if(type(name) != "t_STR", error("The name must be a string or integer!"))
-	);
-	str1=str1a=str2=str2a=str3=str3a=Str(name, " ");
-	str1a = Str(str1a, k=myEval(ff, n));
-	str1 = Str(str1, abs(k));
-	n++;
-	while(#str1 + #Str(abs(k=myEval(ff, n))) < 81,
-		str1a = Str(str1a, ",", k);
-		str1 = Str(str1, ",", abs(k));
-		n++
-	);
-	str2a = Str(str2a, k=myEval(ff, n));
-	str2 = Str(str2, abs(k));
-	n++;
-	while(#str2 + #Str(abs(k=myEval(ff, n))) < 81,
-		str2a = Str(str2a, ",", k);
-		str2 = Str(str2, ",", abs(k));
-		n++
-	);
-	str3a = Str(str3a, k=myEval(ff, n));
-	str3 = Str(str3, abs(k));
-	n++;
-	while(#str3 + #Str(abs(k=myEval(ff, n))) < 82,	\\ No trailing comma
-		str3a = Str(str3a, ",", k);
-		str3 = Str(str3, ",", abs(k));
-		n++
-	);
-	print("%S "str1",\n%T "str2",\n%U "str3);
-	if(str1 != str1a | str2 != str2a | str3 != str3a,
-		print("%V "str1a",\n%W "str2a",\n%X "str3a)
-	)
-};
-addhelp(writeSeq, "writeSeq(name, ff, {offset=1}): Displays the S, T, and U lines (and V, W, X lines if needed) for the sequence ff, which can be given as a function (closure), a vector, or a polynoimial.");
-
-
-myEval(ff, n)={
-	my(t=type(ff));
-	if (t == "t_CLOSURE",
-		return(ff(n))
-	);
-	if(t == "t_POL",
-		return(sum(k=0,poldegree(ff),n^k*polcoeff(ff,k)))
-	);
-	if(t == "t_VEC" || t == "t_COL",
-		return(ff[n])
-	);
-	error("Bad type, must be closure, polynomial, or vector.")
-};
 
 
 \\ Characteristic function of A
@@ -738,6 +592,7 @@ dotproduct(a:vec, b:vec)={
 	sum(i=1,#a,a[i]*b[i])
 };
 addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and b.");
+
 
 /*
 \\ ***************************************************************************************************
