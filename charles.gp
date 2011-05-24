@@ -418,7 +418,7 @@ forpseudo(ff)={
 	);
 	for(i=0,89,
 		read(concat("psp/psp-chunk", i));
-		trap(,
+		trap(user,
 			print("User error, ending loop...");
 			pspChunk=0;
 			return()

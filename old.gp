@@ -603,6 +603,74 @@ addhelp(quad, "quad(a,b,c): Solves the quadratic equation ax^2 + bx + c in a sim
 \\ *                                    One-time use functions                                       *
 \\ ***************************************************************************************************
 
+
+A066888(lim,sz)={
+	my(v=vector(sz),n=1,t=1,s=0);
+	forprime(p=2,lim,
+		if(p>t,
+print(s" primes between T(",n-1,") = ",n*(n-1)/2," and "t);
+			if(s>0&s<=sz&!v[s],
+				v[s]=n-1
+			);
+			n++;
+			t=n*(n+1)/2;
+			s=1
+		,
+			s++
+		)
+	);
+	v
+};
+
+
+\\ A056757 etc.
+builder(p=2,n=1,x=0)={	\\ called by user; also handles p <= 7
+\\print("builder("p","n","x")");
+	my(v=[],u,y,q=nextprime(p+1),f=if(p==7,builderSmall,builder));
+	for(e=0,if(p==2,10,7),
+		y=x+3*log(e+1)-e*log(p);
+		u=f(q,n*p^e,y);
+		if(#u, v=concat(v,u));
+		if(y>0, v=concat(v,n*p^e))
+	);
+	if(p==2,vecsort(v),v)
+};
+builderSmall(p,n,x)={	\\ p > 7
+\\print("builderSmall("p","n","x")");
+\\if(p<5,error("builderSmall called with inappropriate argument"));
+	if(x+3*log(2)<log(p), return([]));	\\ Not enough mojo to continue with more primes
+	my(v=[],u,y,N,q=nextprime(p+2));
+	v=builderSmall(q,n,x);
+	for(e=1,5,
+		y=x+3*log(e+1)-e*log(p);
+		if(y>0,
+			u=builderSmall(q,N=n*p^e,y);
+			v=if(#u, concat(v,concat(u,N)), concat(v,N))
+		,
+			break
+		)
+	);
+	v
+};
+
+doit()={
+	\\ A125827, etc.
+	my(V=vector(20,i,[]),total=vector(20),t,n=0);
+	forbigprime(p=2,1e14,
+		n++;
+		t=1;
+		for(i=1,20,
+			t*=p;
+			total[i] += t;
+			if (total[i]%n == 0,
+				V[i]=concat(V[i],[n]);
+				print("Sequence #"i": ",V[i])
+			)
+		)
+	)
+};
+
+
 \\ Related to A082794, etc.
 intminus(a,b)={
 	my(v);
