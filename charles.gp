@@ -19,35 +19,52 @@ cons(x:real)={
 addhelp(cons, "cons(x): Converts a constant into a sequence of decimal digits.");
 
 
+\\ Output format (work-in-progress):
+\\ [x1, y1, x2, y2, ..., xk, yk, c]: represents density c * x^x1 / log(x)^y1 * x^x2 / log(x)^y2 * ... * x^xk / log(x)^yk
+\\ [x1, y1, x2, y2, ..., xk, yk]: same, but with unknown constant.
+\\ Examples:
+\\ [k]			Exactly k primes
+\\ []			O(1) primes
+\\ [1, 1, 1]	(1 + o(1)) x/log(x) primes (the maximum)
+\\ [1/2, 1]		Theta(sqrt(x)/log(x)) primes -- not sure about which symbol to use, maybe O is better
 primesin(P:pol)={
-	if (type(P)=="t_INT",
-		if (isprime(P),
-			print("Contains 1 prime.")
+	my(t=type(P));
+	if (t=="t_INT",
+		return(if (isprime(P),
+			print("Contains 1 prime.");
+			[1]
 		,
-			print("Contains 0 primes.")
-		);
-		return()
+			print("Contains 0 primes.");
+			[0]
+		));
 	);
-	if (type(P)!="t_POL", error("bad type"));
+	if (t=="t_FRAC" || t=="t_REAL",
+		print("Contains 0 primes.");
+		return([0])
+	);
+	if (t!="t_POL", error("bad type"));
+	
 	if (poldegree(P) == 1,
 		my(a=polcoeff(P,1),b=polcoeff(P,0),g,t);
 		if (type(a) == "t_INT" && type(b) == "t_INT",
 			g=gcd(a,b);
 			if (g == 1,
 				t=eulerphi(a);
-				print("Infinitely many primes (Dirichlet), density n/log n * 1/"t);
-				return
+				print("Infinitely many primes (Dirichlet), density n/log n * ",1/t);
+				return([1,1,1/t])
 			);
-			if (isprime(g) && (1 - b/g) % (a/g) == 0,
-				print("Contains 1 prime.")
+			return(if (isprime(g) && (1 - b/g) % (a/g) == 0,
+				print("Contains 1 prime.");
+				[1]
 			,
-				print("Contains 0 primes.")
-			);
-			return
+				print("Contains 0 primes.");
+				[0]
+			));
 		);
 	);
 	if (poldegree(P) > 2, error("Cannot be determined"));
 };
+addhelp(primesin, "primesin(P): Attempts to give the asymptotic number of primes in the polynomial P, either unconditionally or under standard conjectures. The output format is a vector, which represents:\n[x1, y1, x2, y2, ..., xk, yk, c]: density c * x^x1 / log(x)^y1 * x^x2 / log(x)^y2 * ... * x^xk / log(x)^yk\n[x1, y1, x2, y2, ..., xk, yk]: same, but with unknown leading term.");
 
 
 ConjectureFEmp(a:int,b:int,c:int,lim=1e6)={
@@ -59,6 +76,8 @@ ConjectureFEmp(a:int,b:int,c:int,lim=1e6)={
 	);
 	2*s/Li(sqrt(lim))
 };
+addhelp(ConjectureFEmp, "ConjectureFEmp(a,b,c,{lim}): Helper function for ConjectureF, given integers a, b, and c as coefficients of ax^2 + bx + c.");
+
 
 ConjectureF(a:int,b:int,c:int,lim=1e6)={
 	my(D=b^2-4*a*c,g=gcd(a,b),f);
@@ -115,6 +134,7 @@ print("Correction: ", cf);
 print("Correction: ", cf);
 	pr * (1 - cf)
 };
+addhelp(ConjectureF_C, "ConjectureF_C(D,{lim}): Helper function for ConjectureF, finding the infinite product in the Hardy-Littlewood Conjecture F.");
 
 
 hurwitz(s,x)={
@@ -221,6 +241,7 @@ trv_char(A, n=-1)={
 	);
 	B
 };
+addhelp(trv_char, "trv_char(A, {n}): Characteristic function of vector A. Gives the first n terms, or all terms that can be calculated if omitted.");
 
 
 \\ Euler transform
@@ -231,6 +252,8 @@ trv_euler(A)={
 	for(i=1, #A, A[i] = polcoeff(C,i-1));
 	A
 };
+addhelp(trv_euler, "trv_euler(A): Euler transform of vector A.");
+
 
 ways(v, n)={
 	my(w=vector(n));
