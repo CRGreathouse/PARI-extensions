@@ -16,8 +16,7 @@ cons(x:real)={
 	);
 	v
 };
-
-
+addhelp(cons, "cons(x): Converts a constant into a sequence of decimal digits.");
 
 
 /*
@@ -240,63 +239,65 @@ print("Correction: ", cf);
 };
 
 
-hurwitz(s,x)=
-{
- my(a,res,tes,in,sig,t,m,pr,lim,nn,in2,s1,s2);
- sig=real(x);
- if (sig>1.5,
-  m=floor(sig-0.5);
-  return (hurwitz(s,x-m)-sum(i=1,m,(x-i)^(-s)))
- );
- if (sig<=0,
-  m=ceil(-sig+0.5);
-  return (hurwitz(s,x+m)+sum(i=0,m-1,(x+i)^(-s)))
- );
- pr=precision(1.); sig=real(s); t=imag(s);
- default(realprecision,9);
- res=s-1.;if(abs(res)<0.1,res=-1,res=log(res));
- lim=(pr*log(10)-real((s-.5)*res)+(1.*sig)*log(2.*Pi))/2;
- lim=max(2,ceil(max(lim,abs(s*1.)/2)));
- nn=ceil(sqrt((lim+sig/2-.25)^2+(t*1.)^2/4)/Pi);
- default(realprecision,pr+5);
- a=(x+nn+0.)^(-s);
- res=sum(n=0,nn-1,(x+n)^(-s),a/2);
- in=x+nn; in2=1./(in*in);
- s1=2*s-1; s2=s*(s-1);
- tes=bernreal(2*lim);
- forstep (k=2*lim-2,2,-2,
-  tes=bernreal(k)+in2*(k*k+s1*k+s2)*tes/((k+1)*(k+2))
- );
- tes=in*(1+in2*s2*tes/2);
- res+=tes*a/(s-1);
- res=precision(res,pr); default(realprecision,pr);
- return(res);
-}
+hurwitz(s,x)={
+	my(a,res,tes,in,sig,t,m,pr,lim,nn,in2,s1,s2);
+	sig=real(x);
+	if (sig>1.5,
+		m=floor(sig-0.5);
+		return (hurwitz(s,x-m)-sum(i=1,m,(x-i)^(-s)))
+	);
+	if (sig<=0,
+		m=ceil(-sig+0.5);
+		return (hurwitz(s,x+m)+sum(i=0,m-1,(x+i)^(-s)))
+	);
+	pr=precision(1.);
+	sig=real(s);
+	t=imag(s);
+	default(realprecision,9);
+	res=s-1.;
+	res=if(abs(res)<0.1,-1,log(res));
+	lim=(pr*log(10)-real((s-.5)*res)+(1.*sig)*log(2.*Pi))/2;
+	lim=max(2,ceil(max(lim,abs(s*1.)/2)));
+	nn=ceil(sqrt((lim+sig/2-.25)^2+(t*1.)^2/4)/Pi);
+	default(realprecision,pr+5);
+	a=(x+nn+0.)^(-s);
+	res=sum(n=0,nn-1,(x+n)^(-s),a/2);
+	in=x+nn;
+	in2=1./(in*in);
+	s1=2*s-1;
+	s2=s*(s-1);
+	tes=bernreal(2*lim);
+	forstep (k=2*lim-2,2,-2,
+		tes=bernreal(k)+in2*(k*k+s1*k+s2)*tes/((k+1)*(k+2))
+	);
+	tes=in*(1+in2*s2*tes/2);
+	res+=tes*a/(s-1);
+	res=precision(res,pr);
+	default(realprecision,pr);
+	res
+};
 
-/* (VIII.2) Complex L function, vector form. Chivec is a vector of complex */
-/* values, assumed to be the values from 1 to m of a periodic function. In */
-/* addition, with zero sum, such as a nontrivial character, if s=1.        */
-/* simple implementation, for small m                                      */
 
-Lsimp(chivec,s)=
-{
- my(m);
- m=length(chivec);
- if (s==1,
-  return(-sum(r=1,m,chivec[r]*psi(r/m))/m),
-  return(sum(r=1,m,chivec[r]*hurwitz(s,r/m))/m^s)
- );
-}
+\\ (VIII.2) Complex L function, vector form. Chivec is a vector of complex
+\\ values, assumed to be the values from 1 to m of a periodic function. In
+\\ addition, with zero sum, such as a nontrivial character, if s=1.
+\\ simple implementation, for small m.
+Lsimp(chivec,s)={
+	my(m=#chivec);
+	if (s==1,
+		-sum(r=1,m,chivec[r]*psi(r/m))/m
+	,
+		sum(r=1,m,chivec[r]*hurwitz(s,r/m))/m^s
+	)
+};
 
-/* (VIII.3) Complex L function of quadratic character, simple implementation */
-/* for small |D|                                                             */
 
-Lquad(D, s)=
-{
- my(v);
- v=vector(abs(D),i,kronecker(D,i));
- return (Lsimp(v,s));
-}
+\\ (VIII.3) Complex L function of quadratic character, simple implementation
+\\ for small |D|.
+Lquad(D, s)={
+	my(v=vector(abs(D),i,kronecker(D,i)));
+	Lsimp(v,s)
+};
 
 
 
@@ -326,20 +327,6 @@ forpseudo(ff)={
 	)
 };
 addhelp(forpseudo, "forpseudo(ff): Runs the command (closure) ff on each 2-pseudoprime up to 2^64.");
-
-/*
-check(n)={
-	if(bases(n)!=doit(n),print1(n" "))
-};
-star(n)={
-	n--;
-	n>>valuation(n, 2)
-};
-bases(n)={
-	my(f=factor(n)[, 1], nu=valuation(f[1]-1, 2), nn = star(n));
-	for(i=2, #f, nu = min(nu, valuation(f[i] - 1, 2)); );
-	(1 + (2^(#f * nu) - 1) / (2^#f - 1)) * prod(i=1, #f, gcd(nn, star(f[i])))
-};*/
 
 
 writeSeq(name, ff, offset:int=1)={
@@ -399,12 +386,10 @@ myEval(ff, n)={
 };
 
 
-/* characteristic function of A
- * output sequence b_n = 1 if n if exist k : a_k == n
- * otherwise b_n = 0
- * 2nd parameter is length of output sequence
- */
 \\ Characteristic function of A
+\\ output sequence b_n = 1 if n if exist k : a_k == n
+\\ otherwise b_n = 0
+\\ 2nd parameter is length of output sequence
 trv_char(A, n=-1)={
 	local(B,v);
 	if(n<0, n = A[#A]);
@@ -661,10 +646,9 @@ Pisano(p:int)={
 		)
 	);
 	m
-};
+}; */
 
 
-*/
 findrec(v:vec, verbose:bool=1)={
 	my(c,d = (#v - 1) >> 1, firstNonzero = 0);
 	if (#v < 3,
@@ -753,6 +737,7 @@ dotproduct(a:vec, b:vec)={
 	);
 	sum(i=1,#a,a[i]*b[i])
 };
+addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and b.");
 
 /*
 \\ ***************************************************************************************************
