@@ -67,7 +67,7 @@ GP;addhelp(bigdiv, "bigdiv(a,b,c,d): Does d divide a^b - c? Same as (a^b-c)%d ==
 GP;install("contfracback","D0,G,DG","contfracback","./auto.gp.so");
 GP;addhelp(contfracback, "contfracback(v, terms): Given a continued fraction v, gives the real number back. If terms is given, use only that many terms.");
 GP;install("W","D0,G,p","W","./auto.gp.so");
-GP;addhelp(W, "Primary branch of Lambert's W function. Finds an L >= -1 such that L * exp(L) = x, where x >= -1/e.");
+GP;addhelp(W, "W(x): Primary branch of Lambert's W function. Finds an L >= -1 such that L * exp(L) = x, where x >= -1/e.");
 GP;install("vecsum","G","vecsum","./auto.gp.so");
 GP;addhelp(vecsum, "vecsum(v): Sum of the elements of v.");
 GP;install("vecprod","G","vecprod","./auto.gp.so");
@@ -1340,7 +1340,7 @@ isFibonacci(GEN n)		/* bool */
 			return 0;
 	}
 	GEN k = sqri(n);
-	k = addis(mulis(n, 5), 4);	// Multiplication via shifts is slower here (by ~4 cycles)
+	k = addis(mulis(k, 5), 4);	// Multiplication via shifts is slower here (by ~4 cycles)
 	long res = Z_issquare(k) || (signe(n) > 0 && Z_issquare(subis(k, 8)));
 	avma = ltop;
 	return res;
@@ -3332,7 +3332,7 @@ bfilein(char* name)
 			sprintf(command, "wget http://oeis.org/A%c%c%c%c%c%c/%s", name[1],name[2],name[3],name[4],name[5],name[6],name);
 			int result = system(command);
 			if (result == -1)
-				pari_warn(talker2, "Download failed.");
+				pari_warn(talker, "Download failed.");
 		}
 		f = fopen(name, "r");
 		if (!f)
@@ -4108,10 +4108,10 @@ sieve_block(ulong a, ulong b, char* sieve)
 		pari_warn(warner, "sieve_block called needlessly!");
 		return;
 	}
-    if (DEBUGLEVEL>3) fprintferr("Sieving from %lu to %lu; maxprime = %lu", a, b, maxprime());
+    if (DEBUGLEVEL>4) fprintferr("Sieving from %lu to %lu", a, b);
 	ulong lim = usqrtsafe(b);
 	ulong sz = (b - a + 2) >> 1;
-	if (DEBUGLEVEL>3) fprintferr("; size = %lu\n", sz);
+	if (DEBUGLEVEL>4) fprintferr("; size = %lu\n", sz);
 	long p = 0;
 	
 	memset(sieve, 0, sz);
@@ -4153,7 +4153,10 @@ forbigprime(p=1e19,1e19+1e8,if(p%199==1,print1(".")))
 void
 forbigprime_sieve(ulong a, ulong b, GEN code)
 {
-	ulong chunk = maxuu(4096ULL, cuberoot(b));	// TODO: Optimize size (surely < 512k to stay in L1 cache, but not so large as to force recalculating too often)
+	// TODO: Optimize size (surely < 512k to stay in L1 cache, but not so large
+	// as to force recalculating too often).
+	// Guesstimate: greater of sqrt(n) * lg(n) or 1M
+	ulong chunk = maxuu(0x100000, usqrtsafe(b) * __builtin_ffsll(b));
 	ulong tmp = (b - a) / chunk + 1;
 	pari_sp ltop = avma;
 
@@ -4169,7 +4172,7 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	
 		if (DEBUGLEVEL>2) {
 		tmp = (b - a) / chunk + 1;
-		fprintferr("Chunk size %lu (%.2f MB of %.2f MB free), splitting the work into ~%lu parts\n", chunk, (float)(maxpos * 9.53674316e-7), (float)((bot - avma) * 9.53674316e-7), tmp);
+		fprintferr("Chunk size %lu (%.2f MB of %.2f MB free), splitting the work into ~%lu parts\n", chunk, (float)(maxpos * 9.53674316e-7), (float)((avma - bot) * 9.53674316e-7), tmp);
 	}
 	
 	char* sieve = pari_malloc(chunk);
@@ -4247,14 +4250,6 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 		goto CLEANUP;
 	if (DEBUGLEVEL>3) fprintferr("Last chunk: ");
 	sieve_block(a, b, sieve);	// Sieve the interval
-	if (DEBUGLEVEL>2) {
-		ulong final = b&1 ? b : b - 1;
-		ulong idx = (final - a) >> 4;
-		ulong shift = final - a - (idx << 4);
-		ulong mask = 1 << (shift >> 1);
-		fprintferr("Final candidate: %lu (index %lu, mask %lu: %lu + (%lu << 4) + %lu), sieve says this is %s\n", final, idx, mask, a, idx, shift, !(sieve[idx]&mask) ? "prime" : "composite");
-	}
-
 
 	int pos = 0;
 	chunk = b - a + 2;
@@ -4742,6 +4737,7 @@ solvePell(GEN n, long prec)
 GEN
 tetrMod(GEN a, GEN b, GEN M)
 {
+	pari_err(talker, "busted");
 	// FIXME: Handle the case where gcd(a, M) > 1.
 	if (typ(a) != t_INT || typ(b) != t_INT || typ(M) != t_INT)
 		pari_err(typeer, "tetrMod");
