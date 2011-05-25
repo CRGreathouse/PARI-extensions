@@ -1,0 +1,54 @@
+This is my personal list of things that could/should be done to improve PARI.
+
+Note that the priorities are my own.  For the tasks taken from the PARI TODO
+file, the priority there has been recorded in a parenthetical.
+
+Priority classification (first column): [subjective and debatable]
+5    as soon as possible
+4    should be done
+3    nice to have
+2    maybe not
+1    probably not
+0    no
+-    unclassified
+
+
+***********************  From the PARI standard TODO ************************
+
+5  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
+   in large intervals, sieve out multiple of small primes there, then use
+   isprime() on the rest] (4)
+
+4  changing primelimit from within forprime loop yields unpredictable results
+
+4  implement Jebelean-Krandick diviiexact (5)
+
+3  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
+   (5)
+
+3  add a 'variable' as an optional last argument in content, denominator,
+   numerator, as is done in divrem (cf. 2.6.2) (5)
+
+3  a type t_FILE [current: stream re-opened/flushed/closed after every single
+   write(): disaster when one wants to write often to the same file]
+
+3  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
+   (4)
+
+
+**************************   Personal priorities  ***************************
+
+5  New loop that yields factored integers: perhaps forfactored(n=1,10,...)
+   where sieve is used to make this fast.  Would work nicely with a new
+   factored integer type (t_FACTORED?).
+
+4  Conjecture F related materials, including L-function computation.  But don't
+   spend too long on optimizing the L-fuctions, since Molin is working on
+   an efficient PARI solution:
+   http://pari.math.u-bordeaux.fr/archives/pari-users-1007/msg00004.html
+
+
+
+3  Fix tetrMod
+
+
