@@ -260,8 +260,6 @@ void init_auto(void);
 #include "othergpincludes.h"
 
 
-long rho_found, rho_failed;
-
 #define FAKE_PREC 0		// Used when a precision is required but will not be used
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
 GEN rnormal_cached;
@@ -368,15 +366,17 @@ consistency()
 INLINE GEN
 gtor(GEN x, const char* funcName, long prec)
 {
-	long t = typ(x);
-	if (t == t_REAL)
-		return x;	// x, not a copy of x
-	if (t == t_INT || t == t_FRAC)
-		return cxcompotor(x, prec);
-	pari_err(typeer, funcName);
+	switch (typ(x)) {
+		case t_REAL:
+			return x;	// x, not a copy of x
+		case t_INT:
+		case t_FRAC:
+			return cxcompotor(x, prec);
+		default:
+			pari_err(typeer, funcName);
+	}
 	return NEVER_USED;
 }
-
 
 
 /******************************************************************************/
@@ -649,6 +649,7 @@ rad(GEN n)
 }
 
 
+// TODO: This is slow and I'm not sure why.
 long
 isprimepower(GEN n)
 {
@@ -856,8 +857,6 @@ isPowerful_small(ulong n)
 long
 isPowerful(GEN n)
 {
-	// TODO: Partial factorization could be used to check for larger factors.
-	// This seems worthwhile -- but I'm not sure of the implementation.
 	if (typ(n) != t_INT)
 		pari_err(arither1, "isPowerful");
 	ulong nn = itou_or_0(n);
@@ -918,20 +917,15 @@ isPowerful(GEN n)
 		}
 	}
 	
-	avma = ltop;	// slight abuse of ltop
+	avma = ltop;	// slight abuse of ltop: n is used below
 	return is_pm1(n);
-	
-	//long l1 = is_pm1(n) || cmpis(vecmin(gel(Z_factor(absi(n)), 2)), 1) > 0;
-	//avma = ltop;
-	//return l1;
 }
+
 
 ///////////////////////////////
 long
 isPowerfulCorrect(GEN n)
 {
-	// TODO: Partial factorization could be used to check for larger factors.
-	// This seems worthwhile -- but I'm not sure of the implementation.
 	if (typ(n) != t_INT)
 		pari_err(arither1, "isPowerful");
 
@@ -989,12 +983,8 @@ isPowerfulCorrect(GEN n)
 		}
 	}
 	
-	avma = ltop;	// slight abuse of ltop
+	avma = ltop;	// slight abuse of ltop: n is used below
 	return is_pm1(n);
-	
-	//long l1 = is_pm1(n) || cmpis(vecmin(gel(Z_factor(absi(n)), 2)), 1) > 0;
-	//avma = ltop;
-	//return l1;
 }
 ///////////////////////////////
 
@@ -1228,7 +1218,6 @@ primorial(GEN n)
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
-////////////////////////////////////////////////////////////////
 
 
 GEN
@@ -1267,7 +1256,7 @@ lpf(GEN n)
 			return stoi(p);
 		}
 	}
-	res = gcoeff(Z_factor(n), 1, 1);	// TODO: Partial factorization?
+	res = gcoeff(Z_factor(n), 1, 1);	// TODO: Partial factorization?  Tricky to do right...
 	res = gerepileupto(ltop, res);
 	return res;
 }
@@ -1423,6 +1412,7 @@ lucasmod(ulong n, GEN m, GEN *a, GEN *b)
 	*b = modii(*b, m);
 }
 
+
 GEN
 fibomod(long n, GEN m)
 {
@@ -1465,6 +1455,7 @@ fibomod_tiny(long n, ulong m)
 	
 	return n < 0 && !odd(n) ? -a : a;
 }
+
 
 GEN
 fibmod(GEN n, GEN m)
@@ -1629,6 +1620,10 @@ largestSquareFactor(GEN n)
 }
 
 
+INLINE long
+hamming_word(ulong w)
+{
+	return __builtin_popcountll(w);
 #if 0
 static long byte_weight[] = {
 	0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
@@ -1640,14 +1635,6 @@ static long byte_weight[] = {
 	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
 	3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8
 };
-#endif
-
-
-INLINE long
-hamming_word(ulong w)
-{
-	return __builtin_popcountll(w);
-#if 0
 	long sum = 0;
 	while (w) {
 		//sum += w & 1;
@@ -2335,7 +2322,6 @@ Faulhaber(long e, GEN a)
 	pari_sp ltop = avma;
 	GEN ret = gen_0;
 	GEN x = pol_x(0);
-	//GEN x = pol_x(fetch_user_var("x"));
 	if (!a)
 		a = x;
 	else if (!gcmpX(a))
@@ -2529,7 +2515,7 @@ issquarefree_small(ulong n)
 }
 
 
-// TODO: All of the countPowerful functions could be improved (probably?)
+// TODO: All of the countPowerful functions could be improved greatly
 // by using countSquarefree to check the # of squarefree numbers at the point
 // that dividing will give exactly 1.	Cost: two invocations of countSquarefree
 // at size ~ cuberoot(n).	Savings: ~0.63 cuberoot(n) invocations of
@@ -2938,15 +2924,20 @@ log_2(GEN x, long prec)
 {
 	pari_sp ltop = avma;
 	GEN ret = NEVER_USED;	// to silence compiler, which doesn't know that pari_err never returns
-	long t = typ(x);
-	if (t == t_INT)
-		ret = mplog(itor(x, prec));
-	else if (t == t_REAL)
-		ret = mplog(x);
-	else if (t == t_FRAC)
-		ret = mplog(gmul(x, real_1(prec)));	// TODO: Better way to convert t_FRAC to t_REAL?
-	else
-		pari_err(typeer, "lg");
+	switch(typ(x)) {
+		case t_INT:
+			ret = mplog(itor(x, prec));
+			break;
+		case t_REAL:
+			ret = mplog(x);
+			break;
+		case t_FRAC:
+		case t_COMPLEX:
+			ret = mplog(cxcompotor(x, prec));
+			break;
+		default:
+			pari_err(typeer, "lg");
+	}
 	ret = divrr(ret, mplog2(prec));
 	ret = gerepileupto(ltop, ret);
 	return ret;
