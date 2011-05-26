@@ -562,7 +562,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 						s = Str(s, medial(gvec[i], Str("a(n - ", i, ")")))
 					)
 				);
-				print("Can be though of as "g" interlocking sequences, each of the form a(n) = "s".")
+				print("Can be thought of as "g" interlocking sequences, each of the form a(n) = "s".")
 			)
 		);
 		print1("<a href=\"/Sindx_Rea.html#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
