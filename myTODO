@@ -47,8 +47,10 @@ Priority classification (first column): [subjective and debatable]
    an efficient PARI solution:
    http://pari.math.u-bordeaux.fr/archives/pari-users-1007/msg00004.html
 
+4  Let sqrt work on INTMOD objects with a composite modulus.
 
+4  Good code for finding recurrence relations.
 
-3  Fix tetrMod
+3  Code a correct tetration-mod-m function.
 
 
