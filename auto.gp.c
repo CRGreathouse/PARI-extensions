@@ -2970,7 +2970,6 @@ contfracback(GEN v, GEN terms)
 }
 
 
-// TODO: increase precision through calculation?
 GEN
 W(GEN x, long prec)
 {
@@ -2991,12 +2990,12 @@ W(GEN x, long prec)
 			return real_0(prec);
 		}
 		pari_sp btop = avma;
-		GEN minusOneOverE = negr(mpexp(stor(-1, prec)));
-		long c = cmprr(x, minusOneOverE);
+		GEN oneOverE = mpexp(stor(-1, prec));
+		long c = absr_cmp(x, oneOverE);
 		avma = btop;
 		if (!c)
 			return real_m1(prec);	// otherwise, sometimes sqrt becomes complex
-		if (c < 0)
+		if (c > 0)	// x < -1/e
 			pari_err(talker, "out of range");
 	}
 	t = real_1(prec);
@@ -3013,7 +3012,7 @@ W(GEN x, long prec)
 			w = rtor(w, prec);
 		}
 	} else {
-		w = mplog(x);
+		w = mplog(x);	// Faster than the better approximation log + log log
 	}
 	if (cmprs(x, 3) > 0)
 		w = subrr(w, mplog(w));
