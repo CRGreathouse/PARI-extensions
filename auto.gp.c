@@ -3355,16 +3355,18 @@ GEN
 bfile(GEN name, GEN v, GEN offset)
 {
 	pari_sp ltop = avma;
-	GEN cur = gen_0, Anum = gen_0;
+	GEN Anum = NEVER_USED;
+	long cur = NEVER_USED;
 	// If no v is given, fine; but if it is it must be a vector.
 	// Should this use is_vec_t(typ(v)) to allow t_COL as well?
 	if (v && typ(v) != t_VEC)
 		pari_err(typeer, "bfile");
 	if (!offset)
-		offset = gen_1;
-	else if (typ(offset) != t_INT)
+		cur = 0;
+	else if (typ(offset) == t_INT)
+		cur = itos(offset) - 1;
+	else
 		pari_err(typeer, "bfile");
-	cur = subis(offset, 1);
 	
 	if (typ(name) == t_INT)
 	{
@@ -3378,12 +3380,12 @@ bfile(GEN name, GEN v, GEN offset)
 		}
 		Anum = concat(name, NULL);	// "0","0","0","0","4","0" -> "000040"
 		name = concat(concat(strtoGENstr("b"), Anum), strtoGENstr(".txt"));
-	} else {
-		if (typ(name) != t_STR)
-			pari_err(typeer, "bfile");
+	} else if (typ(name) == t_STR) {
 		// TODO: Try to extract a reasonable A-number, or just set to blank?
 		Anum = strtoGENstr("000000");
 		//Anum = concat(extract0(gtovec(name), stoi(126), NULL), NULL);
+	} else {
+		pari_err(typeer, "bfile");
 	}
 	
 	char* filename = GSTR(name);
@@ -3391,12 +3393,13 @@ bfile(GEN name, GEN v, GEN offset)
 		return bfilein(filename);
 	FILE *f = fopen(filename, "r");
 	if (f) {
-		pari_warn(warner, "File `%Ps' already exists. Appending terms..", name);
+		pari_warn(warner, "File `%Ps' already exists. Moving to bfile.old...", name);
 		fclose(f);
+		rename(filename, "bfile.old");
 	}
 	
+	f = fopen(filename, "w+");
 	long l1 = lg(v);
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	long i;
 	for (i = 1; i < l1; ++i)
 	{
@@ -3408,12 +3411,16 @@ bfile(GEN name, GEN v, GEN offset)
 			pari_warn(warner, "Next term has %Ps digits; exiting.\n", digits(e));
 			break;
 		}
-		write0(filename, mkvec3(cur = addis(cur, 1), strtoGENstr(" "), e));
-		if (low_stack(st_lim, stack_lim(btop, 1)))
-			cur = gerepilecopy(btop, cur);
+
+		char *num = GENtostr(e);
+		fprintf(f, "%ld %s\n", ++cur, num);
+		pari_free(num);
 	}
-	//pari_printf("%%H A%Ps Author, <a href=\"b%Ps.txt\">Table of n, a(n) for n = %Ps..%Ps</a>\n", Anum, Anum, offset, cur);
-	pari_printf("%%H A%Ps Charles R Greathouse IV, <a href=\"/A%Ps/b%Ps.txt\">Table of n, a(n) for n = %Ps..%Ps</a>\n", Anum, Anum, Anum, offset, cur);
+	fclose(f);
+	if(offset)
+		pari_printf("A%Ps: Terms %Ps..%ld written to %s\n", Anum, offset, cur, filename);
+	else
+		pari_printf("A%Ps: Terms 1..%ld written to %s\n", Anum, cur, filename);
 	avma = ltop;
 	return gnil;
 }
