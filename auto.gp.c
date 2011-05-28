@@ -847,8 +847,7 @@ isPowerful_small(ulong n)
 	
 	// if the input was a powerful number, n the square of a prime or the cube of a prime.
 	pari_sp btop = avma;
-	//long ret = n == 1 || Z_isanypower(utoipos(n), NULL);
-	long ret = 
+	long ret = n == 1 || Z_isanypower(utoipos(n), NULL);	// FIXME: Check for correctness and speed, something was wrong here.
 	avma = btop;
 	return ret;
 }
