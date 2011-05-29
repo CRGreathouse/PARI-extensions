@@ -213,6 +213,7 @@ GEN Faulhaber(long e, GEN a);
 GEN rp(long b);
 GEN countPowerful(GEN lim);
 GEN countSquarefree(GEN lim);
+ulong ucountSquarefree(ulong lim);
 GEN Mfactor(GEN p, GEN lim, GEN start);
 GEN bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start);
 long bigdiv(GEN a, GEN b, GEN c, GEN d);
@@ -2523,8 +2524,13 @@ issquarefree_small(ulong n)
 ulong
 ucountPowerfulu(ulong n)
 {
-	ulong k, res = 0;
-	ulong breakpoint = cuberoot(n >> 2);
+#if 1
+	// About 33% faster
+	ulong k, breakpoint = cuberoot(n >> 2);
+	ulong res = ucountSquarefree(cuberoot(n)) - ucountSquarefree(breakpoint);
+#else
+	ulong k, breakpoint = cuberoot(n), res = 0;
+#endif
 	for (k = 1; k <= breakpoint; k++)
 		if (issquarefree_small(k))
 			res += usqrtsafe(n / k) / k;
@@ -2536,8 +2542,9 @@ ulong
 ucountPowerfuli(GEN n)
 {
 	pari_sp ltop = avma;
-	ulong p1 = itos(gfloor(powrfrac(itor(n, lgefint(n)), 1, 3))), res = 0, k;
-	for (k = 1; k <= p1; k++)
+	ulong cube_root = itos(gfloor(powrfrac(itor(n, lgefint(n)), 1, 3)));
+	ulong res = 0, k;
+	for (k = 1; k <= cube_root; k++)
 		if (issquarefree_small(k)) {
 			res += itos(divis(sqrti(divis(n, k)), k));
 			//res += itos(sqrti(divii(n, powuu(k, 3))));	// About 35% slower
