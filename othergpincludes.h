@@ -22,6 +22,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   *p = init_primepointer(*a, 0, &d); return d;
 }
 
+
 // A private function from basemath/prime.c
 static ulong
 u_LucasMod(ulong n, ulong P, ulong N)
@@ -45,6 +46,7 @@ u_LucasMod(ulong n, ulong P, ulong N)
   }
   return v;
 }
+
 
 // A private function from basemath/prime.c
 static int
@@ -87,6 +89,37 @@ polequal(GEN x, GEN y)
   while (ly > lx) if (!gequal0(gel(y,--ly))) return 0;
   for (lx--; lx >= 2; lx--) if (!gequal(gel(x,lx), gel(y,lx))) return 0;
   return 1;
+}
+
+
+// A private function from arith1.c
+static int
+is_char_2(GEN a)
+{
+  long j;
+  GEN b;
+  switch(typ(a))
+  {
+  case t_INTMOD:
+    b = gel(a,1);
+    if (!mod2(b))
+    {
+      if (!equaliu(b, 2)) pari_err(impl, "issquare for this input");
+      return 1;
+    }
+    return 0;
+  case t_FFELT:
+    if (equaliu(FF_p_i(a), 2)) return 1;
+    return 0;
+  case t_POLMOD:
+    if (is_char_2(gel(a,1)) || is_char_2(gel(a,2))) return 1;
+    return 0;
+  case t_POL:
+    for (j = 2; j < lg(a); j++)
+      if (is_char_2(gel(a,j))) return 1;
+    return 0;
+  }
+  return 0;
 }
 
 
