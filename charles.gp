@@ -7,6 +7,8 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
+
+
 cons(x:real)={
 	my(t=precision(x),s=log(x)\log(10),v=vector(t));
 	x /= 10^s;
@@ -510,7 +512,14 @@ findrec(v:vec, verbose:bool=1)={
 	);
 	for (i=firstNonzero,d,
 		c = findrecd(v,i,verbose);
-		if(c, return(c))
+		if(c,
+			if(verbose,
+				my(poly='x^#c-sum(i=1,#c,c[i]*'x^(#c-i)),f=factor(poly));
+				print("Characteristic polynomial: "poly);
+				if(#f[,1] > 1 || f[1,2] > 1, print("\t= "f))
+			);
+			return(c)
+		)
 	);
 	if(verbose,print("Cannot be described by a homogeneous linear recurrence relation with "d" or fewer coefficients."));
 	0
@@ -551,6 +560,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 			for(i=1,#c,
 				if(c[i] != 0, g = gcd(g, i))
 			);
+			/*
 			if (g > 1,
 				my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
 				for(i=1,#gvec,
@@ -563,7 +573,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 					)
 				);
 				print("Can be thought of as "g" interlocking sequences, each of the form a(n) = "s".")
-			)
+			)*/
 		);
 		print1("<a href=\"/Sindx_Rea.html#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
 		for(i=2,#c,print1(","c[i]));
