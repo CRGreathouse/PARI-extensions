@@ -88,5 +88,77 @@ polequal(GEN x, GEN y)
   for (lx--; lx >= 2; lx--) if (!gequal(gel(x,lx), gel(y,lx))) return 0;
   return 1;
 }
+
+
+// A private function from arith1.c
+static long
+polissquareall(GEN x, GEN *pt)
+{
+  pari_sp av;
+  long v, l = degpol(x);
+  GEN y, a, b;
+
+  if (!signe(x))
+  {
+    if (pt) *pt = gcopy(x);
+    return 1;
+  }
+  if (pt) *pt = gen_0;
+  if (l&1) return 0; /* odd degree */
+  av = avma;
+  v = RgX_valrem(x, &x);
+  if (v) {
+    l = degpol(x);
+    if (l&1) return 0;
+  }
+  a = gel(x,2);
+  switch (typ(a))
+  {
+    case t_INT: y =  Z_issquareall(a,&b)? gen_1: gen_0; break;
+    case t_POL: y = polissquareall(a,&b)? gen_1: gen_0; break;
+    default: y = gissquare(a); b = NULL; break;
+  }
+  if (y == gen_0) { avma = av; return 0; }
+  if (!l) {
+    if (!pt) { avma = av; return 1; }
+    if (!b) b = gsqrt(a,DEFAULTPREC);
+    y = scalarpol(b, varn(x)); goto END;
+  }
+  if (is_char_2(x))
+  {
+    long i, lx;
+    x = gmul(x, mkintmod(gen_1, gen_2));
+    lx = lg(x);
+    if ((lx-3) & 1) { avma = av; return 0; }
+    for (i = 3; i < lx; i+=2)
+      if (!gequal0(gel(x,i))) { avma = av; return 0; }
+    if (pt) {
+      y = cgetg((lx+3) / 2, t_POL);
+      for (i = 2; i < lx; i+=2)
+        if (!gissquareall(gel(x,i), &gel(y, (i+2)>>1))) { avma = av; return 0; }
+      y[1] = evalsigne(1) | evalvarn(varn(x));
+      goto END;
+    } else {
+      for (i = 2; i < lx; i+=2)
+        if (!gissquare(gel(x,i))) { avma = av; return 0; }
+      avma = av; return 1;
+    }
+  }
+  else
+  {
+    x = RgX_Rg_div(x,a);
+    y = gtrunc(gsqrt(RgX_to_ser(x,2+l),0));
+    if (!RgX_equal(gsqr(y), x)) { avma = av; return 0; }
+    if (!pt) { avma = av; return 1; }
+    if (!gequal1(a))
+    {
+      if (!b) b = gsqrt(a,DEFAULTPREC);
+      y = gmul(b, y);
+    }
+  }
+END:
+  *pt = v? gerepilecopy(av, RgX_shift_shallow(y, v >> 1)): gerepileupto(av, y);
+  return 1;
+}
 #endif
 ////////////////////////////////////////////////////////////////////////////////

@@ -5194,24 +5194,26 @@ iscyclo(GEN f)
 		pari_err(typeer, "iscyclo");
 	pari_sp ltop = avma;
 	GEN f1, f2, fn, x, mx;
-	long var = varn(f);	// Variable number in polynomial
-	x = mkpoln(2, gen_1, gen_0);	// x
-	setvarn(x, var);
 	
 	f1 = graeffe(f);
 	if (polequal(f, f1)) {
 		avma = ltop;
 		return 1;
 	}
-	
+
+	// Set up variables
+	long var = varn(f);	// Variable number in polynomial
+	x = mkpoln(2, gen_1, gen_0);	// x
+	setvarn(x, var);
 	mx = mkpoln(2, gen_m1, gen_0);	// -x
 	setvarn(mx, var);
+	
 	fn = gsubst(f, var, mx);
-	if (gequal(f1, fn) && iscyclo(fn)) {
+	if (polequal(f1, fn) && iscyclo(fn)) {
 		avma = ltop;
 		return 1;
 	}
-	long ret = !gequal0(gissquareall(f1, &f2)) && iscyclo(f2);
+	long ret = polissquareall(f1, &f2) && iscyclo(f2);
 	avma = ltop;
 	return ret;
 }
