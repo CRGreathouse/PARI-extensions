@@ -5262,7 +5262,10 @@ istotient(GEN n)
 
 
 /* This function should be called only internally.  n and m are positive t_INT
- * values.
+ * values.  Test with
+#
+sum(n=1,35214/2,istotient(2*n)==0)
+forstep(n=2,1e6,2,istotient(2*n))
  */
 long
 totientHelper(GEN n, GEN m)
@@ -5287,6 +5290,13 @@ totientHelper(GEN n, GEN m)
 			if (!dvdii(k, p))
 				break;
 			k = diviiexact(k, p);
+			/* // Slower:
+			GEN quotient, remainder;
+			quotient = dvmdii(k, p, &remainder);
+			if (remainder != gen_0)	// documentation guarantees that gen_0, not a copy, is returned if p|k.
+				break;
+			k = quotient;
+			*/
 		}
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &k);
