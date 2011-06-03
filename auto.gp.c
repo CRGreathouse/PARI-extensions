@@ -2566,16 +2566,22 @@ ucountPowerfulu(ulong n)
 }
 
 
+/*
+a(n)=sum(k=1, floor((n+.5)^(1/3)), if(issquarefree(k), sqrtint(n\k^3)));
+a(1092727^3)
+cP(1092727^3)
+*/
 ulong
 ucountPowerfuli(GEN n)
 {
 	pari_sp ltop = avma;
+	
 	ulong cube_root = itou(cuberootint(n));
 	ulong res = 0, k;
 	for (k = 1; k <= cube_root; k++)
 		if (issquarefree_small(k)) {
-			res += itos(divis(sqrti(divis(n, k)), k));
-			//res += itos(sqrti(divii(n, powuu(k, 3))));    // About 35% slower
+			res += itos(truedivis(sqrti(truedivis(n, k)), k));
+			//res += itos(sqrti(divii(n, powuu(k, 3))));	// Slower?
 			avma = ltop;
 		}
 	return res;
