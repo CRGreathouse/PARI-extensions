@@ -5190,26 +5190,24 @@ graeffe(GEN f)
 long
 iscyclo(GEN f)
 {
-  pari_sp ltop = avma;
-  GEN f1 = gen_0, f2 = gen_0, fn = gen_0, x = pol_x(fetch_user_var("x"));
-  long l1;	  /* bool */
-  if (typ(f) != t_POL)
-    pari_err(typeer, "iscyclo");
-  f1 = graeffe(f);
-  if (gequal(f, f1))
-  {
-    avma = ltop;
-    return 1;
-  }
-  fn = gsubst(f, gvar(x), gneg(x));
-  if (gequal(f1, fn) && iscyclo(fn))
-  {
-    avma = ltop;
-    return 1;
-  }
-  l1 = !gequal0(gissquareall(f1, &f2)) && iscyclo(f2);
-  avma = ltop;
-  return l1;
+	pari_sp ltop = avma;
+	GEN f1, f2, fn, x = pol_x(fetch_user_var("x"));
+	long l1;
+	if (typ(f) != t_POL)
+		pari_err(typeer, "iscyclo");
+	f1 = graeffe(f);
+	if (gequal(f, f1)) {
+		avma = ltop;
+		return 1;
+	}
+	fn = gsubst(f, gvar(x), gneg(x));
+	if (gequal(f1, fn) && iscyclo(fn)) {
+		avma = ltop;
+		return 1;
+	}
+	l1 = !gequal0(gissquareall(f1, &f2)) && iscyclo(f2);
+	avma = ltop;
+	return l1;
 }
 
 
