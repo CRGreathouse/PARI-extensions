@@ -2416,7 +2416,7 @@ issquarefree_small(ulong n)
 		}
 		
 		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (p >= last1)
+		if (p > last1)
 			break;
 	}
 
