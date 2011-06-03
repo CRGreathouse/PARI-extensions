@@ -3,7 +3,7 @@
   help = "/usr/local/bin/gphelp -cu 6"
   prettyprinter = /usr/local/bin/tex2mail -TeX -noindent -ragged -by_par
   prompt = "(%H:%M)"
-  primelimit = 300M
+  primelimit = 100M
   parisize = 52428800
   factor_add_primes = 1
 \\  read "auto.gp"
