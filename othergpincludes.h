@@ -73,5 +73,20 @@ u_IsLucasPsP(ulong n)
   }
   return 0;
 }
+
+
+// A private function from gen2.c
+/* x,y t_POL */
+static int
+polequal(GEN x, GEN y)
+{
+  long lx, ly;
+  if (x[1] != y[1]) return 0;
+  lx = lg(x); ly = lg(y);
+  while (lx > ly) if (!gequal0(gel(x,--lx))) return 0;
+  while (ly > lx) if (!gequal0(gel(y,--ly))) return 0;
+  for (lx--; lx >= 2; lx--) if (!gequal(gel(x,lx), gel(y,lx))) return 0;
+  return 1;
+}
 #endif
 ////////////////////////////////////////////////////////////////////////////////
