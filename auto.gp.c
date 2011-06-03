@@ -5216,8 +5216,6 @@ iscyclo(GEN f)
 long
 istotient(GEN n)
 {
-	pari_sp ltop = avma;
-	GEN k = gen_0, p = gen_0, d = gen_0, p2 = gen_0;
 	if (typ(n) != t_INT)
 		pari_err(arither1, "istotient");
 	if (signe(n) < 1)
@@ -5225,6 +5223,8 @@ istotient(GEN n)
 	if(mod2(n))
 		return isint1(n);
 
+	pari_sp ltop = avma;
+	GEN k, p, d, p2;
 	k = n;
 	while (1) {
 		if (totientHelper(k, gen_2)) {
@@ -5237,7 +5237,6 @@ istotient(GEN n)
 		k = gerepileuptoint(ltop, k);
 	}
 	p2 = divisors(shifti(n, -1));
-{
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	long i;
 	for (i = 1; i < lg(p2); ++i) {
@@ -5245,8 +5244,6 @@ istotient(GEN n)
 		if (!(isprime(p = addis(d, 1))))
 			continue;
 		k = diviiexact(n, d);
-{
-		pari_sp btop = avma;
 		while (1) {
 			if (totientHelper(k, p)) {
 				avma = ltop;
@@ -5255,13 +5252,10 @@ istotient(GEN n)
 			if (!dvdii(k, p))
 				break;
 			k = diviiexact(k, p);
-			k = gerepileuptoint(btop, k);
 		}
-}
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &k);
 	}
-}
 	avma = ltop;
 	return 0;
 }
@@ -5278,7 +5272,6 @@ totientHelper(GEN n, GEN m)
 	pari_sp ltop = avma;
 	GEN k, p, d, p1;
 	p1 = divisors(shifti(n, -1));
-{
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	long l2;
 	for (l2 = 1; l2 < lg(p1); ++l2) {
@@ -5298,7 +5291,6 @@ totientHelper(GEN n, GEN m)
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &k);
 	}
-}
 	avma = ltop;
 	return 0;
 }
