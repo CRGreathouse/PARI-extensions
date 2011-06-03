@@ -5269,62 +5269,54 @@ istotient(GEN n)
 long
 totientHelper(GEN n, GEN m)
 {
-  pari_sp ltop = avma;
-  GEN k = gen_0, p = gen_0, d = gen_0;	  /* int */
-  GEN p1 = gen_0;	  /* vec */
-  if (typ(n) != t_INT)
-    pari_err(typeer, "totientHelper");
-  if (!m)
-    m = gen_1;
-  else
-    if (typ(m) != t_INT)
-      pari_err(typeer, "totientHelper");
-  k = gen_0;
-  p = gen_0;
-  d = gen_0;
-  if (equali1(n))
-  {
-    avma = ltop;
-    return 1;
-  }
-  if (smodis(n, 2))
-  {
-    avma = ltop;
-    return 0;
-  }
-  p1 = divisors(shifti(n, -1));
-  {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    long l2;
-    GEN dd = gen_0;	  /* int */
-    for (l2 = 1; l2 < lg(p1); ++l2)
-    {
-      dd = icopy(gel(p1, l2));
-      d = shifti(dd, 1);
-      if ((cmpii(d, m) < 0) || !(isprime(p = addis(d, 1))))
-        continue;
-      k = truedivii(n, d);
-      {
-        pari_sp btop = avma;
-        while (1)
-        {
-          if (totientHelper(k, p))
-          {
-            avma = ltop;
-            return 1;
-          }
-          if (signe(modii(k, p)))
-            break;
-          k = gdivent(k, p);
-          k = gerepileuptoint(btop, k);
-        }
-      }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepileall(btop, 4, &dd, &d, &p, &k);
-    }
-  }
-  avma = ltop;
-  return 0;
+	pari_sp ltop = avma;
+	GEN k = gen_0, p = gen_0, d = gen_0;	  /* int */
+	GEN p1 = gen_0;	  /* vec */
+	if (typ(n) != t_INT)
+		pari_err(typeer, "totientHelper");
+	if (!m)
+		m = gen_1;
+	else
+		if (typ(m) != t_INT)
+			pari_err(typeer, "totientHelper");
+	if (equali1(n)) {
+		avma = ltop;
+		return 1;
+	}
+	if (smodis(n, 2)) {
+		avma = ltop;
+		return 0;
+	}
+	p1 = divisors(shifti(n, -1));
+{
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	long l2;
+	GEN dd = gen_0;
+	for (l2 = 1; l2 < lg(p1); ++l2) {
+		dd = icopy(gel(p1, l2));
+		d = shifti(dd, 1);
+		if ((cmpii(d, m) < 0) || !(isprime(p = addis(d, 1))))
+			continue;
+		k = truedivii(n, d);
+{
+		pari_sp btop = avma;
+		while (1) {
+			if (totientHelper(k, p)) {
+				avma = ltop;
+				return 1;
+			}
+			if (signe(modii(k, p)))
+				break;
+			k = gdivent(k, p);
+			k = gerepileuptoint(btop, k);
+		}
+}
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+			gerepileall(btop, 4, &dd, &d, &p, &k);
+	}
+}
+	avma = ltop;
+	return 0;
 }
 
 
