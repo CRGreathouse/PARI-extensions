@@ -5244,7 +5244,7 @@ istotient(GEN n)
 		d = shifti(gel(p2, i), 1);
 		if (!(isprime(p = addis(d, 1))))
 			continue;
-		k = truedivii(n, d);
+		k = diviiexact(n, d);
 {
 		pari_sp btop = avma;
 		while (1) {
@@ -5252,9 +5252,9 @@ istotient(GEN n)
 				avma = ltop;
 				return 1;
 			}
-			if (signe(modii(k, p)))
+			if (!dvdii(k, p)))
 				break;
-			k = gdivent(k, p);
+			k = diviiexact(k, p);
 			k = gerepileuptoint(btop, k);
 		}
 }
