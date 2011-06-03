@@ -2373,6 +2373,34 @@ cuberoot(ulong n)
 	return ret;
 }
 
+GEN
+cuberootint(GEN x)
+{
+	pari_sp ltop = avma;
+	long t = typ(x);
+	GEN ret = NEVER_USED;
+	if (t == t_INT) {
+		ret = gfloor(powrfrac(itor(x, lgefint(x)), 1, 3));
+	} else if (t == t_REAL) {
+		ret = gfloor(powrfrac(x, 1, 3));
+		x = gfloor(x);
+	} else {
+		pari_err(typeer, "cuberootint");
+	}
+
+	if (cmpii(powis(ret, 3), x) == 1) {
+		ret = subis(ret, 1);
+		while (cmpii(powis(ret, 3), x) == 1)
+			ret = subis(ret, 1);
+		ret = gerepileupto(ltop, ret);
+		return ret;
+	}
+	while (cmpii(powis(addis(ret, 1), 3), x) < 1)
+		ret = addis(ret, 1);
+	ret = gerepileupto(ltop, ret);
+	return ret;
+}
+
 
 long
 issquarefree_small(ulong n)
@@ -2542,12 +2570,12 @@ ulong
 ucountPowerfuli(GEN n)
 {
 	pari_sp ltop = avma;
-	ulong cube_root = itos(gfloor(powrfrac(itor(n, lgefint(n)), 1, 3)));
+	ulong cube_root = itou(cuberootint(n));
 	ulong res = 0, k;
 	for (k = 1; k <= cube_root; k++)
 		if (issquarefree_small(k)) {
 			res += itos(divis(sqrti(divis(n, k)), k));
-			//res += itos(sqrti(divii(n, powuu(k, 3))));	// About 35% slower
+			//res += itos(sqrti(divii(n, powuu(k, 3))));    // About 35% slower
 			avma = ltop;
 		}
 	return res;
