@@ -120,7 +120,6 @@ GP;install("bfile","GDGDG","bfile","./auto.gp.so");
 GP;addhelp(bfile, "bfile(name, v, offset=1): If v is given, creates a b-file with the values of v, using name as the A-number (given as a number or a filename). If v is not given, open the b-file name (again, as a filename or number) and return a vector of its values.");
 GP;install("dsum","G","dsum","./auto.gp.so");
 GP;addhelp(dsum, "dsum(n): Digit sum of n. Sloane's A007953.");
-// New \/
 GP;install("checkmult","lGD1,L,","checkmult","./auto.gp.so");
 GP;addhelp(checkmult, "checkmult(v,{verbose=1}): Is the sequence v multiplicative?");
 GP;install("checkcmult","lGD1,L,","checkcmult","./auto.gp.so");
@@ -129,8 +128,6 @@ GP;install("checkdiv","lGD1,L,","checkdiv","./auto.gp.so");
 GP;addhelp(checkdiv, "checkdiv(v,{verbose=1}): Is v a divisibility sequence?");
 GP;install("solvePell","Gp","solvePell","./auto.gp.so");
 GP;addhelp(solvePell, "solvePell(n): Returns a solution to the equation x^2 - ny^2 = 1.");
-GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
-GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
 GP;install("Engel","Gp","Engel","./auto.gp.so");
 GP;addhelp(Engel, "Engel(x): Engel expansion of x.");
 GP;install("Eng","G","Eng","./auto.gp.so");
@@ -143,6 +140,9 @@ GP;install("rhoest","Gp","rhoest","./auto.gp.so");
 GP;addhelp(rhoest, "de Bruijn's asymptotic approximation for rho(x), rewritten as in van de Lune and Wattel 1969.  Curiously, their paper shows values for this estimate that differ from those calculated by this function, often as soon as the second decimal place -- but as the difference is in the direction of the true value, I have not looked further into this.");
 GP;install("DickmanRho","Gp","DickmanRho","./auto.gp.so");
 GP;addhelp(DickmanRho, "Estimates the value of the Dickman rho function. For x <= 3 the exact values are used, up to rounding; up to 15 the value is interpolated using known values and rhoest; after 15 rhoest is used, along with a correction factor based on the last value in rhoTable.");
+// New \/
+GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
+GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
 // New /\
 // No associated help
 GP;install("init_auto","v","init_auto","./auto.gp.so");
@@ -156,7 +156,6 @@ GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
 
 
 
-//////////////////////////////////////////////////////////// New
 long checkmult(GEN v, long verbose);
 long checkcmult(GEN v, long verbose);
 long checkdiv(GEN v, long verbose);
@@ -169,6 +168,7 @@ GEN composite(long n);
 GEN deBruijnXi(GEN x);
 GEN rhoest(GEN x, long prec);
 GEN DickmanRho(GEN x, long prec);
+//////////////////////////////////////////////////////////// New
 //////////////////////////////////////////////////////////// New
 
 
@@ -274,8 +274,8 @@ init_auto(void)
 
 
 /*
- * TODO: Split file into several parts, comment dependencies, start version
- * log, and upload to website
+ * TODO: Split file into several parts, comment dependencies,
+ * and upload to website
 */
 
 /*
@@ -2566,22 +2566,16 @@ ucountPowerfulu(ulong n)
 }
 
 
-/*
-a(n)=sum(k=1, floor((n+.5)^(1/3)), if(issquarefree(k), sqrtint(n\k^3)));
-a(1092727^3)
-cP(1092727^3)
-*/
 ulong
 ucountPowerfuli(GEN n)
 {
 	pari_sp ltop = avma;
-	
 	ulong cube_root = itou(cuberootint(n));
 	ulong res = 0, k;
 	for (k = 1; k <= cube_root; k++)
 		if (issquarefree_small(k)) {
-			res += itos(truedivis(sqrti(truedivis(n, k)), k));
-			//res += itos(sqrti(divii(n, powuu(k, 3))));	// Slower?
+			res += itos(divis(sqrti(divis(n, k)), k));
+			//res += itos(sqrti(divii(n, powuu(k, 3))));    // About 35% slower
 			avma = ltop;
 		}
 	return res;
