@@ -143,17 +143,31 @@ GP;addhelp(DickmanRho, "Estimates the value of the Dickman rho function. For x <
 // New \/
 GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
 GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
-// New /\
+GP;install("iscyclo","lG","iscyclo","./auto.gp.so");
+GP;addhelp(iscyclo, "iscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.");
+GP;install("istotient","lG","istotient","./auto.gp.so");
+GP;addhelp(istotient, "istotient(n): Does there exist some m such that eulerphi(m) = n?");
+* // New /\
 // No associated help
 GP;install("init_auto","v","init_auto","./auto.gp.so");
 GP;install("consistency","l","consistency","./auto.gp.so");
 GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
 GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
-* */
+GP;install("graeffe","G","graeffe","./auto.gp.so");
+GP;install("totientHelper","lGDG","totientHelper","./auto.gp.so");
+*/
 
 // Removed: //GP;install("pBounds","vD0,G,DGp","pBounds","./auto.gp.so");
 // Removed: //GP;addhelp(pBounds, "pBounds(n, verbose=0): Estimates the nth prime. Set verbose=1 to get a list of sources for the results.");
 
+
+
+//////////////////////////////////////////////////////////// New
+GEN graeffe(GEN f);
+long iscyclo(GEN f);
+long istotient(GEN n);
+long totientHelper(GEN n, GEN m);
+//////////////////////////////////////////////////////////// New
 
 
 long checkmult(GEN v, long verbose);
@@ -168,10 +182,6 @@ GEN composite(long n);
 GEN deBruijnXi(GEN x);
 GEN rhoest(GEN x, long prec);
 GEN DickmanRho(GEN x, long prec);
-//////////////////////////////////////////////////////////// New
-//////////////////////////////////////////////////////////// New
-
-
 GEN dsum(GEN n);
 ulong dsum_small(ulong n);
 long issemiprime(GEN n);
@@ -5141,6 +5151,203 @@ DickmanRho(GEN x, long prec)
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
+
+
+GEN
+graeffe(GEN f)
+{
+  pari_sp ltop = avma;
+  GEN d = gen_0, g = gen_0, h = gen_0, p1 = gen_0;
+  GEN p2 = gen_0;	  /* vec */
+  GEN p3 = gen_0;
+  GEN p4 = gen_0;	  /* vec */
+  GEN x = pol_x(fetch_user_var("x")), p5 = gen_0;
+  if (typ(f) != t_POL)
+    pari_err(typeer, "graeffe");
+  d = stoi(degpol(f));
+  p1 = gaddgs(gdiventgs(d, 2), 1);
+  {
+    long i;
+    p2 = cgetg(gtos(p1)+1, t_VEC);
+    for (i = 1; gcmpsg(i, p1) <= 0; ++i)
+      gel(p2, i) = polcoeff0(f, (2*i) - 2, -1);
+  }
+  g = p2;
+  p3 = gdiventgs(gaddgs(d, 1), 2);
+  {
+    long i;
+    p4 = cgetg(gtos(p3)+1, t_VEC);
+    for (i = 1; gcmpsg(i, p3) <= 0; ++i)
+      gel(p4, i) = polcoeff0(f, (2*i) - 1, -1);
+  }
+  h = p4;
+  p5 = gsub(gsqr(gtopolyrev(g, -1)), gmul(x, gsqr(gtopolyrev(h, -1))));
+  p5 = gerepileupto(ltop, p5);
+  return p5;
+}
+
+
+long
+iscyclo(GEN f)
+{
+  pari_sp ltop = avma;
+  GEN f1 = gen_0, f2 = gen_0, fn = gen_0, x = pol_x(fetch_user_var("x"));
+  long l1;	  /* bool */
+  if (typ(f) != t_POL)
+    pari_err(typeer, "iscyclo");
+  f1 = graeffe(f);
+  if (gequal(f, f1))
+  {
+    avma = ltop;
+    return 1;
+  }
+  fn = gsubst(f, gvar(x), gneg(x));
+  if (gequal(f1, fn) && iscyclo(fn))
+  {
+    avma = ltop;
+    return 1;
+  }
+  l1 = !gequal0(gissquareall(f1, &f2)) && iscyclo(f2);
+  avma = ltop;
+  return l1;
+}
+
+
+long
+istotient(GEN n)
+{
+  pari_sp ltop = avma;
+  GEN k = gen_0, p = gen_0, d = gen_0;	  /* int */
+  long l1;	  /* bool */
+  GEN p2 = gen_0;	  /* vec */
+  if (typ(n) != t_INT)
+    pari_err(typeer, "istotient");
+  k = gen_0;
+  p = gen_0;
+  d = gen_0;
+  if (cmpis(n, 2) < 0)
+  {
+    l1 = equali1(n);
+    avma = ltop;
+    return l1;
+  }
+  if (smodis(n, 2))
+  {
+    avma = ltop;
+    return 0;
+  }
+  k = icopy(n);
+  {
+    pari_sp btop = avma;
+    while (1)
+    {
+      if (totientHelper(k, gen_2))
+      {
+        avma = ltop;
+        return 1;
+      }
+      if (smodis(k, 2))
+        break;
+      k = gdivent(k, gen_2);
+      k = gerepileuptoint(btop, k);
+    }
+  }
+  p2 = divisors(shifti(n, -1));
+  {
+    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+    long l3;
+    GEN dd = gen_0;	  /* int */
+    for (l3 = 1; l3 < lg(p2); ++l3)
+    {
+      dd = icopy(gel(p2, l3));
+      d = shifti(dd, 1);
+      if (!(isprime(p = addis(d, 1))))
+        continue;
+      k = truedivii(n, d);
+      {
+        pari_sp btop = avma;
+        while (1)
+        {
+          if (totientHelper(k, p))
+          {
+            avma = ltop;
+            return 1;
+          }
+          if (signe(modii(k, p)))
+            break;
+          k = gdivent(k, p);
+          k = gerepileuptoint(btop, k);
+        }
+      }
+      if (low_stack(st_lim, stack_lim(btop, 1)))
+        gerepileall(btop, 4, &dd, &d, &p, &k);
+    }
+  }
+  avma = ltop;
+  return 0;
+}
+
+long
+totientHelper(GEN n, GEN m)
+{
+  pari_sp ltop = avma;
+  GEN k = gen_0, p = gen_0, d = gen_0;	  /* int */
+  GEN p1 = gen_0;	  /* vec */
+  if (typ(n) != t_INT)
+    pari_err(typeer, "totientHelper");
+  if (!m)
+    m = gen_1;
+  else
+    if (typ(m) != t_INT)
+      pari_err(typeer, "totientHelper");
+  k = gen_0;
+  p = gen_0;
+  d = gen_0;
+  if (equali1(n))
+  {
+    avma = ltop;
+    return 1;
+  }
+  if (smodis(n, 2))
+  {
+    avma = ltop;
+    return 0;
+  }
+  p1 = divisors(shifti(n, -1));
+  {
+    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+    long l2;
+    GEN dd = gen_0;	  /* int */
+    for (l2 = 1; l2 < lg(p1); ++l2)
+    {
+      dd = icopy(gel(p1, l2));
+      d = shifti(dd, 1);
+      if ((cmpii(d, m) < 0) || !(isprime(p = addis(d, 1))))
+        continue;
+      k = truedivii(n, d);
+      {
+        pari_sp btop = avma;
+        while (1)
+        {
+          if (totientHelper(k, p))
+          {
+            avma = ltop;
+            return 1;
+          }
+          if (signe(modii(k, p)))
+            break;
+          k = gdivent(k, p);
+          k = gerepileuptoint(btop, k);
+        }
+      }
+      if (low_stack(st_lim, stack_lim(btop, 1)))
+        gerepileall(btop, 4, &dd, &d, &p, &k);
+    }
+  }
+  avma = ltop;
+  return 0;
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////// End newcomers
