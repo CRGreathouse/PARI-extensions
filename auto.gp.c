@@ -5267,15 +5267,16 @@ istotient(GEN n)
 }
 
 
+/* This function should be called only internally.  n and m are positive t_INT
+ * values.
+ */
 long
 totientHelper(GEN n, GEN m)
 {
+	if (mod2(n))
+		return equali1(n);
 	pari_sp ltop = avma;
 	GEN k, p, d, p1;
-	if (equali1(n))
-		return 1;
-	if (mod2(n))
-		return 0;
 	p1 = divisors(shifti(n, -1));
 {
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
@@ -5284,20 +5285,16 @@ totientHelper(GEN n, GEN m)
 		d = shifti(gel(p1, l2), 1);
 		if ((cmpii(d, m) < 0) || !(isprime(p = addis(d, 1))))
 			continue;
-		k = truedivii(n, d);
-{
-		pari_sp btop = avma;
+		k = diviiexact(n, d);
 		while (1) {
 			if (totientHelper(k, p)) {
 				avma = ltop;
 				return 1;
 			}
-			if (signe(modii(k, p)))
+			if (!dvdii(k, p))
 				break;
-			k = gdivent(k, p);
-			k = gerepileuptoint(btop, k);
+			k = diviiexact(k, p);
 		}
-}
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &k);
 	}
