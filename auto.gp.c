@@ -5220,10 +5220,10 @@ istotient(GEN n)
 	GEN k = gen_0, p = gen_0, d = gen_0, p2 = gen_0;
 	if (typ(n) != t_INT)
 		pari_err(arither1, "istotient");
-	if (signe(n) < 1 || mod2(n))
+	if (signe(n) < 1)
 		return 0;
-	if (isint1(n))
-		return 1;
+	if(mod2(n))
+		return isint1(n);
 
 	k = n;
 	while (1) {
