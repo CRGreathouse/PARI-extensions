@@ -5252,7 +5252,7 @@ istotient(GEN n)
 				avma = ltop;
 				return 1;
 			}
-			if (!dvdii(k, p)))
+			if (!dvdii(k, p))
 				break;
 			k = diviiexact(k, p);
 			k = gerepileuptoint(btop, k);
@@ -5266,35 +5266,22 @@ istotient(GEN n)
 	return 0;
 }
 
+
 long
 totientHelper(GEN n, GEN m)
 {
 	pari_sp ltop = avma;
-	GEN k = gen_0, p = gen_0, d = gen_0;	  /* int */
-	GEN p1 = gen_0;	  /* vec */
-	if (typ(n) != t_INT)
-		pari_err(typeer, "totientHelper");
-	if (!m)
-		m = gen_1;
-	else
-		if (typ(m) != t_INT)
-			pari_err(typeer, "totientHelper");
-	if (equali1(n)) {
-		avma = ltop;
+	GEN k, p, d, p1;
+	if (equali1(n))
 		return 1;
-	}
-	if (smodis(n, 2)) {
-		avma = ltop;
+	if (mod2(n))
 		return 0;
-	}
 	p1 = divisors(shifti(n, -1));
 {
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	long l2;
-	GEN dd = gen_0;
 	for (l2 = 1; l2 < lg(p1); ++l2) {
-		dd = icopy(gel(p1, l2));
-		d = shifti(dd, 1);
+		d = shifti(gel(p1, l2), 1);
 		if ((cmpii(d, m) < 0) || !(isprime(p = addis(d, 1))))
 			continue;
 		k = truedivii(n, d);
@@ -5312,7 +5299,7 @@ totientHelper(GEN n, GEN m)
 		}
 }
 		if (low_stack(st_lim, stack_lim(btop, 1)))
-			gerepileall(btop, 4, &dd, &d, &p, &k);
+			gerepileall(btop, 1, &k);
 	}
 }
 	avma = ltop;
