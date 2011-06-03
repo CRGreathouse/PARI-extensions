@@ -5216,75 +5216,64 @@ iscyclo(GEN f)
 long
 istotient(GEN n)
 {
-  pari_sp ltop = avma;
-  GEN k = gen_0, p = gen_0, d = gen_0;	  /* int */
-  long l1;	  /* bool */
-  GEN p2 = gen_0;	  /* vec */
-  if (typ(n) != t_INT)
-    pari_err(typeer, "istotient");
-  k = gen_0;
-  p = gen_0;
-  d = gen_0;
-  if (cmpis(n, 2) < 0)
-  {
-    l1 = equali1(n);
-    avma = ltop;
-    return l1;
-  }
-  if (smodis(n, 2))
-  {
-    avma = ltop;
-    return 0;
-  }
-  k = icopy(n);
-  {
-    pari_sp btop = avma;
-    while (1)
-    {
-      if (totientHelper(k, gen_2))
-      {
-        avma = ltop;
-        return 1;
-      }
-      if (smodis(k, 2))
-        break;
-      k = gdivent(k, gen_2);
-      k = gerepileuptoint(btop, k);
-    }
-  }
-  p2 = divisors(shifti(n, -1));
-  {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    long l3;
-    GEN dd = gen_0;	  /* int */
-    for (l3 = 1; l3 < lg(p2); ++l3)
-    {
-      dd = icopy(gel(p2, l3));
-      d = shifti(dd, 1);
-      if (!(isprime(p = addis(d, 1))))
-        continue;
-      k = truedivii(n, d);
-      {
-        pari_sp btop = avma;
-        while (1)
-        {
-          if (totientHelper(k, p))
-          {
-            avma = ltop;
-            return 1;
-          }
-          if (signe(modii(k, p)))
-            break;
-          k = gdivent(k, p);
-          k = gerepileuptoint(btop, k);
-        }
-      }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepileall(btop, 4, &dd, &d, &p, &k);
-    }
-  }
-  avma = ltop;
-  return 0;
+	pari_sp ltop = avma;
+	GEN k = gen_0, p = gen_0, d = gen_0, p2 = gen_0;
+	long l1;
+	if (typ(n) != t_INT)
+		pari_err(typeer, "istotient");
+	if (cmpis(n, 2) < 0) {
+		l1 = equali1(n);
+		avma = ltop;
+		return l1;
+	}
+	if (smodis(n, 2)) {
+		avma = ltop;
+		return 0;
+	}
+	k = icopy(n);
+{
+	pari_sp btop = avma;
+	while (1) {
+		if (totientHelper(k, gen_2)) {
+			avma = ltop;
+			return 1;
+		}
+		if (smodis(k, 2))
+			break;
+		k = gdivent(k, gen_2);
+		k = gerepileuptoint(btop, k);
+	}
+}
+	p2 = divisors(shifti(n, -1));
+{
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	long l3;
+	GEN dd = gen_0;	  /* int */
+	for (l3 = 1; l3 < lg(p2); ++l3) {
+		dd = icopy(gel(p2, l3));
+		d = shifti(dd, 1);
+		if (!(isprime(p = addis(d, 1))))
+			continue;
+		k = truedivii(n, d);
+{
+		pari_sp btop = avma;
+		while (1) {
+			if (totientHelper(k, p)) {
+				avma = ltop;
+				return 1;
+			}
+			if (signe(modii(k, p)))
+				break;
+			k = gdivent(k, p);
+			k = gerepileuptoint(btop, k);
+		}
+}
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+		gerepileall(btop, 4, &dd, &d, &p, &k);
+	}
+}
+	avma = ltop;
+	return 0;
 }
 
 long
