@@ -5193,7 +5193,7 @@ iscyclo(GEN f)
 	if (typ(f) != t_POL)
 		pari_err(typeer, "iscyclo");
 	pari_sp ltop = avma;
-	GEN f1, f2, fn, x, mx;
+	GEN f1, f2, fn, mx;
 	
 	f1 = graeffe(f);
 	if (polequal(f, f1)) {
@@ -5203,8 +5203,6 @@ iscyclo(GEN f)
 
 	// Set up variables
 	long var = varn(f);	// Variable number in polynomial
-	x = mkpoln(2, gen_1, gen_0);	// x
-	setvarn(x, var);
 	mx = mkpoln(2, gen_m1, gen_0);	// -x
 	setvarn(mx, var);
 	
