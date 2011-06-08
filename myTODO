@@ -53,4 +53,5 @@ Priority classification (first column): [subjective and debatable]
 
 3  Code a correct tetration-mod-m function.
 
-
+3  Extend fnice() to printing factored polynomials.  Perhaps also accepting
+   factorizations as input?
