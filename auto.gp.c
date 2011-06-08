@@ -164,6 +164,7 @@ GP;install("totientHelper","lGDG","totientHelper","./auto.gp.so");
 
 //////////////////////////////////////////////////////////// New
 GEN graeffe(GEN f);
+long BradfordDavenport(GEN f);
 long iscyclo(GEN f);
 long istotient(GEN n);
 long totientHelper(GEN n, GEN m);
@@ -5197,7 +5198,14 @@ iscyclo(GEN f)
 	long degree = degpol(f);
 	if (degree < 2)
 		return degree == 1 && is_pm1(constant_term(f));
+	return BradfordDavenport(f) && gisirreducible(f);
+}
 
+
+// Checks if f is a product of distinct cyclotomic polynomials.  Assumes f is
+// a t_POL of degree > 1.
+long
+BradfordDavenport(GEN f) {
 	pari_sp ltop = avma;
 	GEN f1, f2, fn, mx;
 	
@@ -5213,11 +5221,11 @@ iscyclo(GEN f)
 	setvarn(mx, var);
 	
 	fn = gsubst(f, var, mx);
-	if (polequal(f1, fn) && iscyclo(fn)) {
+	if (polequal(f1, fn) && BradfordDavenport(fn)) {
 		avma = ltop;
 		return 1;
 	}
-	long ret = polissquareall(f1, &f2) && iscyclo(f2);
+	long ret = polissquareall(f1, &f2) && BradfordDavenport(f2);
 	avma = ltop;
 	return ret;
 }
