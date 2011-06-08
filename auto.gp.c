@@ -5192,6 +5192,12 @@ iscyclo(GEN f)
 {
 	if (typ(f) != t_POL)
 		pari_err(typeer, "iscyclo");
+	if (!isint1(leading_term(f)))
+		return 0;
+	long degree = degpol(f);
+	if (degree < 2)
+		return degree == 1 && is_pm1(constant_term(f));
+
 	pari_sp ltop = avma;
 	GEN f1, f2, fn, mx;
 	
