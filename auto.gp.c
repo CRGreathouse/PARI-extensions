@@ -5198,7 +5198,7 @@ iscyclo(GEN f)
 	if (degree < 2)
 		return degree == 1 && is_pm1(constant_term(f));
 	
-	return RgX_is_ZX(f) && BradfordDavenport(f) && gisirreducible(f);
+	return RgX_is_ZX(f) && BradfordDavenport(f) && gisirreducible(f) == gen_1;
 }
 
 
