@@ -5189,19 +5189,11 @@ iscyclo(GEN f)
 		pari_err(typeer, "iscyclo");
 	if (!isint1(leading_term(f)))
 		return 0;
-	long degree, lf, i;
-	degree = degpol(f);
+	long degree = degpol(f);
 	if (degree < 2)
 		return degree == 1 && is_pm1(constant_term(f));
 	
-	// Check if the coefficients are integers.  You'd think that this is what
-	// RgX_type(f) == t_INT was for, but you'd be wrong.
-	lf = lg(f);
-	for (i = 2; i < lf; i++)
-		if (typ(gel(f, i)) != t_INT)
-			return 0;	// Or type error?
-	
-	return BradfordDavenport(f) && gisirreducible(f);
+	return RgX_is_ZX(f) && BradfordDavenport(f) && gisirreducible(f);
 }
 
 
