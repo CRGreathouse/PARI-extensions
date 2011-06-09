@@ -5154,16 +5154,16 @@ DickmanRho(GEN x, long prec)
 }
 
 
-// Assumes that f is a t_POL with t_INT coefficients.  Returns a polynomial
-// with roots that are precisely the squares of the roots of f.
+// Assumes that f is a nonzero t_POL with t_INT coefficients.  Returns a
+// polynomial with roots that are precisely the squares of the roots of f.
 GEN
 graeffe(GEN f)
 {
 	pari_sp ltop = avma;
-	GEN g, h;
-	GEN x = pol_x(fetch_user_var("x")), p5 = gen_0;
+	GEN g, h, ret, x = mkpoln(2, gen_1, gen_0);
 	if (typ(f) != t_POL)
 		pari_err(typeer, "graeffe");
+		
 	long d = degpol(f);
 	long gsize = (d >> 1) + 1, hsize = (d + 1) >> 1;
 	long i;
@@ -5176,9 +5176,9 @@ graeffe(GEN f)
 	for (i = 1; i <= hsize; ++i)
 		gel(h, i) = polcoeff0(f, (2*i) - 1, -1);
 	
-	p5 = gsub(gsqr(gtopolyrev(g, -1)), gmul(x, gsqr(gtopolyrev(h, -1))));
-	p5 = gerepileupto(ltop, p5);
-	return p5;
+	ret = gsub(gsqr(gtopolyrev(g, -1)), gmul(x, gsqr(gtopolyrev(h, -1))));
+	ret = gerepileupto(ltop, ret);
+	return ret;
 }
 
 
@@ -5216,7 +5216,7 @@ BradfordDavenport(GEN f) {
 	setvarn(mx, var);
 	
 	fn = gsubst(f, var, mx);
-	if (polequal(f1, fn) && BradfordDavenport(fn)) {
+	if (ZX_equal(f1, fn) && BradfordDavenport(fn)) {
 		avma = ltop;
 		return 1;
 	}
