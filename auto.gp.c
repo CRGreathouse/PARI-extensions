@@ -5160,31 +5160,22 @@ GEN
 graeffe(GEN f)
 {
 	pari_sp ltop = avma;
-	GEN g = gen_0, h = gen_0, p1 = gen_0;
-	GEN p2 = gen_0;	  /* vec */
-	GEN p3 = gen_0;
-	GEN p4 = gen_0;	  /* vec */
+	GEN g, h;
 	GEN x = pol_x(fetch_user_var("x")), p5 = gen_0;
 	if (typ(f) != t_POL)
 		pari_err(typeer, "graeffe");
 	long d = degpol(f);
 	long gsize = (d >> 1) + 1, hsize = (d + 1) >> 1;
-	p1 = stoi(gsize);
-	p3 = stoi(hsize);
-{
 	long i;
-	p2 = cgetg(gsize+1, t_VEC);
+	
+	g = cgetg(gsize+1, t_VEC);
 	for (i = 1; i <= gsize; ++i)
-		gel(p2, i) = polcoeff0(f, (2*i) - 2, -1);
-}
-	g = p2;
-{
-	long i;
-	p4 = cgetg(hsize+1, t_VEC);
+		gel(g, i) = polcoeff0(f, (2*i) - 2, -1);
+	
+	h = cgetg(hsize+1, t_VEC);
 	for (i = 1; i <= hsize; ++i)
-		gel(p4, i) = polcoeff0(f, (2*i) - 1, -1);
-}
-	h = p4;
+		gel(h, i) = polcoeff0(f, (2*i) - 1, -1);
+	
 	p5 = gsub(gsqr(gtopolyrev(g, -1)), gmul(x, gsqr(gtopolyrev(h, -1))));
 	p5 = gerepileupto(ltop, p5);
 	return p5;
