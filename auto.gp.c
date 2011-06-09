@@ -5168,16 +5168,21 @@ graeffe(GEN f)
 	long gsize = (d >> 1) + 1, hsize = (d + 1) >> 1;
 	long i;
 	
-	g = cgetg(gsize+1, t_VEC);
+	g = cgetg(gsize+2, t_POL);
+	g[1] = evalvarn(0);
 	for (i = 1; i <= gsize; ++i)
-		gel(g, i) = polcoeff0(f, (2*i) - 2, -1);
+		gel(g, i + 1) = polcoeff0(f, (2*i) - 2, -1);
+	g = normalizepol_lg(g, gsize + 2);
 	
-	h = cgetg(hsize+1, t_VEC);
+	h = cgetg(hsize+2, t_POL);
+	h[1] = evalvarn(0);
 	for (i = 1; i <= hsize; ++i)
-		gel(h, i) = polcoeff0(f, (2*i) - 1, -1);
+		gel(h, i + 1) = polcoeff0(f, (2*i) - 1, -1);
+	h = normalizepol_lg(h, hsize + 2);
 	
-	ret = gsub(gsqr(gtopolyrev(g, -1)), gmul(x, gsqr(gtopolyrev(h, -1))));
+	ret = gsub(gsqr(g), gmul(x, gsqr(h)));
 	ret = gerepileupto(ltop, ret);
+	setvarn(ret, varn(f));
 	return ret;
 }
 
