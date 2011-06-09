@@ -143,8 +143,8 @@ GP;addhelp(DickmanRho, "Estimates the value of the Dickman rho function. For x <
 // New \/
 GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
 GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
-GP;install("iscyclo","lG","iscyclo","./auto.gp.so");
-GP;addhelp(iscyclo, "iscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.");
+GP;install("poliscyclo","lG","poliscyclo","./auto.gp.so");
+GP;addhelp(poliscyclo, "poliscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.");
 GP;install("istotient","lG","istotient","./auto.gp.so");
 GP;addhelp(istotient, "istotient(n): Does there exist some m such that eulerphi(m) = n?");
 * // New /\
@@ -165,7 +165,7 @@ GP;install("totientHelper","lGDG","totientHelper","./auto.gp.so");
 //////////////////////////////////////////////////////////// New
 GEN graeffe(GEN f);
 long BradfordDavenport(GEN f);
-long iscyclo(GEN f);
+long poliscyclo(GEN f);
 long istotient(GEN n);
 long totientHelper(GEN n, GEN m);
 //////////////////////////////////////////////////////////// New
@@ -5188,10 +5188,10 @@ graeffe(GEN f)
 
 
 long
-iscyclo(GEN f)
+poliscyclo(GEN f)
 {
 	if (typ(f) != t_POL)
-		pari_err(typeer, "iscyclo");
+		pari_err(typeer, "poliscyclo");
 	if (!isint1(leading_term(f)))
 		return 0;
 	long degree = degpol(f);
