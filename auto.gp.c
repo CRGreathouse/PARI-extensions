@@ -5195,15 +5195,24 @@ iscyclo(GEN f)
 		pari_err(typeer, "iscyclo");
 	if (!isint1(leading_term(f)))
 		return 0;
-	long degree = degpol(f);
+	long degree, lf, i;
+	degree = degpol(f);
 	if (degree < 2)
 		return degree == 1 && is_pm1(constant_term(f));
+	
+	// Check if the coefficients are integers.  You'd think that this is what
+	// RgX_type(f) == t_INT was for, but you'd be wrong.
+	lf = lg(f);
+	for (i = 2; i < lf; i++)
+		if (typ(gel(f, i)) != t_INT)
+			return 0;	// Or type error?
+	
 	return BradfordDavenport(f) && gisirreducible(f);
 }
 
 
 // Checks if f is a product of distinct cyclotomic polynomials.  Assumes f is
-// a t_POL of degree > 1.
+// a t_POL of t_INTS with degree > 1.
 long
 BradfordDavenport(GEN f) {
 	pari_sp ltop = avma;
