@@ -63,3 +63,5 @@ Priority classification (first column): [subjective and debatable]
 
 3  Script (function?) to deal 'nicely' with recurrence relations, finding Binet
    forms and searching for cycles (using cyclotomic junk above).
+
+3  Decent polisirreducible() that stops as soon as it finds a factor
