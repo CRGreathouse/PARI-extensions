@@ -495,12 +495,28 @@ Pisano(p:int)={
 }; */
 
 
-findrec(v:vec, verbose:bool=1)={
-	my(c,d = (#v - 1) >> 1, firstNonzero = 0);
-	if (#v < 3,
-		warning("findrec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again.");
+rec(v:vec)={
+	my(c=trap(,0,findrec(v)),d=(#v-1)>>1);
+	
+	\\ Can't find a recurrence: why?
+	if(!c,
+		if (#v < 3,
+			print("rec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again.")
+		,
+			print("Cannot be described by a homogeneous linear recurrence relation with "d" or fewer coefficients.")
+		);
 		return
 	);
+	
+	my(poly='x^#c-sum(i=1,#c,c[i]*'x^(#c-i)),f=factor(poly));
+	print("Characteristic polynomial: "poly);
+	if(#f[,1] > 1 || f[1,2] > 1, print("\t= "f))
+};
+addhelp(findrec, "findrec(v, {verbose=1}): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+
+
+findrec(v:vec, verbose:bool=1)={
+	my(c,d = (#v - 1) >> 1, firstNonzero = 0);
 	forstep(i=d,1,-1,
 		if(v[i] != 0, firstNonzero = i)
 	);
@@ -512,16 +528,8 @@ findrec(v:vec, verbose:bool=1)={
 	);
 	for (i=firstNonzero,d,
 		c = findrecd(v,i,verbose);
-		if(c,
-			if(verbose,
-				my(poly='x^#c-sum(i=1,#c,c[i]*'x^(#c-i)),f=factor(poly));
-				print("Characteristic polynomial: "poly);
-				if(#f[,1] > 1 || f[1,2] > 1, print("\t= "f))
-			);
-			return(c)
-		)
+		if(c,return(c))
 	);
-	if(verbose,print("Cannot be described by a homogeneous linear recurrence relation with "d" or fewer coefficients."));
 	0
 };
 addhelp(findrec, "findrec(v, {verbose=1}): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
