@@ -508,6 +508,55 @@ rec(v:vec)={
 		return
 	);
 	
+	\\ Print out recurrence in standard form.
+	my(init=1,s);
+	print1("Recurrence relation is a(n) = ");
+	for(i=1,#c,
+		if(c[i] == 0, next);
+		if(init,
+			s = initial(c[i], Str("a(n-", i, ")"));
+			init = 0
+		,
+			s = Str(s, medial(c[i], Str("a(n-", i, ")")))
+		)
+	);
+	print(s".");
+
+	\\ Check if sequence is recurrence.  Eventually, this should use
+	\\ poliscycloproduct, which will find more periodic sequences (and should
+	\\ allow sequences to be certified as non-periodic).
+	if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
+		print("Sequence has period "#c".");		
+	,
+		my(g=0);
+		for(i=1,#c,
+			if(c[i] != 0, g = gcd(g, i))
+		);
+		/*
+		if (g > 1,
+			my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
+			for(i=1,#gvec,
+				if(gvec[i] == 0, next);
+				if(init,
+					s = initial(gvec[i], Str("a(n - ", i, ")"));
+					init = 0
+				,
+					s = Str(s, medial(gvec[i], Str("a(n - ", i, ")")))
+				)
+			);
+			print("Can be thought of as "g" interlocking sequences, each of the form a(n) = "s".")
+		)*/
+	);
+	
+	\\ Print out Sloane index link with signature.
+	print1("<a href=\"/Sindx_Rea.html#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
+	for(i=2,#c,print1(","c[i]));
+	print(").");
+	
+	\\ Degrees of freedom: how certain are we of the result?
+	print((#v-2*#c)" d.f.");
+
+	\\ Characteristic polynomial
 	my(poly='x^#c-sum(i=1,#c,c[i]*'x^(#c-i)),f=factor(poly));
 	print("Characteristic polynomial: "poly);
 	if(#f[,1] > 1 || f[1,2] > 1, print("\t= "f))
@@ -538,7 +587,7 @@ addhelp(findrec, "findrec(v, {verbose=1}): Tries to find a homogeneous linear re
 findrecd(v:vec, d:int, verbose:bool=1)={
 	my(M,c);
 	if (#v < 2*d,
-		warning("findrec: Not enough information to determine if the sequence is a "d"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again.");
+		warning("findrecd: Not enough information to determine if the sequence is a "d"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again.");
 		return
 	);
 	M = matrix(d,d,x,y,v[d+x-y]);
@@ -547,46 +596,6 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 	c = matsolve(M,vector(d,i,v[d+i])~);
 	for(n=2*d+1,#v,
 		if(v[n] != sum(i=1,d,v[n-i] * c[i]),return(0))
-	);
-	if(verbose,
-		my(init=1,s);
-		print1("Recurrence relation is a(n) = ");
-		for(i=1,#c,
-			if(c[i] == 0, next);
-			if(init,
-				s = initial(c[i], Str("a(n-", i, ")"));
-				init = 0
-			,
-				s = Str(s, medial(c[i], Str("a(n-", i, ")")))
-			)
-		);
-		print(s".");
-		if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
-			print("Sequence has period "#c".");		
-		,
-			my(g=0);
-			for(i=1,#c,
-				if(c[i] != 0, g = gcd(g, i))
-			);
-			/*
-			if (g > 1,
-				my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
-				for(i=1,#gvec,
-					if(gvec[i] == 0, next);
-					if(init,
-						s = initial(gvec[i], Str("a(n - ", i, ")"));
-						init = 0
-					,
-						s = Str(s, medial(gvec[i], Str("a(n - ", i, ")")))
-					)
-				);
-				print("Can be thought of as "g" interlocking sequences, each of the form a(n) = "s".")
-			)*/
-		);
-		print1("<a href=\"/Sindx_Rea.html#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
-		for(i=2,#c,print1(","c[i]));
-		print(").");
-		print((#v-2*d)" d.f.")
 	);
 	c
 };
