@@ -220,7 +220,7 @@ panHelper(n)={
 	);
 	t
 };
-PH=vector(PHLen,i,panHelper(i-1));
+if(PH=='PH || #PH < #PHLen, PH=vector(PHLen,i,panHelper(i-1)));
 pan(n)={
 	my(t=0);
 	while(n>=PHLen,
@@ -346,8 +346,7 @@ addhelp(normalNum, "normalNum(n, b=10): Given n digits of a b-normal number, in 
 
 \\ These functions are for constructing a list of numbers not the sum of a prime and two positive powers of two.
 \\ Related to Sloane's A156695.
-p2=vector(80, n, 2^n);p22=sumset(p2, p2);p22=vector(2000, i, p22[i]);
-test(n)={
+testA156695(n)={
 	my(i=0);
 	while(p22[i++]<n,
 		if(isprime(n-p22[i]), return(0))
@@ -355,14 +354,22 @@ test(n)={
 	1
 };
 list(a,b)={
+	if(p22=='p22,
+		print1("Initializing vectors...");
+		p2=vector(80, n, 2^n);
+		p22=sumset(p2, p2);
+		p22=vector(2000, i, p22[i]);
+		print("done.")
+	);
 	forstep(n=bitor(floor(a),1),b,2,
-		if(test(n), print1(", "n))
+		if(testA156695(n), print1(", "n))
 	)
 };
 list1(a,b)={
+	list(2,2);	\\ initialize, if needed
 	print("WARNING: Using the conjecture that members of this sequence are 255 mod 510.");
 	forstep(n=(a\510)*510+255,b,510,
-		if(test(n),print1(", "n))
+		if(testA156695(n),print1(", "n))
 	)
 };
 
@@ -643,7 +650,7 @@ ff2(n)={
 search(lim)={
 	my(t,A,B,C);
 	for(a=0,lim,
-if(a%100==0,print1(a" "));
+		if(a%100==0,print1(a" "));	\\ show progress
 		A = a^2;
 		if(a%3,
 			forstep(c=a+a%3,lim,if(a%3==1,[1,2],[2,1]),
@@ -749,7 +756,7 @@ A066888(lim,sz)={
 	my(v=vector(sz),n=1,t=1,s=0);
 	forprime(p=2,lim,
 		if(p>t,
-print(s" primes between T(",n-1,") = ",n*(n-1)/2," and "t);
+			print(s" primes between T(",n-1,") = ",n*(n-1)/2," and "t);	\\ show progress
 			if(s>0&s<=sz&!v[s],
 				v[s]=n-1
 			);
@@ -940,8 +947,12 @@ A059389(n)={ \\ For n > 1
 	fibonacci(t+2)+fibonacci(n-t*(t-1)/2)
 };
 addhelp(A059389, "A059389(n): Sums of two nonzero Fibonacci numbers. Sloane's A059389.");
-fib2=concat(2,vector(99999,n,A059389(n+1)));
 sunconj(n,s=100000)={
+	if(fib2=='fib2,
+		print1("Initializing vector...");
+		fib2=concat(2,vector(99999,n,A059389(n+1)));
+		print("done.")
+	);
 	forstep(i=s,1,-1,
 		if(isprime(n-fib2[i]),return(0))
 	);
@@ -1310,7 +1321,7 @@ phisetest(v)={
 	#v*S-sum(i=1,#v,ceil(S/v[i]*(v[i]-eulerphi(v[i]))))
 };
 
-test(lim,startAt=1)={
+testPhi(lim,startAt=1)={
 	my(diff=0,b,t);
 	for(s=startAt,lim,
 		for(a=1,s>>1,
@@ -1324,7 +1335,7 @@ test(lim,startAt=1)={
 	);
 	diff
 };
-test1(lim,startAt=1)={
+testPhi1(lim,startAt=1)={
 	my(diff=0,b,t);
 	for(s=startAt,lim,
 		for(a=1,s>>1,
