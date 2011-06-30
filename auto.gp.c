@@ -175,6 +175,7 @@ long totientHelper(GEN n, GEN m);
 //////////////////////////////////////////////////////////// New
 
 
+GEN listtovec_shallow(GEN v);
 long checkmult(GEN v, long verbose);
 long checkcmult(GEN v, long verbose);
 long checkdiv(GEN v, long verbose);
@@ -282,9 +283,7 @@ GEN rnormal_cached;
 void
 init_auto(void)
 {
-	pari_sp ltop = avma;
 	rnormal_cached = 0;
-	avma = ltop;
 }
 
 
@@ -3322,6 +3321,17 @@ eps(long prec)
 /**																	 I/O																		**/
 /******************************************************************************/
 
+GEN listtovec_shallow(GEN v)
+{
+	GEN x = list_data(v);
+	long i = 1, lx = x ? lg(x): 1;
+	GEN y = cgetg(lx, t_VEC);
+	for (; i < lx; i++)
+		gel(y,i) = gel(x,i);
+	return y;
+}
+
+
 // Parse a zero-terminated line to find the second number:
 // 20 10485876
 // would yield "1048576". Note that the input string is modified in the process.
@@ -3406,10 +3416,20 @@ bfile(GEN name, GEN v, GEN offset)
 	pari_sp ltop = avma;
 	GEN Anum = NEVER_USED;
 	long cur = NEVER_USED;
-	// If no v is given, fine; but if it is it must be a vector.
-	// Should this use is_vec_t(typ(v)) to allow t_COL as well?
-	if (v && typ(v) != t_VEC)
-		pari_err(typeer, "bfile");
+
+	if (v) {
+		switch(typ(v)) {
+			case t_VEC:
+			case t_COL:
+				break;
+			case t_LIST:
+				v = listtovec_shallow(v);
+				break;
+			default:
+				pari_err(typeer, "bfile");
+		}
+	}
+	
 	if (!offset)
 		cur = 0;
 	else if (typ(offset) == t_INT)
