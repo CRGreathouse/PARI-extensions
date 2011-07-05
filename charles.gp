@@ -6,7 +6,16 @@ default(timer, 0);
 \\ *					Working space						*
 \\ ***************************************************************************************************
 
-
+LinearRecurrence(sig:vec, initial:vec, terms:small)={
+	if(terms<=#initial, return(vector(terms,i,initial[i])));
+	if(#sig>#initial, error("Not enough terms to uniquely determine sequence"));
+	my(v=vector(terms));
+	for(i=1,#initial,v[i]=initial[i]);
+	for(i=#initial+1,terms,
+		v[i]=sum(j=1,#sig,sig[j]*v[i-j])
+	);
+	v
+};
 
 
 cons(x:real)={
