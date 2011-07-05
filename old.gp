@@ -6,6 +6,13 @@ default(timer, 0);
 \\ *                                Reusable base-dependant functions                                *
 \\ ***************************************************************************************************
 
+dprod(n)={
+	n=eval(Vec(Str(n)));
+	prod(i=1,#n,n[i])
+};
+addhelp(dprod, "dprod(n): Product of the decimal digits of n, Sloane's A007954.");
+
+
 ispal(n:int,B:int=10)={
 	my(tmp:int, d:int);
 	if (B == 10,
@@ -609,6 +616,100 @@ addhelp(quad, "quad(a,b,c): Solves the quadratic equation ax^2 + bx + c in a sim
 \\ ***************************************************************************************************
 \\ *                                    One-time use functions                                       *
 \\ ***************************************************************************************************
+
+
+\\ Find terms of A145746.
+okA145746(n,m)={
+	if(m%2,
+		if(n%2,
+			!issquare(n)
+		,
+			issquare(n) || issquare(n/2)
+		)
+	,
+		\\ This is the 'hot' path, taken 1 - (5/9)^d of the time, or 99.5% for 9-digit numbers.
+		if(n%2,
+			\\ About all the benefit is here.
+			issquare(n)
+		,
+			1
+			\\ Don't pretest here at all -- the effort saved is minimal and the cost of testing
+			\\ is relatively high.
+			\\!issquare(n)&&!issquare(n>>1)
+		)
+	) && sigma(n)-n==m
+};
+P=vector(1000,i,if(i<112,0,dprod(i-1)));
+check1()={
+	my(P0);
+	for(t=1,999,
+		P0=dprod(t);
+		if(sigma(t)-t==P0, print1(t", "))
+	)
+};
+check2()={
+	my(PA,A,PB,t);
+	for(a=1,999,
+		PA=dprod(a);
+		if(!PA,next);
+		A=1000*a;
+		for(b=111,999,
+			PB=P[b+1];
+			if(!PB,next);
+			PB*=PA;
+			t=A+b;
+			if(sigma(t)-t==PB, print1(t", "))
+		)
+	)
+};
+check3()={
+	my(PA,A,PB,B,PC,t);
+	for(a=1,999,
+		PA=dprod(a);
+		if(!PA,next);
+		A=1000*a;
+		for(b=111,999,
+			PB=P[b+1];
+			if(!PB,next);
+			PB*=PA;
+			B=1000*(A+b);
+			for(c=111,999,
+				PC=P[c+1];
+				if(!PC,next);
+				PC*=PB;
+				t=B+c;
+				if(okA145746(t,PC), print1(t", "))
+			)
+		)
+	)
+};
+check4()={
+	my(PA,A,PB,B,PC,C,PD,t);
+	for(a=1,999,
+		PA=dprod(a);
+		if(!PA,next);
+		A=1000*a;
+		for(b=111,999,
+			PB=P[b+1];
+			if(!PB,next);
+			PB*=PA;
+			B=1000*(A+b);
+			for(c=111,999,
+				PC=P[c+1];
+				if(!PC,next);
+				PC*=PB;
+				C=1000*(B+c);
+				for(d=111,999,
+					PD=P[d+1];
+					if(!PD,next);
+					PD*=PC;
+					t=C+d;
+					if(okA145746(t,PD), print1(t", "))
+				)
+			)
+		)
+	)
+};
 
 
 \\ A176494 (without term 341)
