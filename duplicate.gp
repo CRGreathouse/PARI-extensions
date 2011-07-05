@@ -53,9 +53,10 @@ forbigprime(from,to,ff)={
 		from += bigprimechunk;
 	)
 };
+addhelp(forbigprime, "forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b.");
 
 
-English(n:int)={
+Eng(n:int)={
 	my(tmp, s="");
 	if (n < 1000,
 		if (n > 0, return(Eng(n)));
@@ -99,6 +100,7 @@ English(n:int)={
 	);
 	s
 };
+addhelp(Eng, "Eng(n): English name of the number n.");
 
 
 fibmod(n:int, m:int)={
@@ -141,6 +143,7 @@ Pisano(p:int,e:small)={
 
 
 \\ Version 2... worse, I think?
+/*
 Pisano(p:int)={
 	if (!isprime(p), return(0));
 	my(m=p%5,m1,f);
@@ -156,7 +159,7 @@ Pisano(p:int)={
 		)
 	);
 	m
-};
+};*/
 
 \\ ***************************************************************************************************
 \\ *				Prime-related arithmetic functions				*
