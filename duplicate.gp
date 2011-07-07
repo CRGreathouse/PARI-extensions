@@ -56,6 +56,70 @@ forbigprime(from,to,ff)={
 addhelp(forbigprime, "forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b.");
 
 
+graeffe(f:pol)={
+	my(d=poldegree(f),g=vector(d\2+1,i,polcoeff(f,2*i-2)),h=vector((d+1)\2,i,polcoeff(f,2*i-1)));
+	Polrev(g)^2-x*Polrev(h)^2
+};
+addhelp(graeffe, "graeffe(f): Assumes that f is a nonzero t_POL with t_INT coefficients.  Returns a polynomial with roots that are precisely the squares of the roots of f.");
+
+
+poliscyclo(f:pol)={
+	my(f1=graeffe(f),f2,fn);
+	if(f==f1,return(1));
+	fn=subst(f,x,-x);
+	if(f1==fn&iscyclo(fn),return(1));
+	issquare(f1,&f2)&iscyclo(f2)
+};
+addhelp(poliscyclo, "poliscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.");
+
+
+\\addhelp(poliscycloproduct, "poliscycloproduct(f, {flag=0}): Is f a product of distinct cyclotomic polynomials?  If flag is 1, return the least n such that f | x^n-1.");
+
+
+istotient(n:int)={
+	my(k:int,p:int,d:int);
+	if(n<2,return(n==1));
+	if(n%2,return(0));
+	k=n;
+	while(1,
+		if(totientHelper(k,2), return(1));
+		if(k%2,break);
+		k\=2
+	);
+	fordiv(n>>1,dd,
+    	d=dd<<1;
+		if(!isprime(p=d+1),next);
+		k=n\d;
+		while(1,
+			if(totientHelper(k,p), return(1));
+			if(k%p,break);
+			k\=p
+		)
+	);
+	0
+};
+addhelp(istotient, "istotient(n): Does there exist some m such that eulerphi(m) = n?");
+
+
+totientHelper(n:int,m:int=1)={
+	my(k:int,p:int,d:int);
+	if(n==1,return(1));
+	if(n%2,return(0));
+	fordiv(n>>1,dd,
+    	d=dd<<1;
+		if(d<m|!isprime(p=d+1),next);
+		k=n\d;
+		while(1,
+			if(totientHelper(k,p), return(1));
+			if(k%p,break);
+			k\=p
+		)
+	);
+	0
+};
+addhelp(totientHelper, "totientHelper(n,m): Helper function for totient.");
+
+
 Eng(n:int)={
 	my(tmp, s="");
 	if (n < 1000,
