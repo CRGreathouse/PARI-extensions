@@ -3,6 +3,8 @@
 #include <pari/paripriv.h>
 #include "float.h"
 /*
+GP;install("Bell","L","Bell","./auto.gp.so");
+GP;addhelp(Bell, "Bell(n): Returns the n-th Bell or exponential number, Sloane's A000110.");
 GP;install("log_2","Gp","lg","./auto.gp.so");
 GP;addhelp(lg, "lg(x): Binary logarithm of x.");
 GP;install("rad","G","rad","./auto.gp.so");
@@ -146,7 +148,7 @@ GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
 GP;install("poliscyclo","lG","poliscyclo","./auto.gp.so");
 GP;addhelp(poliscyclo, "poliscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.");
 GP;install("poliscycloproduct","lGD0,L,","poliscycloproduct","./auto.gp.so");
-GP;addhelp(poliscyclo, "poliscyclo(f, {flag=0}): Is f a product of distinct cyclotomic polynomials?  If flag is 1, return the least n such that f | x^n-1.");
+GP;addhelp(poliscycloproduct, "poliscycloproduct(f, {flag=0}): Is f a product of distinct cyclotomic polynomials?  If flag is 1, return the least n such that f | x^n-1.");
 GP;install("istotient","lG","istotient","./auto.gp.so");
 GP;addhelp(istotient, "istotient(n): Does there exist some m such that eulerphi(m) = n?");
 * // New /\
@@ -1500,7 +1502,7 @@ fibmod(GEN n, GEN m)
 		if (signe(m) < 0)
 			m = negi(m);
 		if (!signe(m))
-			pari_err(user, "division by 0");
+			pari_err(gdiver, "fibmod");
 		if (equali1(m))
 		{
 			avma = ltop;
@@ -2965,6 +2967,74 @@ bigdiv(GEN a, GEN b, GEN c, GEN d)
 /******************************************************************************/
 /**													Real and complex functions											**/
 /******************************************************************************/
+
+static long BellMod32[] = {
+	1,1,2,5,15,20,11,13,12,27,7,10,29,21,26,17,3,12,15,1,12,15,27,26,9,25,18,13,
+	7,4,3,5,12,19,31,10,5,13,10,25,27,28,7,25,12,7,19,26,17,17,2,21,31,20,27,29,
+	12,11,23,10,13,5,26,1,19,12,31,17,12,31,11,26,25,9,18,29,23,4,19,21,12,3,15,
+	10,21,29,10,9,11,28,23,9,12,23,3,26
+};
+
+
+// Checked up to 3600
+GEN
+Bell(long n)
+{
+	if (n < 2) {
+		if (n < 0)
+			pari_err(talker, "negative argument to Bell");
+		return gen_1;
+	}
+	pari_sp ltop = avma;
+	GEN B, Br, f, t;
+	
+	// Estimate of # of bits needed, with some guard digits
+	long sz = 0.78 * n * log2(n / M_E) / BITS_IN_LONG + 4;	// 0.78 is a fudge
+
+	// This while re-does the calculation if the precision was too low.
+	while (1) {
+		long k = 1;
+		f = real_1(sz);
+		B = real_0(sz);
+		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+		
+		// This is the hot loop where all calculations are done.
+		while (1) {
+			f = divrs(f, k);
+			t = mulir(powis(stoi(k), n), f);
+			if (expo(t) < -25)
+				break;
+			B = addrr(B, t);
+			++k;
+			if (low_stack(st_lim, stack_lim(btop, 1)))
+				gerepileall(btop, 2, &f, &B);
+		}
+		B = mulrr(B, gexp(gen_m1, sz));
+		if (nbits2prec(expo(B)+1) > lg(B))
+			goto FIX_PRECISION;
+		
+		Br = ceilr(B); // calculate answer
+		
+		// Check if answer is within a millionth of an integer
+		if (cmprr(absr(mpsub(B, Br)), real2n(-20, DEFAULTPREC)) < 0) {
+			Br = gerepilecopy(ltop, Br);
+			
+			// Sanity check on the floating-point arithmetic
+			if (mod32(Br) != BellMod32[n % 96])
+				pari_err(talker, "Bell(%d) failed verification mod 32, please report", n);
+			if (DEBUGLEVEL > 2) {
+				pari_printf("Precision for Bell(%d): %d (%d digits), an excess of %d (%d digits)\n", n, sz, prec2ndec(sz), sz - expi(Br) / BITS_IN_LONG, prec2ndec(sz) - sizedigit(Br));
+			}
+			return Br;
+		}
+		
+FIX_PRECISION:
+		sz += sz >> 3;	// increase precion slightly
+		pari_warn(warnprec, "Bell", sz);
+		avma = ltop;
+	}
+}
+
 
 // Convenience function: binary logarithm of x
 GEN

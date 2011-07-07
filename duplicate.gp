@@ -547,6 +547,27 @@ addhelp(bigdiv, "bigdiv(a,b,c,d): Does d divide a^b - c?  Same as (a^b-c)%d == 0
 \\ *				Real and complex functions					*
 \\ ***************************************************************************************************
 
+Bell1(n:small)={
+	my(pr:small=default(realprecision),B:real,Br:int,sz:small);
+	sz = n * lg(n/exp(1)) \ lg(10) + 5;	\\ estimate of # of bits needed
+	default(realprecision, sz);
+	my(f:real=1.0,t:real,k:small=1);
+	B=0.;
+	while(1,
+		f /= k;
+		t = k^n * f;
+		k++;
+		if(t < 1e-9, break, B+=t)
+	);
+	B*=exp(-1);
+	Br=round(B);
+	if(abs(B-Br)>1e-6,error("not enough precision"));
+	default(realprecision,pr);
+	Br
+};
+addhelp(Bell, "Bell(n): Returns the n-th Bell or exponential number, Sloane's A000110.");
+
+
 deBruijnXi(x)={
 	my(left, right, m);
 	if (x < 1, error ("deBruijnXi: Can't find a xi given x < 1."));
