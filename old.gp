@@ -274,6 +274,24 @@ addhelp(pan9, "pan9(n): Is the number a 1-to-9 pandigital (exactly 9 distinct di
 \\ *                          Obscure (but otherwise reusable) functions                             *
 \\ ***************************************************************************************************
 
+numinvphi(n,m=1)={
+	my(s=0,k,p);
+	if(n==1,return(1+(m<2)));
+	fordiv(n,d,
+		if(d<m,next);
+		if(!isprime(p=d+1),next);
+		k=n\d;
+		while(1,
+			s+=numinvphi(k,p);
+			if(k%p,break);
+			k\=p
+		)
+	);
+	s
+};
+addhelp(numinvphi, "numinvphi(n): Number of m with eulerphi(m) = n. Sloane's A014197.");
+
+
 \\ Lazily evaluate the number of labeled acyclic digraphs.
 dag(t:int)={
 	my(n:int);
@@ -945,7 +963,7 @@ intminus(a,b)={
 	if(#V & V[1]==0,V=vector(#V-1,i,V[i+1]));
 	V=vecsort(V,1);
 };
-go(N)=local(V=[[1,10]]);for(n=1,99,oV=V;intminus(N/n,(N+1)/n);intminus(10*N/n,10*(N+1)/n);intminus(100*N/n,100*(N+1)/n);if(V!=oV,print1(n"n, ")));V*1.
+go(N)=local(V=[[1,10]]);for(n=1,99,oV=V;intminus(N/n,(N+1)/n);intminus(10*N/n,10*(N+1)/n);intminus(100*N/n,100*(N+1)/n);if(V!=oV,print1(n"n, ")));V*1.;
 
 
 A037053(n)={

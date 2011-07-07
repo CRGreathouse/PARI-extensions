@@ -6,6 +6,19 @@ default(timer, 0);
 \\ *					Working space						*
 \\ ***************************************************************************************************
 
+complement(v:vec)={
+	my(u=List(),i=1,n=1);
+	while(i<#v,
+		if(v[i]>n,
+			listput(u,n)
+		,
+			i++
+		);
+		n++
+	);
+	Vec(u)
+};
+
 LinearRecurrence(sig:vec, initial:vec, terms:small)={
 	if(terms<=#initial, return(vector(terms,i,initial[i])));
 	if(#sig>#initial, error("Not enough terms to uniquely determine sequence"));
