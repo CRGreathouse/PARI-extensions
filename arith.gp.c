@@ -1,0 +1,1096 @@
+/******************************************************************************/
+/**											 Other arithmetic functions													*/
+/******************************************************************************/
+
+GEN
+oddres(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(typeer, "oddres");
+	long v = vali(n);
+	return v ? shifti(n, -v) : icopy(n);
+}
+
+
+// Faster than
+//	 !cmpii(n, int2n(vali(n)))
+//	 !cmpis(shifti(n, -vali(n)), 1)
+//	 expi(n) == vali(n)
+//	 hamming(n) == 1
+// even for single-word values, and much faster for multiword values.
+// If all you have is a word, you can just use n & !(n & (n-1)).
+long
+ispow2(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "ispow2");
+	if (signe(n) < 1)
+		return 0;
+	pari_sp ltop = avma;
+	
+	GEN xp = int_LSW(n);
+	long lx = lgefint(n);
+	ulong u = *xp;
+	long i = 3;
+	for (; i < lx; ++i)
+	{
+		if (u != 0)
+		{
+			avma = ltop;
+			return 0;
+		}
+		xp = int_nextW(xp);
+		u = *xp;
+	}
+	avma = ltop;
+	//return hamming_word(u) == 1;	// 14% slower
+	return !(u & (u-1));
+}
+
+
+long
+isTriangular(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "isTriangular");
+	pari_sp ltop = avma;
+	long ret = Z_issquare(addis(shifti(n, 3), 1));
+	avma = ltop;
+	return ret;
+}
+
+
+long isHexagonal(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "isHexagonal");
+	if (signe(n) < 1)
+		return signe(n) == 0;	// 0 is hexagonal
+	pari_sp ltop = avma;
+	GEN root;
+	long ret = Z_issquareall(addis(shifti(n, 3), 1), &root);
+	if (ret)
+		ret = mod4(root) == 3;
+	avma = ltop;
+	return ret;
+}
+
+
+// Approximate speed on a Phenom II at various input sizes:
+// size	 cycles		time
+// 1e00			110	 40 ns
+// 1e10			150	 50 ns
+// 1e20			268	100 ns
+// 1e30			282	100 ns
+// 1e50			297	110 ns
+// 1e75			316	110 ns
+// 1e100		 322	120 ns
+// 1e200		 385	140 ns
+// 1e500		 569	200 ns
+// 1e1000		941	300 ns
+// 1e2000	 1710	600 ns
+// 1e5000	 3910	1.4 µs
+// 1e10000	7540		3 µs
+// 1e20000 15200		5 µs
+// 1e50000 37000	 13 µs
+long
+isFibonacci(GEN n)		/* bool */
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "isFibonacci");
+	if (!is_bigint(n))
+		return isSmallFib(itos(n));
+	pari_sp ltop = avma;
+
+	// Good residue classes: 55, 76, 144, 199, 377, 521, 987, 1364, 2584, 3571, 6765, 9349, 17711, 24476, 46368, 64079, 121393, 167761, 317811, 439204, 832040, 1149851, 2178309, 3010349, 5702887, 7881196, 14930352, 20633239, 39088169, ...
+	long rem = smodis(n, 17711);
+	if (rem & 1) {
+		if (rem > 5 && rem != 13 && rem != 21 && rem != 55 && rem != 89 && rem != 233 && rem != 377 && rem != 987 && rem != 1597 && rem != 4181 && rem != 6765 && rem != 15127 && rem != 17567 && rem != 17703)
+			return 0;
+	} else {
+		if (rem > 2 && rem < 17708 && rem != 8 && rem != 34 && rem != 144 && rem != 610 && rem != 2584 && rem != 10946 && rem != 16724 && rem != 17334 && rem != 17656 && rem != 17690)
+			return 0;
+	}
+	GEN k = sqri(n);
+	k = addis(mulis(k, 5), 4);	// Multiplication via shifts is slower here (by ~4 cycles)
+	long res = Z_issquare(k) || (signe(n) > 0 && Z_issquare(subis(k, 8)));
+	avma = ltop;
+	return res;
+}
+
+
+static long smallfib[] = {
+#ifdef LONG_IS_64BIT
+	-7540113804746346429,-2880067194370816120,-1100087778366101931,
+	-420196140727489673,-160500643816367088,-61305790721611591,
+	-23416728348467685,-8944394323791464,-3416454622906707,
+	-1304969544928657,-498454011879264,-190392490709135,-72723460248141,
+	-27777890035288,-10610209857723,-4052739537881,-1548008755920,
+	-591286729879,-225851433717,-86267571272,-32951280099,-12586269025,
+	-4807526976,-1836311903,-701408733,-267914296,-102334155,-39088169,
+	-14930352,-5702887,-2178309,-832040,-317811,-121393,-46368,-17711,
+	-6765,-2584,-987,-377,-144,-55,-21,-8,-3,-1,0,1,1,2,3,5,8,13,21,34,
+	55,89,144,233,377,610,987,1597,2584,4181,6765,10946,17711,28657,
+	46368,75025,121393,196418,317811,514229,832040,1346269,2178309,
+	3524578,5702887,9227465,14930352,24157817,39088169,63245986,
+	102334155,165580141,267914296,433494437,701408733,1134903170,
+	1836311903,2971215073,4807526976,7778742049,12586269025,20365011074,
+	32951280099,53316291173,86267571272,139583862445,225851433717,
+	365435296162,591286729879,956722026041,1548008755920,2504730781961,
+	4052739537881,6557470319842,10610209857723,17167680177565,
+	27777890035288,44945570212853,72723460248141,117669030460994,
+	190392490709135,308061521170129,498454011879264,806515533049393,
+	1304969544928657,2111485077978050,3416454622906707,5527939700884757,
+	8944394323791464,14472334024676221,23416728348467685,
+	37889062373143906,61305790721611591,99194853094755497,
+	160500643816367088,259695496911122585,420196140727489673,
+	679891637638612258,1100087778366101931,1779979416004714189,
+	2880067194370816120,4660046610375530309,7540113804746346429
+#else
+	-1836311903,-701408733,-267914296,-102334155,-39088169,-14930352,
+	-5702887,-2178309,-832040,-317811,-121393,-46368,-17711,-6765,-2584,
+	-987,-377,-144,-55,-21,-8,-3,-1,0,1,1,2,3,5,8,13,21,34,55,89,144,
+	233,377,610,987,1597,2584,4181,6765,10946,17711,28657,46368,75025,
+	121393,196418,317811,514229,832040,1346269,2178309,3524578,5702887,
+	9227465,14930352,24157817,39088169,63245986,102334155,165580141,
+	267914296,433494437,701408733,1134903170,1836311903
+#endif
+};
+
+
+long
+isSmallFib(long n)
+{
+	int left = 0;
+#ifdef LONG_IS_64BIT
+	int right = 139;
+#else
+	int right = 70;
+#endif
+	while (left + 1 < right) {
+		int mid = (left + right) >> 1;
+		if (n < smallfib[mid])
+			right = mid;
+		else
+			left = mid;
+	}
+	return n == smallfib[left] || n == smallfib[right];
+}
+
+
+static void
+lucasmod(ulong n, GEN m, GEN *a, GEN *b)
+{
+	GEN z, t, zt;
+	if (!n) { *a = gen_2; *b = gen_1; return; }
+	lucasmod(n >> 1, m, &z, &t);
+	zt = mulii(z, t);
+	switch(n & 3) {
+		case  0: *a = addsi(-2,sqri(z)); *b = addsi(-1,zt); break;
+		case  1: *a = addsi(-1,zt);      *b = addsi(2,sqri(t)); break;
+		case  2: *a = addsi(2,sqri(z));  *b = addsi(1,zt); break;
+		case  3: *a = addsi(1,zt);       *b = addsi(-2,sqri(t));
+	}
+	*a = modii(*a, m);
+	*b = modii(*b, m);
+}
+
+
+GEN
+fibomod(long n, GEN m)
+{
+	if (typ(m) != t_INT)
+		pari_err(arither1, "fibomod");
+	pari_sp av = avma;
+	GEN a, b;
+	if (!n) return gen_0;
+	lucasmod((ulong)(labs(n)-1), mulis(m, 5), &a, &b);
+	a = modii(diviuexact(addii(shifti(a,1),b), 5), m);
+	if (n < 0 && !odd(n)) setsigne(a, -1);
+	return gerepileuptoint(av, a);
+}
+
+
+static void
+lucasmod_tiny(ulong n, ulong m, ulong *a, ulong *b)
+{
+	ulong z, t;
+	if (!n) { *a = 2; *b = 1; return; }
+	lucasmod_tiny(n >> 1, m, &z, &t);
+	switch(n & 3) {
+		case  0: *a = z*z - 2; *b = z*t - 1; break;
+		case  1: *a = z*t - 1; *b = t*t + 2; break;
+		case  2: *a = z*z + 2; *b = z*t + 1; break;
+		case  3: *a = z*t + 1; *b = t*t - 2;
+	}
+	*a = *a % m;
+	*b = *b % m;
+}
+
+
+ulong
+fibomod_tiny(long n, ulong m)
+{
+	ulong a, b;
+	if (!n) return 0;
+	lucasmod_tiny((ulong)(labs(n)-1), (ulong)(5*m), &a, &b);
+	a = (((a << 1) + b) / 5) % m;
+	
+	return n < 0 && !odd(n) ? -a : a;
+}
+
+
+GEN
+fibmod(GEN n, GEN m)
+{
+	if (typ(n) != t_INT || typ(m) != t_INT)
+		pari_err(arither1, "fibmod");
+	long nn = itos_or_0(n);
+	if (nn) {
+		ulong mm = itou_or_0(m);
+		if (mm) {
+#ifdef LONG_IS_64BIT
+			if (mm <= 858993459UL)
+#else
+			if (mm <= 13107UL)
+#endif
+				return utoi(fibomod_tiny(nn, mm));
+		}
+		return fibomod(nn, m);
+	}
+	if (!signe(n))
+		return gen_0;
+
+	GEN f, t, res;
+	long l;
+	pari_sp ltop = avma;
+	if (cmpis(m, 6) < 0)
+	{
+		if (signe(m) < 0)
+			m = negi(m);
+		if (!signe(m))
+			pari_err(gdiver, "fibmod");
+		if (equali1(m))
+		{
+			avma = ltop;
+			return gen_0;
+		}
+		if (cmpis(m, 2) == 0)
+		{
+			l = smodis(n, 3) > 0;
+			avma = ltop;
+			return stoi(l);
+		}
+		if (cmpis(m, 3) == 0)
+		{
+			/* 0 1 1 2 0 2 2 1 */
+			res = modis(fibo(mod8(n)), 3);
+			res = gerepileupto(ltop, res);
+			return res;
+		}
+		if (cmpis(m, 4) == 0)
+		{
+			/* 0 1 1 2 3 1 */
+			res = remi2n(fibo(smodis(n, 6)), 2);
+			res = gerepileupto(ltop, res);
+			return res;
+		}
+		if (cmpis(m, 5) == 0)
+		{
+			/* 0 1 1 2 3 0 3 3 1 4 0 4 4 3 2 0 2 2 4 1 */
+			res = modis(fibo(smodis(n, 20)), 5);
+			res = gerepileupto(ltop, res);
+			return res;
+		}
+	}
+	// Rough estimate of the break-even point.	Yes, it's quite large.
+	/*
+	if (cmpis(n, 1000) < 0)
+	{
+		res = modii(fibo(itos(n)), m);
+		res = gerepileupto(ltop, res);
+		return res;
+	}*/
+	
+	f = Z_factor(m);
+	long e;
+	t = gmodulo(gen_0, gen_1);
+	l = glength(gel(f, 1));
+	pari_sp btop = avma;
+	long i;
+	for (i = 1; i <= l; ++i)
+	{
+		e = itos(gcoeff(f, i, 2));
+		t = chinese(t, gmodulo(fibo(smodis(n, Pisano(itos(gcoeff(f, i, 1)), e))), powis(gcoeff(f, i, 1), e)));
+		t = gerepileupto(btop, t);
+	}
+	res = lift(t);
+	res = gerepileupto(ltop, res);
+	return res;
+}
+
+
+// Pisano periods of odd primes (with 0s elsewhere)
+static long PisanoArr[] = {
+	0,8,20,16,0,10,28,0,36,18,0,48,0,0,14,30,0,0,76,0,40,88,0,32,0,0,108,0,0,58,
+	60,0,0,136,0,70,148,0,0,78,0,168,0,0,44,0,0,0,196,0,50,208,0,72,108,0,76,0,
+	0,0,0,0,0,256,0,130,0,0,276,46,0,0,0,0,148,50,0,0,316,0,0,328,0,336,0,0,348,
+	0,0,178,90,0,0,0,0,190,388,0,396,22,0,0,0,0,0,42,0,0,0,0,0,448,0,456,114,0,
+	52,0,0,238,240,0,0,0,0,250,0,0,516,0,0,176,0,0,268,270,0,0,556,0,56,568,0,0,
+	0,0,588,0,0,0,0,0,0,88,0,310,628,0,636,0,0,0,0,0,0,110,0,0,676,0,0,0,0,232,
+	174,0,236,0,0,358,0,0,0,736,0,0,748,0,0,378,0,768,0,0,388,0,0,0,796,0,200,0,
+	0,0,408,0,0,0,0,418,84,0,0,0,0,430,868,0,0,438,0,888,0,0,448,0,0,0,916,0,46,
+	928,0,936,0,0,0,0,0,478,0,0,0,976,0,490,0,0,0,498,0,1008,0,0,254,0,0,0,0,0,
+	26,1048,0,0,0,0,0,0,0,0,90,0,0,1096,0,0,0,0,124,0,0,376,0,0,568,570,0,0,
+	1156,0,0,0,0,1176,0,0,1188,0,0,598,600,0,0,1216,0,0,1228,0,1236,206,0,0,0,0,
+	0,630,0,0,0,0,640,1288,0,1296,0,0,1308,0,0,658,220,0,0,0,0,0,1348,0,452,0,0,
+	1368,0,0,0,138,0,0,0,0,700,0,0,0,118,0,0,0,0,718,0,0,0,1456,0,0,1468,0,0,
+	738,0,496,0,0,0,750,0,0,1516,0,380,0,0,0,192,0,1548,0,0,0,0,0,0,1576,0,0,0,
+	0,228,0,0,0,0,0,202,270,0,0,0,0,820,1648,0,1656,276,0,0,0,0,838,0,0,0,0,0,0,
+	1708,0,1716,78,0,1728,0,0,0,0,0,0,1756,0,176,1768,0,1776,0,0,0,0,0,0,0,0,0,
+	1816,0,70,0,0,0,102,0,0,0,0,928,0,0,0,1876,0,470,0,0,1896,0,0,212,0,0,0,0,0,
+	0,176,0,970,0,0,652,0,0,1968,0,0,0,198,0,0,1996
+};
+
+
+/* Helper function for fibmod; returns a multiple of the period of Fibonacci numbers mod p^e. */
+/* Assumes p is prime and e > 0. */
+long
+Pisano(long p, long e)
+{
+	long p1;
+	if (p < 999) {
+		if (p == 5)
+			return (long)upowuu(5, (ulong)e) << 2;
+		e--;
+		if (p == 2)
+			return 3 << e;
+		p1 = PisanoArr[p>>1];
+		return e ? p1 * (long)upowuu(p, e) : p1;
+	}
+	long t = p%5;
+	if (t == 2 || t == 3)
+		p1 = (p + 1) << 1;
+	else
+		p1 = p - 1;
+	return e == 1 ? p1 : p1 * (long)upowuu(p, e - 1);
+}
+
+
+GEN
+largestSquareFactor(GEN n)
+{
+	pari_sp ltop = avma;
+	GEN f, res;
+	long l1, e, i;
+	if (typ(n) != t_INT)
+		pari_err(arither1, "largestSquareFactor");
+	if (!signe(n))
+		return gen_0;
+
+	f = Z_factor(n);
+	l1 = glength(gel(f, 1));
+	res = gen_1;
+	for (i = 1; i <= l1; ++i)
+	{
+		e = itos(gcoeff(f, i, 2));
+		if (e > 1)
+			res = mulii(res, e >= 4 ? powis(gcoeff(f, i, 1), e >> 1) : gcoeff(f, i, 1));
+	}
+	res = gsqr(res);	// Remove this line to instead calculate A000188.
+	res = gerepileupto(ltop, res);
+	return res;
+}
+
+
+INLINE long
+hamming_word(ulong w)
+{
+	return __builtin_popcountll(w);
+#if 0
+static long byte_weight[] = {
+	0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
+	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
+	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
+	3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8
+};
+	long sum = 0;
+	while (w) {
+		//sum += w & 1;
+		//w >>= 1;
+
+		//sum++;
+		//w &= w - 1;
+
+		sum += byte_weight[w & 255];
+		w >>= 8;
+	}
+	return sum;
+#endif
+}
+
+
+long
+hamming(GEN n)
+{
+	pari_sp ltop = avma;
+	if (typ(n) != t_INT)
+		pari_err(arither1, "hamming");
+	if (!signe(n))
+		return 0;
+
+	GEN xp = int_MSW(n);
+	long lx = lgefint(n);
+	ulong u = *xp;
+	long sum = 0;
+	long i = 3;
+	for (; i < lx; ++i)
+	{
+		sum += hamming_word(u);
+		xp=int_precW(xp);
+		u = *xp;
+	}
+	avma = ltop;
+	return sum + hamming_word(u);
+}
+
+
+static ulong DS[] ={
+	0,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10,11,3,4,5,6,7,8,
+	9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,9,10,11,
+	12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,10,11,
+	12,13,14,15,16,17,18,1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10,11,3,4,5,6,7,8,
+	9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,9,10,11,
+	12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,10,11,
+	12,13,14,15,16,17,18,10,11,12,13,14,15,16,17,18,19,2,3,4,5,6,7,8,9,10,11,3,
+	4,5,6,7,8,9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,
+	9,10,11,12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,
+	9,10,11,12,13,14,15,16,17,18,10,11,12,13,14,15,16,17,18,19,11,12,13,14,15,
+	16,17,18,19,20,3,4,5,6,7,8,9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,
+	11,12,13,14,6,7,8,9,10,11,12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,
+	12,13,14,15,16,17,9,10,11,12,13,14,15,16,17,18,10,11,12,13,14,15,16,17,18,
+	19,11,12,13,14,15,16,17,18,19,20,12,13,14,15,16,17,18,19,20,21,4,5,6,7,8,9,
+	10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,9,10,11,12,13,14,15,7,8,9,10,11,
+	12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,10,11,12,13,14,15,16,17,18,10,
+	11,12,13,14,15,16,17,18,19,11,12,13,14,15,16,17,18,19,20,12,13,14,15,16,17,
+	18,19,20,21,13,14,15,16,17,18,19,20,21,22,5,6,7,8,9,10,11,12,13,14,6,7,8,9,
+	10,11,12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,
+	10,11,12,13,14,15,16,17,18,10,11,12,13,14,15,16,17,18,19,11,12,13,14,15,16,
+	17,18,19,20,12,13,14,15,16,17,18,19,20,21,13,14,15,16,17,18,19,20,21,22,14,
+	15,16,17,18,19,20,21,22,23,6,7,8,9,10,11,12,13,14,15,7,8,9,10,11,12,13,14,
+	15,16,8,9,10,11,12,13,14,15,16,17,9,10,11,12,13,14,15,16,17,18,10,11,12,13,
+	14,15,16,17,18,19,11,12,13,14,15,16,17,18,19,20,12,13,14,15,16,17,18,19,20,
+	21,13,14,15,16,17,18,19,20,21,22,14,15,16,17,18,19,20,21,22,23,15,16,17,18,
+	19,20,21,22,23,24,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,
+	10,11,12,13,14,15,16,17,18,10,11,12,13,14,15,16,17,18,19,11,12,13,14,15,16,
+	17,18,19,20,12,13,14,15,16,17,18,19,20,21,13,14,15,16,17,18,19,20,21,22,14,
+	15,16,17,18,19,20,21,22,23,15,16,17,18,19,20,21,22,23,24,16,17,18,19,20,21,
+	22,23,24,25,8,9,10,11,12,13,14,15,16,17,9,10,11,12,13,14,15,16,17,18,10,11,
+	12,13,14,15,16,17,18,19,11,12,13,14,15,16,17,18,19,20,12,13,14,15,16,17,18,
+	19,20,21,13,14,15,16,17,18,19,20,21,22,14,15,16,17,18,19,20,21,22,23,15,16,
+	17,18,19,20,21,22,23,24,16,17,18,19,20,21,22,23,24,25,17,18,19,20,21,22,23,
+	24,25,26,9,10,11,12,13,14,15,16,17,18,10,11,12,13,14,15,16,17,18,19,11,12,
+	13,14,15,16,17,18,19,20,12,13,14,15,16,17,18,19,20,21,13,14,15,16,17,18,19,
+	20,21,22,14,15,16,17,18,19,20,21,22,23,15,16,17,18,19,20,21,22,23,24,16,17,
+	18,19,20,21,22,23,24,25,17,18,19,20,21,22,23,24,25,26,18,19,20,21,22,23,24,
+	25,26,27
+};
+
+
+// TODO: Binary splitting first, then by thousands.
+GEN
+dsum(GEN n)	  /* int */
+{
+	if (typ(n) != t_INT)
+		pari_err(typeer, "dsum");
+	long nn = itou_or_0(n);
+	if (nn)
+		return utoipos(dsum_small(nn));
+#ifdef LONG_IS_64BIT
+	if (lgefint(n) > 4003199668773774)
+#else
+	if (lgefint(n) > 49540182)
+#endif
+		pari_err(overflower, "freaking giant number in dsum");
+		// TODO: Handle very large numbers that overflow ulong?
+	
+	pari_sp ltop = avma;
+	ulong s = 0;
+	GEN t, ret;
+	GEN thou = stoi(1000);
+	
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	while (signe(n) > 0)
+	{
+		t = divrem(n, thou, -1);
+		s += DS[itos(gel(t, 2))];
+		n = gel(t, 1);
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+			gerepileall(btop, 1, &n);
+	}
+	ret = stoi(s);
+	ret = gerepileuptoint(ltop, ret);
+	return ret;
+}
+
+
+ulong
+dsum_small(ulong n)
+{
+	ulong s = 0;
+	while (n)
+	{
+		s += DS[n % 1000];
+		n /= 1000;
+	}
+	return s;
+}
+
+
+long
+istwo(GEN n)
+{
+	// TODO: Serious improvements available with incremental factoring
+	pari_sp ltop = avma;
+	GEN f = gen_0;
+	long ret, l;
+	if (typ(n) != t_INT)
+		pari_err(arither1, "istwo");
+	
+	// Remove factors of 2
+	long tmp = vali(n);
+	if (tmp)
+		n = shifti(n, -tmp);
+	
+	// Remove negatives
+	if (cmpis(n, 3) < 0)
+	{
+		ret = signe(n) >= 0;
+		avma = ltop;
+		return ret;
+	}
+
+	// End early if possible: numbers that are 3 mod 4 always have some prime factor 3 mod 4 raised to an odd power.
+	if (mod4(n) == 3)
+		return 0;
+	
+	f = Z_factor(n);
+	l = glength(gel(f, 1));
+	long i;
+	for (i = 1; i <= l; ++i)
+	{
+		if (mod4(gcoeff(f, i, 1)) == 3 && mod2(gcoeff(f, i, 2)))
+		{
+			avma = ltop;
+			return 0;
+		}
+	}
+	avma = ltop;
+	return 1;
+}
+
+
+GEN
+ways2(GEN n)
+{
+	// TODO: Serious improvements available with incremental factoring
+	if (typ(n) != t_INT)
+		pari_err(arither1, "ways2");
+
+	pari_sp ltop = avma;
+	GEN res = gen_1, f = factor(oddres(n));
+	long l1 = glength(gel(f, 1));
+	pari_sp btop = avma;
+	long i;
+	for (i = 1; i <= l1; ++i)
+	{
+		if (mod4(gcoeff(f, i, 1)) == 3)
+		{
+			if (mod2(gcoeff(f, i, 2)))
+			{
+				avma = ltop;
+				return gen_0;
+			}
+		} else {
+			res = mulii(res, addis(gcoeff(f, i, 2), 1));
+		}
+		res = gerepileupto(btop, res);
+	}
+	res = shifti(addis(res, 1), -1);
+	res = gerepileuptoleaf(ltop, res);
+	return res;
+}
+
+
+long
+isthree(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "isthree");
+	if (signe(n) < 0)
+		return 0;
+
+	long tmp = vali(n);
+	if (tmp & 1)
+		return 1;
+	pari_sp ltop = avma;
+	long l1 = mod8(shifti(n, -tmp)) != 7;
+	avma = ltop;
+	return l1;
+}
+
+
+INLINE long
+uissquare(ulong n)
+{
+	ulong ignore;
+	return uissquareall(n, &ignore);
+}
+
+
+long
+sways3s(ulong n)
+{
+	pari_sp ltop = avma;
+	long p1 = (long)usqrtsafe(n);
+	long res = 0;
+	long k, t, m, p2, tmod4;
+	for (k = 0; k <= p1; k++)
+	{
+		tmod4 = (n - (k&1))&3;
+		if (tmod4 == 3)
+			continue;
+		t = n - k * k;
+		if (!istwo(stoi(t)))
+			continue;
+		avma = ltop;
+		p2 = (long)usqrtsafe(t>>1);
+		switch (tmod4) {
+			case 0:
+				for (m = ((k + 1)|1) - 1; m <= p2; m += 2)
+					if (uissquare(t - m * m))
+						res++;
+				break;
+			case 1:
+				for (m = k; m <= p2; m++)
+					if (uissquare(t - m * m))
+						res++;
+				break;
+			case 2:
+				for (m = k|1; m <= p2; m += 2)
+					if (uissquare(t - m * m))
+						res++;
+				break;
+		}
+	}
+	return res;
+}
+
+
+GEN
+ways3(GEN n)
+{
+	pari_sp ltop = avma;
+	GEN p1, t, res;
+	if (typ(n) != t_INT)
+		pari_err(typeer, "ways3");
+	if (signe(n) < 1)
+		return signe(n) ? gen_0 : gen_1;
+	
+	// ways3(4n) = ways3(n); ways3(4^k(8n + 7)) = 0
+	if (!mod4(n)) {
+		n = shifti(n, -(vali(n) >> 1) << 1);
+	}
+	if (mod8(n) == 7) {
+		avma = ltop;
+		return gen_0;
+	}
+	ulong small = itou_or_0(n);
+	if (small) {
+		avma = ltop;
+		return stoi(sways3s(small));
+	}
+	
+	p1 = sqrtint(truedivis(n, 3));
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	GEN k, p3, p4;
+	res = gen_0;
+	for (k = gen_0; cmpii(k, p1) <= 0; k = addis(k, 1))
+	{
+		t = subii(n, sqri(k));
+		p3 = sqrtint(shifti(t, -1));
+{
+		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+		GEN m;
+		p4 = gen_0;
+		for (m = k; cmpii(m, p3) <= 0; m = addis(m, 1))
+		{
+			if (Z_issquare(subii(t, gsqr(m))))
+				p4 = addis(p4, 1);
+			if (low_stack(st_lim, stack_lim(btop, 1)))
+				gerepileall(btop, 2, &p4, &m);
+		}
+}
+		res = addii(res, p4);
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+			gerepileall(btop, 4, &res, &k, &p3, &p4);
+			//gerepileall(btop, 2, &res, &k);	// This is significantly (15%+) slower -- I don't know why.
+	}
+	res = gerepileupto(ltop, res);
+	return res;
+}
+
+
+// Looking for A000523?  Try expi.  A029837 and A070939 are similar.
+// See also __builtin_ffsll
+GEN
+msb(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "msb");
+	if (signe(n) < 1) {
+		if (signe(n))
+			pari_err(talker, "msb: negative argument");	// TODO: What error type to use?
+		return gen_0;	// Convention from A053644
+	}
+
+	return int2n(expi(n));
+}
+
+
+GEN
+fusc(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "fusc");
+	if (signe(n) < 1)
+		return gen_0;
+	pari_sp ltop = avma;
+	GEN ret;
+	
+	// Note: Different constants depending on word size!
+#ifdef LONG_IS_64BIT
+	long l = lgefint(n);
+	if (l < 4 || (l == 4 && *int_MSW(n) <= 13153337344ULL))
+#else
+	if (cmpii(n, u2toi(9386, 2863311530ULL)) <= 0)
+#endif
+		ret = utoi(fusc_small(n));
+	else
+		ret = fusc_large(n);
+	ret = gerepileupto(ltop, ret);
+	return ret;
+}
+
+
+ulong
+fusc_small(GEN n)
+{
+	ulong a = 1, b = 0;
+	pari_sp ltop = avma;
+	
+	GEN xp = int_LSW(n);
+	long lx = lgefint(n);
+	ulong u = *xp;
+	
+	// If n has two words, handle the least-significant one (otherwise it has
+	// only one word).
+	if (lx > 3)
+	{
+		if (u & 0x1)
+			b += a;
+		else
+			a += b;
+		if (u & 0x2)
+			b += a;
+		else
+			a += b;
+		if (u & 0x4)
+			b += a;
+		else
+			a += b;
+		if (u & 0x8)
+			b += a;
+		else
+			a += b;
+		if (u & 0x10)
+			b += a;
+		else
+			a += b;
+		if (u & 0x20)
+			b += a;
+		else
+			a += b;
+		if (u & 0x40)
+			b += a;
+		else
+			a += b;
+		if (u & 0x80)
+			b += a;
+		else
+			a += b;
+		if (u & 0x100)
+			b += a;
+		else
+			a += b;
+		if (u & 0x200)
+			b += a;
+		else
+			a += b;
+		if (u & 0x400)
+			b += a;
+		else
+			a += b;
+		if (u & 0x800)
+			b += a;
+		else
+			a += b;
+		if (u & 0x1000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x2000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x4000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x8000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x10000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x20000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x40000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x80000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x100000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x200000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x400000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x800000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x1000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x2000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x4000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x8000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x10000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x20000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x40000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x80000000)
+			b += a;
+		else
+			a += b;
+#ifdef LONG_IS_64BIT
+		if (u & 0x100000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x200000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x400000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x800000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x1000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x2000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x4000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x8000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x10000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x20000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x40000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x80000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x100000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x200000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x400000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x800000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x1000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x2000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x4000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x8000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x10000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x20000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x40000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x80000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x100000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x200000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x400000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x800000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x1000000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x2000000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x4000000000000000)
+			b += a;
+		else
+			a += b;
+		if (u & 0x8000000000000000)
+			b += a;
+		else
+			a += b;
+#endif
+		xp=int_nextW(xp);
+		u = *xp;
+	}
+	
+	ulong tmp = u;
+	while (tmp)
+	{
+		if (tmp&1)
+			b += a;
+		else
+			a += b;
+		tmp >>= 1;
+	}
+	
+	avma = ltop;
+	return b;
+}
+
+
+GEN
+fusc_large(GEN n)
+{
+	pari_sp ltop = avma;
+	GEN a = gen_1, b = gen_0;
+	while (signe(n))
+	{
+		if (mod2(n))
+			b = addii(b, a);
+		else
+			a = addii(a, b);
+		n = shifti(n, -1);	// TODO: Step through number as in fusc_small rather than shifting
+	}
+	b = gerepileupto(ltop, b);
+	return b;
+}
