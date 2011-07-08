@@ -1,7 +1,11 @@
 #!/usr/bin/perl -w
 
-$defined = 0;
-$output = 0;
+use strict;
+use warnings;
+my $defined = 0;
+my $output = 0;
+my $cur;
+my $offset;
 
 while (<>) {	# For each line of the b-file
 	$_ =~ s/\s*#.*//;	# Remove comments with optional whitespace.
@@ -39,5 +43,5 @@ if ($output) {
 	print "];\n\n";
 }
 
-$lines = $cur - $offset + 1;
+my $lines = $cur - $offset + 1;
 print "Found $lines valid lines, from $offset to $cur.\n";
