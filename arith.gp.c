@@ -26,7 +26,6 @@ ispow2(GEN n)
 		pari_err(arither1, "ispow2");
 	if (signe(n) < 1)
 		return 0;
-	pari_sp ltop = avma;
 	
 	GEN xp = int_LSW(n);
 	long lx = lgefint(n);
@@ -35,16 +34,59 @@ ispow2(GEN n)
 	for (; i < lx; ++i)
 	{
 		if (u != 0)
-		{
-			avma = ltop;
 			return 0;
-		}
 		xp = int_nextW(xp);
 		u = *xp;
 	}
-	avma = ltop;
 	//return hamming_word(u) == 1;	// 14% slower
 	return !(u & (u-1));
+}
+
+
+long
+ispow3(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err(arither1, "ispow3");
+	if (signe(n) < 1 || !mod2(n))
+		return 0;
+	ulong nn = itou_or_0(n);
+	if (nn)
+		return ispow3_tiny(nn);
+	
+	pari_sp ltop = avma;
+	double sz3 = dbllog2r(itor(n, DEFAULTPREC)) / log2(3) + 0.5;
+	long ret =equalii(n, powis(stoi(3), (int)sz3));
+	avma = ltop;
+	return ret;
+}
+
+
+long
+issm3(long n)
+{
+	static long sm3table[] = {
+#ifdef LONG_IS_64BIT
+		0, 0, 4052555153018976267, 1350851717672992089, 0, 450283905890997363, 150094635296999121, 0, 50031545098999707, 0, 16677181699666569, 5559060566555523, 0, 1853020188851841, 617673396283947, 0, 205891132094649, 0, 68630377364883, 22876792454961, 0, 7625597484987, 2541865828329, 0, 847288609443, 282429536481, 0, 94143178827, 0, 31381059609, 10460353203, 0,
+#endif
+		3486784401, 1162261467, 0, 387420489, 0, 129140163, 43046721, 0, 14348907, 4782969, 0, 1594323, 531441, 0, 177147, 0, 59049, 19683, 0, 6561, 2187, 0, 729, 0, 243, 81, 0, 27, 9, 0, 3, 1
+	};
+	
+	n >>= __builtin_ctzl(n);
+	return n > 0 && n == sm3table[__builtin_clzl(n)];
+}
+
+
+long ispow3_tiny(ulong n)
+{
+	static ulong pow3table[] = {
+#ifdef LONG_IS_64BIT
+		12157665459056928801, 0, 4052555153018976267, 1350851717672992089, 0, 450283905890997363, 150094635296999121, 0, 50031545098999707, 0, 16677181699666569, 5559060566555523, 0, 1853020188851841, 617673396283947, 0, 205891132094649, 0, 68630377364883, 22876792454961, 0, 7625597484987, 2541865828329, 0, 847288609443, 282429536481, 0, 94143178827, 0, 31381059609, 10460353203, 0,
+#endif
+		3486784401, 1162261467, 0, 387420489, 0, 129140163, 43046721, 0, 14348907, 4782969, 0, 1594323, 531441, 0, 177147, 0, 59049, 19683, 0, 6561, 2187, 0, 729, 0, 243, 81, 0, 27, 9, 0, 3, 1
+	};
+	
+	return n == pow3table[__builtin_clzl(n)];
 }
 
 
@@ -746,7 +788,7 @@ ways3(GEN n)
 
 
 // Looking for A000523?  Try expi.  A029837 and A070939 are similar.
-// See also __builtin_ffsll
+// See also __builtin_clzll (also __builtin_ffsll for the lsb)
 GEN
 msb(GEN n)
 {

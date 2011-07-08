@@ -3,6 +3,7 @@
 #include <pari/paripriv.h>
 #include "float.h"
 /*
+GP;install("issm3","lL","issm3","./auto.gp.so");
 GP;install("Bell","L","Bell","./auto.gp.so");
 GP;addhelp(Bell, "Bell(n): Returns the n-th Bell or exponential number, Sloane's A000110.");
 GP;install("log_2","Gp","lg","./auto.gp.so");
@@ -40,6 +41,8 @@ GP;install("hamming","lG","hamming","./auto.gp.so");
 GP;addhelp(hamming, "hamming(n): Hamming weight of n (considered as a binary number). Sloane's A000120.");
 GP;install("ispow2","lG","ispow2","./auto.gp.so");
 GP;addhelp(ispow2, "ispow2(n): Is n a power of two? Characteristic function of Sloane's A000079.");
+GP;install("ispow3","lG","ispow3","./auto.gp.so");
+GP;addhelp(ispow3, "ispow3(n): Is n a power of three? Characteristic function of Sloane's A000244.");
 GP;install("issemiprime","lG","issemi","./auto.gp.so");
 GP;addhelp(issemi, "issemi(n): Is n a semiprime? Sloane's A064911; characteristic function of Sloane's A001358.");
 GP;install("istwo","lG","istwo","./auto.gp.so");
@@ -219,6 +222,8 @@ GEN largestSquareFactor(GEN n);
 INLINE long hamming_word(ulong w);
 long hamming(GEN n);
 long ispow2(GEN n);
+long ispow3(GEN n);
+long ispow3_tiny(ulong n);
 long istwo(GEN n);
 GEN ways2(GEN n);
 long isthree(GEN n);
