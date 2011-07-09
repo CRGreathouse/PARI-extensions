@@ -708,17 +708,6 @@ sopfr(GEN n)
 }
 
 
-static long smallpr[] = {
-	1, 1, 2, 6, 6, 30, 30, 210, 210, 210, 210, 2310, 2310, 30030, 30030, 30030,
-	30030, 510510, 510510, 9699690, 9699690, 9699690, 9699690, 223092870,
-	223092870, 223092870, 223092870, 223092870, 223092870
-#ifdef LONG_IS_64BIT
-	, 6469693230, 6469693230, 200560490130, 200560490130, 200560490130,
-	200560490130, 200560490130, 200560490130
-#endif
-};
-
-
 GEN
 gpf(GEN n)
 {
@@ -799,6 +788,16 @@ prodtree(GEN A, long start, long stop)
 GEN
 primorial(GEN n)
 {
+	static long smallpr[] = {
+		1, 1, 2, 6, 6, 30, 30, 210, 210, 210, 210, 2310, 2310, 30030, 30030, 30030,
+		30030, 510510, 510510, 9699690, 9699690, 9699690, 9699690, 223092870,
+		223092870, 223092870, 223092870, 223092870, 223092870
+#ifdef LONG_IS_64BIT
+		, 6469693230, 6469693230, 200560490130, 200560490130, 200560490130,
+		200560490130, 200560490130, 200560490130
+#endif
+	};
+	
 	pari_sp ltop = avma;
 	long nn = NEVER_USED;
 	GEN ret;
@@ -832,7 +831,7 @@ primorial(GEN n)
 
 	ulong primeCount = uprimepi(nn);
 	GEN pr = primes_zv(primeCount);
-	ret = prodtree(pr, 1, primeCount);
+	ret = prodtree(pr, 1, primeCount);	// Possible TODO: Free memory from latter half of array once its product is calculated?
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
@@ -849,26 +848,25 @@ lpf(GEN n)
 		return gen_0;	// My choice of convention: lpf(0) = 0
 	if (!mod2(n))
 		return gen_2;
-	if (cmpis(n, 2) < 0)
-	{
+	if (cmpis(n, 2) < 0) {
 		if (cmpis(n, -1) >= 0)
 			return gen_1;
 		n = negi(n);
 	}
-	pari_sp btop = avma;
+
 	long p = 0;
 	byteptr primepointer = diffptr;
 	NEXT_PRIME_VIADIFF(p, primepointer);
-	for (;p < 9999; avma = btop)	// TODO: Find appropriate cutoff here
+	for (;p < 9999;)	// TODO: Find appropriate cutoff here
 	{
 		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (!smodis(n, p))
+		if (dvdis(n, p))
 		{
 			avma = ltop;
 			return stoi(p);
 		}
 		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (!smodis(n, p))
+		if (dvdis(n, p))
 		{
 			avma = ltop;
 			return stoi(p);
