@@ -460,7 +460,7 @@ largestSquareFactor(GEN n)
 INLINE long
 hamming_word(ulong w)
 {
-	return __builtin_popcountll(w);
+	return __builtin_popcountl(w);
 #if 0
 static long byte_weight[] = {
 	0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
@@ -800,7 +800,7 @@ ways3(GEN n)
 
 
 // Looking for A000523?  Try expi.  A029837 and A070939 are similar.
-// See also __builtin_clzll (also __builtin_ffsll for the lsb)
+// See also __builtin_clzl (also __builtin_ffsl for the lsb)
 GEN
 msb(GEN n)
 {

@@ -368,6 +368,7 @@ uisprimepower(ulong n)
 #endif
 
 	pari_sp ltop = avma;
+	// Check for squares, fourth powers, and eighth powers as appropriate.
 #if CUTOFF <= ROOT4
 	if (uissquareall(n, &n))
 #endif
@@ -397,9 +398,13 @@ uisprimepower(ulong n)
 	ulong mask = 1;
 #endif
 #if CUTOFF <= ROOT9
-	if (is_357_power(nn, &nn, &mask))
-#endif
+	if (is_357_power(nn, &nn, &mask)) {
+		mask = 1;
+		is_357_power(nn, &nn, &mask);
+	}
+#else
 	is_357_power(nn, &nn, &mask);
+#endif
 	
 	ret = isprime(nn);
 	avma = ltop;
@@ -419,7 +424,7 @@ INLINE long
 valu(ulong n)
 {
 #if 1
-	return n ? __builtin_ctzll(n) : -1;
+	return n ? __builtin_ctzl(n) : -1;
 #else
 	if (n == 0)
 		return -1;

@@ -271,7 +271,7 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	// TODO: Optimize size (surely < 512k to stay in L1 cache, but not so large
 	// as to force recalculating too often).
 	// Guesstimate: greater of sqrt(n) * lg(n) or 1M
-	ulong chunk = maxuu(0x100000, usqrtsafe(b) * __builtin_ffsll(b));
+	ulong chunk = maxuu(0x100000, usqrtsafe(b) * __builtin_ffsl(b));
 	ulong tmp = (b - a) / chunk + 1;
 	pari_sp ltop = avma;
 

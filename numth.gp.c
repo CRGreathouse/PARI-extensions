@@ -917,7 +917,7 @@ tetrMod(GEN a, GEN b, GEN M)
 	}
 	pari_sp ltop = avma;
 	GEN e = icopy(a), v;
-	// __builtin_ffsll or expi
+	// __builtin_ffsl or expi
 	long vlen = itos_or_0(b)-1;
 	if (vlen < 0)
 		vlen = expi(subis(M, 1)) + 1;	// Upper bound on A003434
