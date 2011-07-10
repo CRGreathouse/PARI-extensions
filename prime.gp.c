@@ -30,7 +30,7 @@ issemiprime(GEN n)
 		NEXT_PRIME_VIADIFF(p, primepointer);
 		if (p > 997)	// What is a good breakpoint here?
 			break;
-		if (dvdis(n, p))	// "1 if p divides n and 0 otherwise"
+		if (dvdis(n, p))
 		{
 			long ret = isprime(diviuexact(n, p));
 			avma = ltop;
@@ -40,6 +40,9 @@ issemiprime(GEN n)
 	
 	if (isprime(n))
 		return 0;
+	
+	if (DEBUGLEVEL > 3)
+		pari_printf("issemi: Number is a composite with no small prime factors; using general factoring mechanisms.");
 	
 	GEN fac = Z_factor_until(n, shifti(n, -1));	// Find a nontrivial factor -- returns just the factored part
 	GEN expo = gel(fac, 2);
@@ -56,18 +59,23 @@ issemiprime(GEN n)
 		}
 		GEN p = gel(pr, 1);
 		GEN q = gel(pr, 2);
-		long ret = !cmpii(mulii(p, q), n) && isprime(p) && isprime(q);
+		long ret = equalii(mulii(p, q), n) && isprime(p) && isprime(q);
 		avma = ltop;
 		return ret;
 	}
 	if (len == 1) {
 		long e = itos(gel(expo, 1));
-		if (e != 2) {
+		if (e == 2) {
+			GEN p = gel(pr, 1);
+			long ret = equalii(sqri(p), n) && isprime(p);
+			avma = ltop;
+			return ret;
+		} else if (e > 2) {
 			avma = ltop;
 			return 0;
 		}
 		GEN p = gel(pr, 1);
-		long ret = !cmpii(sqri(p), n) && isprime(p);
+		long ret = isprime(p) && isprime(diviiexact(n, p));
 		avma = ltop;
 		return ret;
 	}
@@ -247,7 +255,7 @@ uissemiprime(ulong n)
 		NEXT_PRIME_VIADIFF(p, primepointer);
 	}
 	
-	return 0;	//!uisprime_nosmalldiv(n);
+	return 1;
 #undef CUTOFF_CUBE
 #undef CUTOFF
 }
