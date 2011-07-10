@@ -196,7 +196,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 	}
 	avma = av;
 #ifdef LONG_IS_64BIT
-	if (maxprime() < 4294967296ULL && b > maxprime() * maxprime())
+	if (maxprime() < 4294967296UL && b > maxprime() * maxprime())
 		pari_err(primer1, stoi(usqrtsafe(b)));
 #else
 	// PARI currently guarantees that maxprime() >= 65557, so no check needed

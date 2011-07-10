@@ -136,11 +136,11 @@ cuberoot(ulong n)
 {
 	ulong ret = pow(n + 0.5, 1.0/3);
 #ifdef LONG_IS_64BIT
-	if (n < 100000000000001ULL)
+	if (n < 100000000000001UL)
 #endif
 		return ret;
-	if (n >= 18446724184312856125ULL)
-		return 2642245ULL;
+	if (n >= 18446724184312856125UL)
+		return 2642245UL;
 	if (ret * ret * ret > n) {
 		ret--;
 		while (ret * ret * ret > n)
@@ -184,7 +184,7 @@ cuberootint(GEN x)
 long
 issquarefree_small(ulong n)
 {
-#define CUTOFF 1627ULL
+#define CUTOFF 1627UL
 	long tmp = n&3;
 	if (!tmp)
 		return 0;

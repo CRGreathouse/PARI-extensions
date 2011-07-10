@@ -148,18 +148,18 @@ With prime test fronting, before even rho:
 long
 uissemiprime(ulong n)
 {
-#define CUTOFF 1000ULL
+#define CUTOFF 1000UL
 #ifdef LONG_IS_64BIT
-	#if CUTOFF <= 2642245ULL
+	#if CUTOFF <= 2642245UL
 		#define CUTOFF_CUBE CUTOFF * CUTOFF * CUTOFF
 	#else
-		#define CUTOFF_CUBE 18446744073709551615ULL
+		#define CUTOFF_CUBE 18446744073709551615UL
 	#endif
 #else
-	#if CUTOFF <= 1625ULL
+	#if CUTOFF <= 1625UL
 		#define CUTOFF_CUBE CUTOFF * CUTOFF * CUTOFF
 	#else
-		#define CUTOFF_CUBE 4294967295ULL
+		#define CUTOFF_CUBE 4294967295UL
 	#endif
 #endif
 #if CUTOFF < 661
@@ -315,7 +315,7 @@ uisprimepower(ulong n)
 {
 	// CUTOFF should be at least 89 for best performance. Tests suggest that
 	// 200-300 is the best range for 64-bit platforms.
-#define CUTOFF 199ULL
+#define CUTOFF 199UL
 	long ret;
 	//if (n < 6)
 	//	return n > 0;
