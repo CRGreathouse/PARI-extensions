@@ -48,15 +48,27 @@ ispow3(GEN n)
 {
 	if (typ(n) != t_INT)
 		pari_err(arither1, "ispow3");
-	if (signe(n) < 1 || !mod2(n))
+
+	// Remove negatives and 25% of random numbers
+	if (signe(n) < 1 || !(10 & (1 << mod8(n))))
 		return 0;
+
 	ulong nn = itou_or_0(n);
 	if (nn)
 		return ispow3_tiny(nn);
+
+	// Remove almost all random numbers
+#ifdef LONG_IS_64BIT
+	if (!ispow3_tiny(smodis(n, 18236498188585393201UL)))
+#else
+	if (!ispow3_tiny(smodis(n, 1743392200UL)))
+#endif
+		return 0;
 	
 	pari_sp ltop = avma;
-	double sz3 = dbllog2r(itor(n, DEFAULTPREC)) / log2(3) + 0.5;
-	long ret =equalii(n, powis(stoi(3), (int)sz3));
+	double sz3 = dbllog2r(itor(n, DEFAULTPREC)) / log2(3);
+	int e = (int)(sz3 + 0.5);
+	long ret = equalii(n, powis(stoi(3), e));
 	avma = ltop;
 	return ret;
 }
@@ -81,7 +93,7 @@ long ispow3_tiny(ulong n)
 {
 	static ulong pow3table[] = {
 #ifdef LONG_IS_64BIT
-		12157665459056928801, 0, 4052555153018976267, 1350851717672992089, 0, 450283905890997363, 150094635296999121, 0, 50031545098999707, 0, 16677181699666569, 5559060566555523, 0, 1853020188851841, 617673396283947, 0, 205891132094649, 0, 68630377364883, 22876792454961, 0, 7625597484987, 2541865828329, 0, 847288609443, 282429536481, 0, 94143178827, 0, 31381059609, 10460353203, 0,
+		12157665459056928801UL, 0, 4052555153018976267UL, 1350851717672992089UL, 0, 450283905890997363UL, 150094635296999121UL, 0, 50031545098999707UL, 0, 16677181699666569UL, 5559060566555523UL, 0, 1853020188851841UL, 617673396283947UL, 0, 205891132094649UL, 0, 68630377364883UL, 22876792454961UL, 0, 7625597484987UL, 2541865828329UL, 0, 847288609443UL, 282429536481UL, 0, 94143178827UL, 0, 31381059609UL, 10460353203UL, 0,
 #endif
 		3486784401, 1162261467, 0, 387420489, 0, 129140163, 43046721, 0, 14348907, 4782969, 0, 1594323, 531441, 0, 177147, 0, 59049, 19683, 0, 6561, 2187, 0, 729, 0, 243, 81, 0, 27, 9, 0, 3, 1
 	};
@@ -136,7 +148,7 @@ long isHexagonal(GEN n)
 // 1e20000 15200		5 µs
 // 1e50000 37000	 13 µs
 long
-isFibonacci(GEN n)		/* bool */
+isFibonacci(GEN n)
 {
 	if (typ(n) != t_INT)
 		pari_err(arither1, "isFibonacci");
@@ -144,7 +156,7 @@ isFibonacci(GEN n)		/* bool */
 		return isSmallFib(itos(n));
 	pari_sp ltop = avma;
 
-	// Good residue classes: 55, 76, 144, 199, 377, 521, 987, 1364, 2584, 3571, 6765, 9349, 17711, 24476, 46368, 64079, 121393, 167761, 317811, 439204, 832040, 1149851, 2178309, 3010349, 5702887, 7881196, 14930352, 20633239, 39088169, ...
+	// Good residue classes: A189761 (discovery predates sequence!)
 	long rem = smodis(n, 17711);
 	if (rem & 1) {
 		if (rem > 5 && rem != 13 && rem != 21 && rem != 55 && rem != 89 && rem != 233 && rem != 377 && rem != 987 && rem != 1597 && rem != 4181 && rem != 6765 && rem != 15127 && rem != 17567 && rem != 17703)
@@ -817,9 +829,9 @@ fusc(GEN n)
 	// Note: Different constants depending on word size!
 #ifdef LONG_IS_64BIT
 	long l = lgefint(n);
-	if (l < 4 || (l == 4 && *int_MSW(n) <= 13153337344ULL))
+	if (l < 4 || (l == 4 && *int_MSW(n) <= 13153337344UL))
 #else
-	if (cmpii(n, u2toi(9386, 2863311530ULL)) <= 0)
+	if (cmpii(n, u2toi(9386, 2863311530UL)) <= 0)
 #endif
 		ret = utoi(fusc_small(n));
 	else
