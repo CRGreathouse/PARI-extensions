@@ -290,26 +290,27 @@ fibomod_tiny(long n, ulong m)
 	lucasmod_tiny((ulong)(labs(n)-1), (ulong)(5*m), &a, &b);
 	a = (((a << 1) + b) / 5) % m;
 	
-	return n < 0 && !odd(n) ? -a : a;
+	return n < 0 && !odd(n) ? m-a : a;
 }
 
 
 GEN
 fibmod(GEN n, GEN m)
 {
+	static ulong fmod3[] = {0,1,1,2,0,2,2,1};
+ 	static ulong fmod4[] = {0,1,1,2,3,1};
+	static ulong fmod5[] = {0,1,1,2,3,0,3,3,1,4,0,4,4,3,2,0,2,2,4,1};
 	if (typ(n) != t_INT || typ(m) != t_INT)
 		pari_err(arither1, "fibmod");
 	long nn = itos_or_0(n);
 	if (nn) {
 		ulong mm = itou_or_0(m);
-		if (mm) {
 #ifdef LONG_IS_64BIT
-			if (mm <= 858993459UL)
+		if (mm && mm <= 858993459UL)
 #else
-			if (mm <= 13107UL)
+		if (mm && mm <= 13107UL)
 #endif
-				return utoi(fibomod_tiny(nn, mm));
-		}
+			return utoi(fibomod_tiny(nn, mm));
 		return fibomod(nn, m);
 	}
 	if (!signe(n))
@@ -324,37 +325,27 @@ fibmod(GEN n, GEN m)
 			m = negi(m);
 		if (!signe(m))
 			pari_err(gdiver, "fibmod");
-		if (equali1(m))
-		{
+			
+		switch (itos_or_0(m)) {
+		case 1:	
 			avma = ltop;
 			return gen_0;
-		}
-		if (cmpis(m, 2) == 0)
-		{
+		case 2:
 			l = smodis(n, 3) > 0;
 			avma = ltop;
-			return stoi(l);
-		}
-		if (cmpis(m, 3) == 0)
-		{
-			/* 0 1 1 2 0 2 2 1 */
-			res = modis(fibo(mod8(n)), 3);
-			res = gerepileupto(ltop, res);
-			return res;
-		}
-		if (cmpis(m, 4) == 0)
-		{
-			/* 0 1 1 2 3 1 */
-			res = remi2n(fibo(smodis(n, 6)), 2);
-			res = gerepileupto(ltop, res);
-			return res;
-		}
-		if (cmpis(m, 5) == 0)
-		{
-			/* 0 1 1 2 3 0 3 3 1 4 0 4 4 3 2 0 2 2 4 1 */
-			res = modis(fibo(smodis(n, 20)), 5);
-			res = gerepileupto(ltop, res);
-			return res;
+			return utoipos(l);
+		case 3:
+			l = fmod3[mod8(n)];
+			avma = ltop;
+			return utoipos(l);
+		case 4:
+			l = fmod4[smodis(n, 6)];
+			avma = ltop;
+			return utoipos(l);
+		case 5:
+			l = fmod5[smodis(n, 20)];
+			avma = ltop;
+			return utoipos(l);
 		}
 	}
 	// Rough estimate of the break-even point.	Yes, it's quite large.
