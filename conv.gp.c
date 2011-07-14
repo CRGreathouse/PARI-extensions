@@ -169,15 +169,15 @@ toC(GEN n)
 }
 
 
-GEN
+long
 digits(GEN x)
 {
-	pari_sp ltop = avma;
+	pari_sp av = avma;
 	long s = sizedigit(x) - 1;
 	if (gcmp(x, powis(stoi(10), s)) >= 0)
 		s++;
-	avma = ltop;
-	return stoi(s);
+	avma = av;
+	return s;
 }
 
 

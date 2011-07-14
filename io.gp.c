@@ -156,7 +156,7 @@ bfile(GEN name, GEN v, GEN offset)
 		GEN e = gel(v, i);
 		if (typ(e) != t_INT)
 			pari_err(typeer, "bfile");
-		if (cmpis(digits(e), 1000) > 0)
+		if (digits(e) > 1000)
 		{
 			pari_warn(warner, "Next term has %Ps digits; exiting.\n", digits(e));
 			break;
