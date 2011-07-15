@@ -487,116 +487,96 @@ Engel(GEN x, long prec)
 GEN
 Eng(GEN n)
 {
-  pari_sp ltop = avma;
-  GEN tmp = gen_0, s = gen_0;
-  GEN p1 = gen_0;	  /* vec */
-  GEN p2 = gen_0;
-  GEN p3 = gen_0;	  /* vec */
-  GEN p4 = gen_0;
-  if (typ(n) != t_INT)
-    pari_err(typeer, "Eng");
-  s = strtoGENstr("");
-  if (cmpis(n, 1000000) >= 0)
-  {
-    pariprintf("tmp: %Ps\n", tmp);
-    tmp = truedivis(n, 1000000);
-    s = Str(mkvec2(Eng(tmp), strtoGENstr(" million")));
-    n = subis(n, gtos(gmulgs(tmp, 1000000)));
-    if (!signe(n))
-    {
-      s = gerepileupto(ltop, s);
-      return s;
-    }
-    s = Str(mkvec2(s, strtoGENstr(" ")));
-  }
-  if (cmpis(n, 1000) >= 0)
-  {
-    tmp = truedivis(n, 1000);
-    s = Str(mkvec3(s, Eng(tmp), strtoGENstr(" thousand")));
-    n = subis(n, gtos(gmulgs(tmp, 1000)));
-    if (!signe(n))
-    {
-      s = gerepileupto(ltop, s);
-      return s;
-    }
-    s = Str(mkvec2(s, strtoGENstr(" ")));
-  }
-  if (cmpis(n, 100) >= 0)
-  {
-    tmp = truedivis(n, 100);
-    s = Str(mkvec3(s, Edigit(tmp), strtoGENstr(" hundred")));
-    n = subis(n, gtos(gmulgs(tmp, 100)));
-    if (!signe(n))
-    {
-      s = gerepileupto(ltop, s);
-      return s;
-    }
-    s = Str(mkvec2(s, strtoGENstr(" ")));
-  }
-  if (cmpis(n, 20) < 0)
-  {
-    p1 = cgetg(20, t_VEC);
-    gel(p1, 1) = strtoGENstr("one");
-    gel(p1, 2) = strtoGENstr("two");
-    gel(p1, 3) = strtoGENstr("three");
-    gel(p1, 4) = strtoGENstr("four");
-    gel(p1, 5) = strtoGENstr("five");
-    gel(p1, 6) = strtoGENstr("six");
-    gel(p1, 7) = strtoGENstr("seven");
-    gel(p1, 8) = strtoGENstr("eight");
-    gel(p1, 9) = strtoGENstr("nine");
-    gel(p1, 10) = strtoGENstr("ten");
-    gel(p1, 11) = strtoGENstr("eleven");
-    gel(p1, 12) = strtoGENstr("twelve");
-    gel(p1, 13) = strtoGENstr("thirteen");
-    gel(p1, 14) = strtoGENstr("fourteen");
-    gel(p1, 15) = strtoGENstr("fifteen");
-    gel(p1, 16) = strtoGENstr("sixteen");
-    gel(p1, 17) = strtoGENstr("seventeen");
-    gel(p1, 18) = strtoGENstr("eighteen");
-    gel(p1, 19) = strtoGENstr("ninteen");
-    p2 = Str(mkvec2(s, gel(p1, itos(n))));
-    p2 = gerepileupto(ltop, p2);
-    return p2;
-  }
-  tmp = truedivis(n, 10);
-  p3 = cgetg(10, t_VEC);
-  gel(p3, 1) = gen_0;
-  gel(p3, 2) = strtoGENstr("twenty");
-  gel(p3, 3) = strtoGENstr("thirty");
-  gel(p3, 4) = strtoGENstr("forty");
-  gel(p3, 5) = strtoGENstr("fifty");
-  gel(p3, 6) = strtoGENstr("sixty");
-  gel(p3, 7) = strtoGENstr("seventy");
-  gel(p3, 8) = strtoGENstr("eighty");
-  gel(p3, 9) = strtoGENstr("ninety");
-  s = Str(mkvec2(s, gel(p3, gtos(tmp))));
-  n = subis(n, gtos(gmulgs(tmp, 10)));
-  if (signe(n))
-    p4 = Str(mkvec3(s, strtoGENstr("-"), Edigit(n)));
-  else
-    p4 = s;
-  p4 = gerepileupto(ltop, p4);
-  return p4;
+	if (typ(n) != t_INT)
+		pari_err(typeer, "Eng");
+
+	if (cmpis(n, 1000000000) >= 0) {
+		pari_sp av = avma;
+		GEN tmp = truedivis(n, 1000000000);
+		GEN s = Str(mkvec2(Eng(tmp), strtoGENstr(" billion")));
+		n = subii(n, mulis(tmp, 1000000000));
+		if (signe(n))
+			s = Str(mkvec3(s, strtoGENstr(" "), Eng_small(itos(n))));
+		s = gerepileupto(av, s);
+		return s;
+	} else {
+		return Eng_small(itos(n));
+	}
 }
 
+
 GEN
-Edigit(GEN n)
+Eng_small(long n)
 {
-  pari_sp ltop = avma;
-  GEN p1 = gen_0;	  /* vec */
-  GEN p2 = gen_0;
-  p1 = cgetg(10, t_VEC);
-  gel(p1, 1) = strtoGENstr("one");
-  gel(p1, 2) = strtoGENstr("two");
-  gel(p1, 3) = strtoGENstr("three");
-  gel(p1, 4) = strtoGENstr("four");
-  gel(p1, 5) = strtoGENstr("five");
-  gel(p1, 6) = strtoGENstr("six");
-  gel(p1, 7) = strtoGENstr("seven");
-  gel(p1, 8) = strtoGENstr("eight");
-  gel(p1, 9) = strtoGENstr("nine");
-  p2 = gcopy(gel(p1, gtos(n)));
-  p2 = gerepileupto(ltop, p2);
-  return p2;
+	pari_sp av = avma;
+	GEN s = strtoGENstr("");
+	GEN space = strtoGENstr(" ");
+	if (n >= 1000000) {
+		long tmp = n / 1000000;
+		n -= 1000000 * tmp;
+		if (n)
+			s = Str(mkvec4(s, Eng_tiny(tmp), strtoGENstr(" million"), space));
+		else
+			s = Str(mkvec3(s, Eng_tiny(tmp), strtoGENstr(" million")));
+	}
+	if (n >= 1000) {
+		long tmp = n / 1000;
+		s = Str(mkvec3(s, Eng_tiny(tmp), strtoGENstr(" thousand")));
+		n -= 1000 * tmp;
+		if (n)
+			s = Str(mkvec3(s, space, Eng_tiny(n)));
+		s = gerepileupto(av, s);
+		return s;
+	}
+	s = Eng_tiny(n);
+	s = gerepileupto(av, s);
+	return s;
+}
+
+
+GEN
+Eng_tiny(long n)
+{
+	GEN s;
+	pari_sp av = avma;
+	if (n >= 100) {
+		long tmp = n / 100;
+		s = Str(mkvec2(Edigit(tmp), strtoGENstr(" hundred")));
+		n -= 100 * tmp;
+		if (!n) {
+			s = gerepileupto(av, s);
+			return s;
+		}
+		s = Str(mkvec2(s, strtoGENstr(" ")));
+	} else {
+		s = strtoGENstr("");
+	}
+
+	if (n < 20) {
+		static char* lookup[] = {"","one","two","three","four","five","six",
+		"seven","eight","nine","ten","eleven","twelve","thirteen","fourteen",
+		"fifteen","sixteen","seventeen","eighteen","ninteen"};
+		GEN ret = Str(mkvec2(s, strtoGENstr(lookup[n])));
+		ret = gerepileupto(av, ret);
+		return ret;
+	}
+	
+	long tmp = n / 10;
+	static char* lookup[] = {"","","twenty","thirty","forty","fifty","sixty",
+	"seventy","eighty","ninety"};
+	s = Str(mkvec2(s, strtoGENstr(lookup[tmp])));
+	n -= 10 * tmp;
+	if (n)
+		s = Str(mkvec3(s, strtoGENstr("-"), Edigit(n)));
+	s = gerepileupto(av, s);
+	return s;
+}
+
+
+GEN
+Edigit(long n)
+{
+	static char* lookup[] = {"","one","two","three","four","five","six","seven",
+	"eight","nine"};
+	return strtoGENstr(lookup[n]);
 }
