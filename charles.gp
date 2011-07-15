@@ -468,7 +468,7 @@ rec(v:vec)={
 	);
 	
 	\\ Print out Sloane index link with signature.
-	print1("<a href=\"/Sindx_Rea.html#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
+	print1("<a href=\"/index/Rea#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
 	for(i=2,#c,print1(","c[i]));
 	print(").");
 	
