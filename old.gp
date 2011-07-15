@@ -1041,7 +1041,7 @@ zander(product)={
 };
 
 
-findrec(a,b,cur,writeToFile)={
+findA141768(a,b,cur,writeToFile)={
 	my(t,i=0);
 	forstep(n=bitor(a,1),b,2,
 		if(!isprime(n) && Bpsp(n) > cur,
@@ -1056,7 +1056,7 @@ findrec(a,b,cur,writeToFile)={
 		)
 	)
 };
-addhelp(findrec, "findrec(a,b,cur,writeToFile): Find terms of Sloane's A141768 in [a, b].");
+addhelp(findA141768, "findA141768(a,b,cur,writeToFile): Find terms of Sloane's A141768 in [a, b].");
 
 
 \\ Throwaway functions for testing a conjecture of Z-W Sun.
