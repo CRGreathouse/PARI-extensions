@@ -744,17 +744,17 @@ gpf(GEN n)
 GEN
 prodtree(GEN A, long start, long stop)
 {
-	pari_sp ltop = avma;
-	//pari_sp st_lim = stack_lim(ltop, 1);
+	pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
 	long diff = stop - start;
 	if (diff >= 8) {
 		diff >>= 1;
 		GEN leftprod = prodtree(A, start, start + diff);
-		//if (low_stack(st_lim, stack_lim(ltop, 1)))
+		if (low_stack(st_lim, stack_lim(ltop, 1)))
 			leftprod = gerepileupto(ltop, leftprod);
+		pari_sp btop = avma;
 		GEN rightprod = prodtree(A, start + diff + 1, stop);
 		//if (low_stack(st_lim, stack_lim(ltop, 1)))
-			gerepileall(ltop, 2, &leftprod, &rightprod);
+			rightprod = gerepileupto(btop, rightprod);
 		GEN ret = mulii(leftprod, rightprod);
 		ret = gerepileupto(ltop, ret);
 		return ret;
@@ -789,6 +789,64 @@ prodtree(GEN A, long start, long stop)
 			a = mulss(A[start], A[start+3]);
 			b = mulss(A[start+1], A[start+2]);
 			ret = mulii(a, b);
+			break;
+		default:
+			pari_err(talker, "prodtree passed small argument");
+	}
+	ret = gerepileupto(ltop, ret);
+	return ret;
+}
+
+
+GEN
+prodtree_small(GEN A, long start, long stop)
+{
+	pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
+	long diff = stop - start;
+	if (diff >= 8) {
+		diff >>= 1;
+		GEN leftprod = prodtree(A, start, start + diff);
+		if (low_stack(st_lim, stack_lim(ltop, 1)))
+			leftprod = gerepileupto(ltop, leftprod);
+		pari_sp btop = avma;
+		GEN rightprod = prodtree(A, start + diff + 1, stop);
+		//if (low_stack(st_lim, stack_lim(ltop, 1)))
+			rightprod = gerepileupto(btop, rightprod);
+		GEN ret = mulii(leftprod, rightprod);
+		ret = gerepileupto(ltop, ret);
+		return ret;
+	}
+	
+	GEN ret = NEVER_USED;
+	long a, b, c, d;
+	switch (diff) {
+		case 7:
+			a = A[start] * A[start+7];
+			b = A[start+1] * A[start+6];
+			c = A[start+2] * A[start+5];
+			d = A[start+3] * A[start+4];
+			ret = mulii(mulss(a, b), mulss(c, d));
+			break;
+		case 6:
+			a = A[start] * A[start+3];
+			b = A[start+1] * A[start+2];
+			c = A[start+4] * A[start+6];
+			ret = mulii(mulss(a, b), mulss(c, A[start+5]));
+			break;
+		case 5:
+			a = A[start] * A[start+5];
+			b = A[start+1] * A[start+4];
+			ret = mulii(mulss(a, A[start+2]), mulss(b, A[start+3]));
+			break;
+		case 4:
+			a = A[start] * A[start+2];
+			b = A[start+3] * A[start+4];
+			ret = mulis(mulss(a, A[start+1]), b);
+			break;
+		case 3:
+			a = A[start] * A[start+3];
+			b = A[start+1] * A[start+2];
+			ret = mulss(a, b);
 			break;
 		default:
 			pari_err(talker, "prodtree passed small argument");
@@ -844,7 +902,14 @@ primorial(GEN n)
 
 	ulong primeCount = uprimepi(nn);
 	GEN pr = primes_zv(primeCount);
-	ret = prodtree(pr, 1, primeCount);	// Possible TODO: Free memory from latter half of array once its product is calculated?
+#ifdef LONG_IS_64BIT
+	if (primeCount >= 146144319)
+#else
+	if (primeCount >= 4793)
+#endif
+		ret = prodtree(pr, 1, primeCount);	// Possible TODO: Free memory from latter half of array once its product is calculated?
+	else
+		ret = prodtree_small(pr, 1, primeCount);
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
