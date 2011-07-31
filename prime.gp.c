@@ -859,7 +859,7 @@ prodtree_small(GEN A, long start, long stop)
 GEN
 primorial(GEN n)
 {
-	static long smallpr[] = {
+	static const long smallpr[] = {
 		1, 1, 2, 6, 6, 30, 30, 210, 210, 210, 210, 2310, 2310, 30030, 30030, 30030,
 		30030, 510510, 510510, 9699690, 9699690, 9699690, 9699690, 223092870,
 		223092870, 223092870, 223092870, 223092870, 223092870
