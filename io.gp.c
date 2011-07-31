@@ -158,7 +158,7 @@ bfile(GEN name, GEN v, GEN offset)
 			pari_err(typeer, "bfile");
 		if (digits(e) > 1000)
 		{
-			pari_warn(warner, "Next term has %Ps digits; exiting.\n", digits(e));
+			pari_warn(warner, "Next term has %ld digits; exiting.\n", digits(e));
 			break;
 		}
 
