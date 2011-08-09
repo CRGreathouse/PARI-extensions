@@ -202,7 +202,9 @@ contfracback(GEN v, GEN terms)
 		tterms = itos(terms);
 	else
 		pari_err(typeer, "contfracback");
-	x = gcopy(gel(v, tterms + 1));
+	x = gel(v, tterms + 1);
+	if (tterms == 1)
+		x = gcopy(x);
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	long i = 0;
 	for (i = tterms; i >= 1; i--)

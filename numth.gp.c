@@ -109,6 +109,7 @@ Faulhaber(long e, GEN a)
 	long i = 0;
 	for (; i <= e; ++i)
 	{
+		// TODO: Form the polynomial in a sensible way
 		ret = gadd(ret, gmul(gmul(binomialuu(e + 1, i), bernfrac(i)), gpowgs(x, e + 1 - i)));
 		ret = gerepileupto(btop, ret);
 	}
@@ -440,7 +441,7 @@ moebiusu(ulong n)
 }
 
 
-// TODO: Doesn't really save much time vs. the original.	To improve, a sieve
+// TODO: Doesn't really save much time vs. the original.  To improve, a sieve
 // would be needed (to calculate the values of moebius faster).
 ulong
 ucountSquarefree(ulong lim)
@@ -866,18 +867,18 @@ solvePell(GEN n)
 			pari_err(talker, "invalid argument in solvePell");
 	}
 	pari_sp ltop = avma;
-	GEN C, t = gen_0, x = gen_0, y = gen_0;
+	GEN C, t, x, y;
 	long k = 1;
 	long myprec = 125;
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	pari_sp btop = avma;
 	while (1) {
 		C = contfrac0(gsqrt(n, myprec), NULL, 0);
 {
-		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+		pari_sp btop = avma;
 		GEN p1, p2;	  /* vec */
-		while (k <= glength(C)) {
+		while (k++ <= glength(C)) {
 			long i;
-			p1 = cgetg(k+1, t_VEC);
+			p1 = cgetg(k, t_VEC);
 			for (i = 1; i <= k; ++i)
 				gel(p1, i) = gel(C, i);
 			t = contfracback(p1, NULL);
@@ -890,14 +891,11 @@ solvePell(GEN n)
 				p2 = gerepileupto(ltop, p2);
 				return p2;
 			}
-			k++;
-			if (low_stack(st_lim, stack_lim(btop, 1)))
-				avma = btop;
+			avma = btop;
 		}
 }
 		myprec <<= 1;
-		if (low_stack(st_lim, stack_lim(btop, 1)))
-			avma = btop;
+		avma = btop;
 	}
 	avma = ltop;
 	return gen_0;
