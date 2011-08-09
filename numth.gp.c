@@ -856,47 +856,48 @@ BradfordDavenportProduct(GEN f) {
 	return ret;
 }
 
-// TODO: Better algorithm than continued fractions?  Failing that, at least
-// control number of digits?
 GEN
-solvePell(GEN n, long prec)
+solvePell(GEN n)
 {
-	pari_sp ltop = avma;
-	GEN myprec = gen_0, C = gen_0, k = gen_1, t = gen_0, x = gen_0, y = gen_0;
 	if (typ(n) != t_INT)
 		pari_err(typeer, "solvePell");
-	myprec = stoi(getrealprecision());
-	setrealprecision(125, &prec);
+	if (signe(n) < 1 || Z_issquare(n)) {
+		if (signe(n))
+			pari_err(talker, "invalid argument in solvePell");
+	}
+	pari_sp ltop = avma;
+	GEN C, t = gen_0, x = gen_0, y = gen_0;
+	long k = 1;
+	long myprec = 125;
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	while (1) {
-		C = contfrac0(gsqrt(n, prec), NULL, 0);
+		C = contfrac0(gsqrt(n, myprec), NULL, 0);
 {
 		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-		GEN p1 = gen_0, p2 = gen_0;	  /* vec */
-		while (gcmpgs(k, glength(C)) <= 0) {
+		GEN p1, p2;	  /* vec */
+		while (k <= glength(C)) {
 			long i;
-			p1 = cgetg(gtos(k)+1, t_VEC);
-			for (i = 1; gcmpsg(i, k) <= 0; ++i)
-				gel(p1, i) = gcopy(gel(C, i));
+			p1 = cgetg(k+1, t_VEC);
+			for (i = 1; i <= k; ++i)
+				gel(p1, i) = gel(C, i);
 			t = contfracback(p1, NULL);
 			x = numer(t);
 			y = denom(t);
-			if (gequal1(gsub(gsqr(x), gmul(n, gsqr(y))))) {
-				setrealprecision(gtos(myprec), &prec);
+			if (equali1(subii(sqri(x), mulii(n, sqri(y))))) {
 				p2 = cgetg(3, t_VEC);
 				gel(p2, 1) = gcopy(x);
 				gel(p2, 2) = gcopy(y);
 				p2 = gerepileupto(ltop, p2);
 				return p2;
 			}
-			k = gaddgs(k, 1);
+			k++;
 			if (low_stack(st_lim, stack_lim(btop, 1)))
-				gerepileall(btop, 6, &p1, &t, &x, &y, &p2, &k);
+				avma = btop;
 		}
 }
-		setrealprecision(2*getrealprecision(), &prec);
+		myprec <<= 1;
 		if (low_stack(st_lim, stack_lim(btop, 1)))
-		gerepileall(btop, 5, &C, &t, &x, &y, &k);
+			avma = btop;
 	}
 	avma = ltop;
 	return gen_0;
