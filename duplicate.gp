@@ -168,6 +168,8 @@ addhelp(Eng, "Eng(n): English name of the number n.");
 
 
 fibmod(n:int, m:int)={
+	return(((Mod([1,1;1,0],m))^n)[1,2]);
+	/*
 	my(f,t);
 	if (m < 6,
 		if (m < 0, m = -m);
@@ -187,6 +189,7 @@ fibmod(n:int, m:int)={
 		t = chinese(t,Mod(fibonacci(n%Pisano(f[i,1], f[i,2])),f[i,1]^f[i,2]));
 	);
 	lift(t)
+	*/
 };
 addhelp(fibmod,"fibmod(n,m): Returns the nth Fibonacci number mod m. Same as finonacci(n)%m, but faster for large n.");
 
@@ -278,6 +281,13 @@ sopfr(n:int)={
 	sum(i=1,#f[,1],f[i,1]*f[i,2])
 };
 addhelp(sopfr, "sopfr(n): Sum of prime factors of n (with multiplicity). Sloane's A001414.");
+
+
+sopf(n:int)={
+	my(f=factor(n)[,1]);
+	sum(i=1,#f,f[i])
+};
+addhelp(sopf, "sopf(n): Sum of distinct prime factors of n. Sloane's A008472.");
 
 
 primorial(n)={
