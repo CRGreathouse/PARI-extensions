@@ -131,26 +131,30 @@ rp(long b)
 }
 
 
-// FIXME: Take pity and do some numerical analysis here!
 ulong
 cuberoot(ulong n)
 {
-	ulong ret = pow(n + 0.5, 1.0/3);
+	int i;
+	ulong m = 0, b;
+
+	// Another possibility, if needed to eke out more speed, would be to use
+	// __builtin_clzl and a static array to find the first bit.  This
+	// would help a little for 32-bit calculations and a lot for 64-bit.
 #ifdef LONG_IS_64BIT
-	if (n < 100000000000001UL)
+	for (i = 63; i; i -= 3) {
+#else
+	for (i = 30; i; i -= 3) {
 #endif
-		return ret;
-	if (n >= 18446724184312856125UL)
-		return 2642245UL;
-	if (ret * ret * ret > n) {
-		ret--;
-		while (ret * ret * ret > n)
-			ret--;
-		return ret;
+		b = 3*m*(m + 1) | 1;
+		b <<= i;
+		if (n >= b) {
+			n -= b;
+			m |= 1;
+		}
+		m += m;
 	}
-	while ((ret + 1) * (ret + 1) * (ret + 1) <= n)
-		ret++;
-	return ret;
+	b = 3*m*(m + 1) | 1;
+	return n < b ? m : m | 1;
 }
 
 
@@ -161,6 +165,9 @@ cuberootint(GEN x)
 	long t = typ(x);
 	GEN ret = NEVER_USED;
 	if (t == t_INT) {
+		ulong n = itou_or_0(x);
+		if (n)
+			return utoipos(cuberoot(n));
 		ret = gfloor(powrfrac(itor(x, lgefint(x)), 1, 3));
 	} else if (t == t_REAL) {
 		ret = gfloor(powrfrac(x, 1, 3));
