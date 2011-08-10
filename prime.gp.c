@@ -477,7 +477,8 @@ isPowerful_small(ulong n)
 	if (n == 1)
 		return 1;
 	
-	// if the input was a powerful number, n the square of a prime or the cube of a prime.
+	// If the input was a powerful number, n is now the square of a prime or the
+	// cube of a prime.
 	pari_sp btop = avma;
 	long ret = n == 1 || Z_isanypower(utoipos(n), NULL);	// FIXME: Check for correctness and speed, something was wrong here.
 	avma = btop;
@@ -641,7 +642,7 @@ sprp(GEN n, GEN b)
 {
 	pari_sp ltop = avma;
 	GEN d;
-	long l2;
+	long ret;
 	if (typ(n) != t_INT)
 		pari_err(arither1, "sprp");
 	else if (cmpis(n, 3) < 0)
@@ -651,11 +652,10 @@ sprp(GEN n, GEN b)
 	else if (typ(b) != t_INT)
 		pari_err(arither1, "sprp");
 
-	d = shifti(n, -1);	// At least 1
+	d = subis(n, 1);
 	long s = vali(d);
 	d = shifti(d, -s);
-	s++;
-	d = gpow(gmodulo(b, n), d, FAKE_PREC);
+	d = powgi(gmodulo(b, n), d);
 	if (gequal1(d))
 	{
 		avma = ltop;
@@ -675,9 +675,9 @@ sprp(GEN n, GEN b)
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &d);
 	}
-	l2 = gequalm1(d);
+	ret = gequalm1(d);
 	avma = ltop;
-	return l2;
+	return ret;
 }
 
 

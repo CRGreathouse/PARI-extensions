@@ -420,7 +420,6 @@ pari_warn(warner, "countPowerful is possibly broken, FIXME");
 	else if (typ(n) != t_REAL)
 		pari_err(typeer, "countPowerful");
 
-	//p1 = gfloor(gpow(gadd(n, ghalf), ginv(stoi(3)), FAKE_PREC));
 	p1 = gfloor(powrfrac(gadd(n, ghalf), 1, 3));
 	n = gfloor(n);
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
@@ -545,11 +544,11 @@ Mfactor(GEN p, GEN lim, GEN start)
 			continue;
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 2, &q, &v);
-		if (!gequalgs(gpow(gmodulsg(2, q), modii(p, subis(q, 1)), FAKE_PREC), 1))
+		if (!gequal1(powgi(gmodulsg(2, q), modii(p, subis(q, 1)))))
 			continue;
 		v = concat(v, q);
 		long i = 2;
-		while (gequal1(gpow(gmodulsg(2, powis(q, i)), modii(p, mulii(subis(q, 1), powis(q, i - 1))), FAKE_PREC)))
+		while (gequal1(powgi(gmodulsg(2, powis(q, i)), modii(p, mulii(subis(q, 1), powis(q, i - 1))))))
 		{
 			v = concat(v, q);
 			i++;
@@ -632,7 +631,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 				p6 = b;
 			else
 				p6 = modii(b, mulis(powuu(p, i - 1), p - 1));
-			if (!gequal(gpow(gmodulo(a, powuu(p, i)), p6, FAKE_PREC), c))
+			if (!gequal(powgi(gmodulo(a, powuu(p, i)), p6), c))
 				break;
 			v = concat(v, stoi(p));
 			i++;
@@ -640,15 +639,11 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 				v = gerepileupto(btop, v);
 		}
 	}
-	//long p4 = p;//itos(gprecprime(gmaxgs(start, p3))) + 1;
 	v = gerepileupto(btop, v);
-	btop = avma;	// Should this be reset (as currently) or removed?
-	st_lim = stack_lim(btop, 1);	// Ditto
+	btop = avma;
+	st_lim = stack_lim(btop, 1);
 	p = 0;
-	primepointer = diffptr;		/* bptr */
-
-	//while (p < p4)
-	//	NEXT_PRIME_VIADIFF(p, primepointer);
+	primepointer = diffptr;
 
 	// Second loop -- most of the work is done here
 	for (;;)
@@ -664,7 +659,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 			continue;
 		v = concat(v, stoi(p));
 		long i = 2;
-		while (gequal(gpow(gmodulo(a, powis(stoi(p), i)), modii(b, mulis(powis(stoi(p), i - 1), p - 1)), FAKE_PREC), c))
+		while (gequal(powis(gmodulo(a, powis(stoi(p), i)), modii(b, mulis(powis(stoi(p), i - 1), p - 1))), c))
 		{
 			v = concat(v, stoi(p));
 			i++;
@@ -924,7 +919,6 @@ tetrMod(GEN a, GEN b, GEN M)
 	}
 	pari_sp ltop = avma;
 	GEN e = icopy(a), v;
-	// __builtin_ffsl or expi
 	long vlen = itos_or_0(b)-1;
 	if (vlen < 0)
 		vlen = expi(subis(M, 1)) + 1;	// Upper bound on A003434
@@ -942,7 +936,7 @@ tetrMod(GEN a, GEN b, GEN M)
 	}
 	for (i = glength(v); i >= 1; i--)
 	{
-		e = lift(gpow(gmodulo(a, gel(v, i)), e, FAKE_PREC));
+		e = lift(powgi(gmodulo(a, gel(v, i)), e));
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			e = gerepilecopy(btop, e);
 	}
