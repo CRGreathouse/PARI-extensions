@@ -3,7 +3,7 @@
 /******************************************************************************/
 
 
-// Checked up to 5000 with the 64-bit version
+// Checked up to 10,000 with the 64-bit version.
 GEN
 Bell(long n)
 {
@@ -37,7 +37,7 @@ Bell(long n)
 		// This is the hot loop where all calculations are done.
 		while (1) {
 			f = divrs(f, k);
-			t = mulir(powis(stoi(k), n), f);
+			t = mulir(powuu(k, n), f);
 			if (expo(t) < -25)
 				break;
 			B = addrr(B, t);
@@ -63,13 +63,47 @@ Bell(long n)
 			}
 			return Br;
 		}
-pari_printf("Not accurate enough: error %f\n", rtodbl(absr(mpsub(B, Br))));
 		
 FIX_PRECISION:
 		sz += logf(sz);	// increase precion slightly
 		pari_warn(warnprec, "Bell", sz);
 		avma = ltop;
 	}
+}
+
+
+double
+lnBell(long n)
+{
+	if (n < 2) {
+		if (n < 0)
+			pari_err(talker, "negative argument to lnBell");
+		return 0.0;
+	}
+	double Blog = 0.0, flog = 0.0, tlog;
+	
+	long k = 2;
+	while (1) {
+		double logk = log((double)k);
+		flog -= logk;
+		tlog = n * logk + flog;
+		if (tlog < -17)
+			break;
+		double tmp = tlog - Blog;
+		if (tmp >= log(DBL_MAX))	// TODO: Should this be cut closer?
+			Blog += tmp;
+		else
+			Blog += log1p(exp(tmp));
+		++k;
+	}
+	return Blog - 1.0;
+}
+
+
+GEN
+glnBell(long n)
+{
+	return dbltor(lnBell(n));
 }
 
 
