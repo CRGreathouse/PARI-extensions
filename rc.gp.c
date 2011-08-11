@@ -3,7 +3,7 @@
 /******************************************************************************/
 
 
-// Checked up to 3600
+// Checked up to 5000 with the 64-bit version
 GEN
 Bell(long n)
 {
@@ -21,8 +21,11 @@ Bell(long n)
 	pari_sp ltop = avma;
 	GEN B, Br, f, t;
 	
-	// Estimate of # of bits needed, with some guard digits
-	long sz = 0.78 * n * log2(n / M_E) / BITS_IN_LONG + 4;	// 0.78 is a fudge
+	double logn = log(n);
+	double w = W_small(n);
+	long sz = n * (logn - log(w) - 1 + 1/w) + logn;	// - log(w)/2 - 1;
+	sz /= BITS_IN_LONG * log(2);
+	sz += 5;	// Guard digits
 
 	// This while re-does the calculation if the precision was too low.
 	while (1) {
@@ -55,14 +58,15 @@ Bell(long n)
 			// Sanity check on the floating-point arithmetic
 			if (mod32(Br) != BellMod32[n % 96])
 				pari_err(talker, "Bell(%d) failed verification mod 32, please report", n);
-			if (DEBUGLEVEL > 2) {
-				pari_printf("Precision for Bell(%d): %d (%d digits), an excess of %d (%d digits)\n", n, sz, prec2ndec(sz), sz - expi(Br) / BITS_IN_LONG, prec2ndec(sz) - sizedigit(Br));
+			if (DEBUGLEVEL > 4) {
+				pari_printf("Precision for Bell(%d): %d (%d digits), an excess of %d (%d digits)\n", n, sz - 2, prec2ndec(sz), sz - expi(Br) / BITS_IN_LONG - 3, prec2ndec(sz - expi(Br) / BITS_IN_LONG - 1));
 			}
 			return Br;
 		}
+pari_printf("Not accurate enough: error %f\n", rtodbl(absr(mpsub(B, Br))));
 		
 FIX_PRECISION:
-		sz += sz >> 3;	// increase precion slightly
+		sz += logf(sz);	// increase precion slightly
 		pari_warn(warnprec, "Bell", sz);
 		avma = ltop;
 	}
@@ -249,7 +253,6 @@ W_small(double x)
 		// Halley loop
 		e = exp(w);
 		t = w*e - x;
-		// stop?
 		t /= e*(w+1) - 0.5*(w+2)*t/(w+1);
 		w -= t;
 	}
