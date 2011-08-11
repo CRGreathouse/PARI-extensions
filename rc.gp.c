@@ -218,6 +218,45 @@ contfracback(GEN v, GEN terms)
 }
 
 
+double
+W_small(double x)
+{
+	if (x <= 0)
+	{
+		if (!x)
+			return 0.0;
+		if (x == -exp(-1))
+			return -1.0;	// otherwise, sometimes sqrt becomes complex?
+		if (x < -exp(-1))
+			pari_err(talker, "out of range");
+	}
+	double e, w, t = 1.0;
+	
+	// Initial approximation for iteration
+	if (x < 1)
+	{
+		double tmp = sqrt(2 * exp(1) * x + 2);
+		w = (1 - (11/72*tmp + 1/3)*tmp)*tmp - 1;
+	} else {
+		w = log(x);
+	}
+	if (x > 3)
+		w -= log(w);
+
+	double ep = DBL_EPSILON * (1 + fabs(w));
+	while (fabs(t) > ep)
+	{
+		// Halley loop
+		e = exp(w);
+		t = w*e - x;
+		// stop?
+		t /= e*(w+1) - 0.5*(w+2)*t/(w+1);
+		w -= t;
+	}
+	return w;
+}
+
+
 GEN
 W(GEN x, long prec)
 {
@@ -245,6 +284,7 @@ W(GEN x, long prec)
 			return real_m1(prec);	// otherwise, sometimes sqrt becomes complex
 		if (c > 0)	// x < -1/e
 			pari_err(talker, "out of range");
+		// TODO: Parabolic iteration rather than Halley in this case?
 	}
 	t = real_1(prec);
 	
@@ -260,7 +300,7 @@ W(GEN x, long prec)
 			w = rtor(w, prec);
 		}
 	} else {
-		w = mplog(x);	// Faster than the better approximation log + log log
+		w = mplog(x);
 	}
 	if (cmprs(x, 3) > 0)
 		w = subrr(w, mplog(w));
@@ -278,20 +318,14 @@ W(GEN x, long prec)
 			break;	// Stops calculation when answer is already very close, to avoid division by 0
 		tmp = addrs(w, 1);
 		t = divrr(t, subrr(mulrr(e, tmp), divrr(mulrr(shiftr(addrs(w, 2), -1), t), tmp)));
-		//if (!cmprs(tmp, 0))
-		//	pari_printf("tmp is 0");
-		//GEN dividebythis = subrr(mulrr(e, tmp), divrr(mulrr(shiftr(addrs(w, 2), -1), t), tmp));
-		//if (!cmprs(dividebythis, 0))
-		//	pari_printf("dividebythis is 0");
-		//t = divrr(t, dividebythis);
 		w = subrr(w, t);
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &w);
 	}
 
 	w = gerepileupto(ltop, w);
-if (precision(w) < prec)
-	pari_warn(warner, "precision loss");
+	if (precision(w) < prec)
+		pari_warn(warner, "precision loss");
 	return w;
 }
 
