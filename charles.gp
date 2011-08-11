@@ -6,6 +6,75 @@ default(timer, 0);
 \\ *					Working space						*
 \\ ***************************************************************************************************
 
+
+coin(v:vec)={
+	if(type(v)!="t_VEC", error("Must be a vector"));
+	for(i=1,#v,
+		if(type(v[i])!="t_INT" || v[i]<1,error("Must be a vector of positive integers"))
+	);
+	v=vecsort(v,,8);
+	my(g=vecgcd(v));
+	if(g>1,
+		print("All coins are a multiple of "g"; returning largest nonrepresentable multiple.");
+		return(g*coin(v/g))
+	);
+	if(#v==1,return(0));
+	if(#v==2,return(v[1]*v[2]-v[1]-v[2]));
+	if(#v==3,
+		my(a:int=v[1],b:int=v[2],c:int=v[3],A=gcd(b,c),B=gcd(a,c),C=gcd(a,b));
+		if(A>1||B>1||C>1,
+			\\ Johnson reduction
+			\\ not quite right -- G(a,a,c) != G(a,c)
+			error("fail");
+			my(a1=a/B/C,b1=b/A/C,c1=c/A/B);
+			return(A*B*C*(coin([a1,b1,c1])+a1+b1+c1)-a-b-c)
+		);
+		error("not quite implemented")
+	);
+	error("not implemented")
+};
+addhelp(coin, "coin(v): What is the largest number such that change cannot be made with zero or more coins of denomination v[1], v[2], .., v[#v]?  Usually called the coin problem or the Frobenius problem.");
+
+
+period(n)={
+	if(issquare(n),return(0));
+	my(s=sqrt(n),alpha=s,f=floor(s),P=[0],Q=[1],k);
+	while(1,
+		k=#P;
+		P=concat(P,f*Q[k]-P[k]);
+		Q=concat(Q,(n-P[k+1]^2)/Q[k]);
+		k++;
+		for(i=1,k-1,
+			if(P[i]==P[k] && Q[i]==Q[k], return(k-i))
+		);
+		alpha=(P[k]+s)/Q[k];
+		f=floor(alpha)
+	)
+};
+
+
+smallestNeededToAdd(v:vec,n:int)={
+	v=vecsort(v,,8);
+	if(v[1] <= 0,
+		if(v[1]==0,v=vecextract(v,"2.."));
+		if(v[1]<0,error("can't handle negatives"))
+	);
+	if(v[1]==1,
+		snta1(v,n,#v)
+	,
+		error("not implemented")
+	)
+};
+snta1(v:vec,n:int,a:small)={
+	if(a==1,return(n));
+	my(best=snta1(v,n,a-1),t);
+	for(k=1,n\v[a],
+		t=k+snta1(v,n-v[a]*k,a-1);
+		if(t<best,best=t)
+	);
+	best
+};
+
 complement(v:vec)={
 	my(u=List(),i=1,n=1);
 	while(i<#v,
