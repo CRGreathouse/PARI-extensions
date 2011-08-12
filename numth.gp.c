@@ -146,9 +146,8 @@ cuberoot(ulong n)
 	for (i = 30; i; i -= 3) {
 #endif
 		b = 3*m*(m + 1) | 1;
-		b <<= i;
-		if (n >= b) {
-			n -= b;
+		if ((n >> i) >= b) {
+			n -= b << i;
 			m |= 1;
 		}
 		m += m;
@@ -371,7 +370,7 @@ ucountPowerfuli(GEN n)
 
 
 /*
-// FIXME: Write this, I apparently needed it sometime before but never
+// TODO: Write this, I apparently needed it sometime before but never
 // finished coding it.
 GEN
 listPowerful(GEN lim)
@@ -397,8 +396,6 @@ listPowerful(GEN lim)
 */
 
 
-// FIXME: seems broken, at least for small values, unlike ucountPowerfuli;
-// c.f. isPowerful
 // Varies as zeta(3/2)/zeta(3) n^1/2 + zeta(2/3)/zeta(2) n^1/3 + o(n^1/6)
 // estPowerful(n)=zeta(3/2)/zeta(3)*sqrt(n) + zeta(2/3)/zeta(2)*n^(1/3)
 GEN
@@ -406,7 +403,7 @@ countPowerful(GEN n)
 {
 	pari_sp ltop = avma;
 	GEN p1, ret;
-pari_warn(warner, "countPowerful is possibly broken, FIXME");
+//pari_warn(warner, "countPowerful is possibly broken, FIXME");
 	
 	if (lgefint(p1 = gfloor(n)) <= 3) {
 		ret = utoi(ucountPowerfulu(itou(p1)));
@@ -659,7 +656,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 			continue;
 		v = concat(v, stoi(p));
 		long i = 2;
-		while (gequal(powis(gmodulo(a, powis(stoi(p), i)), modii(b, mulis(powis(stoi(p), i - 1), p - 1))), c))
+		while (gequal(powgi(gmodulo(a, powis(stoi(p), i)), modii(b, mulis(powis(stoi(p), i - 1), p - 1))), c))
 		{
 			v = concat(v, stoi(p));
 			i++;
