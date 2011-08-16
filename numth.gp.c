@@ -403,12 +403,30 @@ countPowerful(GEN n)
 {
 	pari_sp ltop = avma;
 	GEN p1, ret;
-//pari_warn(warner, "countPowerful is possibly broken, FIXME");
 	
-	if (lgefint(p1 = gfloor(n)) <= 3) {
-		ret = utoi(ucountPowerfulu(itou(p1)));
-		ret = gerepileupto(ltop, ret);
-		return ret;
+	long sz = lgefint(p1 = gfloor(n));
+	if (sz <= 4) {
+		if (sz <= 3) {
+			if (signe(n) < 1) {
+				avma = ltop;
+				return gen_0;
+			}
+			ret = utoipos(ucountPowerfulu(itou(p1)));
+			ret = gerepileupto(ltop, ret);
+			return ret;
+		}
+#ifdef LONG_IS_64BIT
+		// Slightly-conservative estimate.
+		else if (cmpii(p1, mkintn(4, 909366712, 745454542, 1225794890, 2766209793)) < 0)
+#else
+		// This is the last number such that the result fits in a 32-bit ulong.
+		else if (cmpii(p1, uu32toi(910359010, 4006567939)) <= 0)
+#endif
+		{
+			ret = utoipos(ucountPowerfuli(p1));
+			ret = gerepileupto(ltop, ret);
+			return ret;
+		}
 	}
 	// ui, 32-bit: 3909962179575504899
 	// ui, 64-bit: ~72047453657149422936422171552392422209
@@ -417,7 +435,7 @@ countPowerful(GEN n)
 	else if (typ(n) != t_REAL)
 		pari_err(typeer, "countPowerful");
 
-	p1 = gfloor(powrfrac(gadd(n, ghalf), 1, 3));
+	p1 = cuberootint(n);
 	n = gfloor(n);
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	GEN k = gen_0;
