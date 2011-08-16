@@ -849,7 +849,7 @@ prodtree_small(GEN A, long start, long stop)
 			ret = mulss(a, b);
 			break;
 		default:
-			pari_err(talker, "prodtree passed small argument");
+			pari_err(talker, "prodtree_small passed small argument");
 	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -885,20 +885,12 @@ primorial(GEN n)
 		return gen_1;
 	if (nn > maxprime() || nn == 0)	// nn == 0 if n didn't fit into a word
 		pari_err(primer1, n);
-	if (nn < 37) {
 #ifdef LONG_IS_64BIT
-		ret = stoi(smallpr[nn]);
+	if (nn < 37)
 #else
-		avma = ltop;
-		if (nn < 29)
-			ret = stoi(smallpr[nn]);
-		else if (nn < 31)
-			ret = uu32toi(1, 2174725934);
-		else
-			ret = uu32toi(46, 2991994514);
-#endif		
-		return ret;
-	}
+	if (nn < 29)
+#endif
+		return stoi(smallpr[nn]);
 
 	ulong primeCount = uprimepi(nn);
 	GEN pr = primes_zv(primeCount);
