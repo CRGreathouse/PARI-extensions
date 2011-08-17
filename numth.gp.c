@@ -330,22 +330,11 @@ issquarefree_small(ulong n)
 }
 
 
-// TODO: All of the countPowerful functions could be improved greatly
-// by using countSquarefree to check the # of squarefree numbers at the point
-// that dividing will give exactly 1.	Cost: two invocations of countSquarefree
-// at size ~ cuberoot(n).	Savings: ~0.63 cuberoot(n) invocations of
-// issquarefree and ~0.38 cuberoot(n) powerings, square roots, and divisions.
-// Big win!
 ulong
 ucountPowerfulu(ulong n)
 {
-#if 1
-	// About 33% faster
 	ulong k, breakpoint = cuberoot(n >> 2);
 	ulong res = ucountSquarefree(cuberoot(n)) - ucountSquarefree(breakpoint);
-#else
-	ulong k, breakpoint = cuberoot(n), res = 0;
-#endif
 	for (k = 1; k <= breakpoint; k++)
 		if (issquarefree_small(k))
 			res += usqrtsafe(n / k) / k;
@@ -357,43 +346,15 @@ ulong
 ucountPowerfuli(GEN n)
 {
 	pari_sp ltop = avma;
-	ulong cube_root = itou(cuberootint(n));
-	ulong res = 0, k;
-	for (k = 1; k <= cube_root; k++)
+	ulong k, breakpoint = itou(cuberootint(shifti(n, -2)));
+	ulong res = itou(countSquarefree(cuberootint(n))) - ucountSquarefree(breakpoint);
+	for (k = 1; k <= breakpoint; k++)
 		if (issquarefree_small(k)) {
 			res += itos(divis(sqrti(divis(n, k)), k));
-			//res += itos(sqrti(divii(n, powuu(k, 3))));    // About 35% slower
 			avma = ltop;
 		}
 	return res;
 }
-
-
-/*
-// TODO: Write this, I apparently needed it sometime before but never
-// finished coding it.
-GEN
-listPowerful(GEN lim)
-{
-	// Should check for memer before attempting further...
-	pari_sp ltop = avma;
-	if (typ(lim) == t_REAL)
-		lim = gfloor(lim);
-	else if (typ(lim) != t_INT)
-		pari_err(typeer, "listPowerful");
-
-#ifdef LONG_IS_64BIT
-	if (lim > mkintn(4, 227191940, 3022159750, 2605788960, 0))
-		pari_err(overflower, "listPowerful");	// around 2^64 or more entries;
-												// surely not enough memory
-#else
-	// 977971126747547528
-	if (lim > uu32toi(227701646, 3932178312))
-		pari_err(overflower, "listPowerful");	// 2^32 or more entries
-#endif
-	
-}
-*/
 
 
 // Varies as zeta(3/2)/zeta(3) n^1/2 + zeta(2/3)/zeta(2) n^1/3 + o(n^1/6)
@@ -406,8 +367,8 @@ countPowerful(GEN n)
 	if (typ(n) != t_INT && typ(n) != t_REAL)
 		pari_err(typeer, "countPowerful");
 	
+	GEN ret;
 	pari_sp ltop = avma;
-	GEN p1, ret;
 	long sz = lgefint(n = gfloor(n));
 	if (sz <= 4) {
 		if (sz <= 3) {
@@ -417,7 +378,8 @@ countPowerful(GEN n)
 		}
 #ifdef LONG_IS_64BIT
 		// Slightly-conservative estimate.
-		else if (cmpii(n, mkintn(4, 909366712, 745454542, 1225794890, 2766209793)) < 0)
+		// 72047453657149422928610771848621443808
+		else if (1)	//(cmpii(n, mkintn(4, 909366712, 745454542, 1225794890, 2766209793)) < 0)
 #else
 		// This is the last number such that the result fits in a 32-bit ulong.
 		else if (cmpii(n, uu32toi(910359010, 4006567939)) <= 0)
@@ -429,11 +391,11 @@ countPowerful(GEN n)
 		}
 	}
 	
-	p1 = cuberootint(n);
+	GEN breakpoint = cuberootint(shifti(n, -2));
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	GEN k = gen_0;
-	ret = gen_0;
-	for (k = gen_1; cmpii(k, p1) <= 0; k = addis(k, 1))
+	ret = subii(countSquarefree(cuberootint(n)), countSquarefree(breakpoint));
+	for (k = gen_1; cmpii(k, breakpoint) <= 0; k = addis(k, 1))
 	{
 		if (Z_issquarefree(k))
 			ret = addii(ret, sqrti(gdivent(n, powis(k, 3))));
