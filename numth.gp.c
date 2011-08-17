@@ -401,42 +401,35 @@ listPowerful(GEN lim)
 GEN
 countPowerful(GEN n)
 {
+	if (signe(n) < 1)
+		return gen_0;
+	if (typ(n) != t_INT && typ(n) != t_REAL)
+		pari_err(typeer, "countPowerful");
+	
 	pari_sp ltop = avma;
 	GEN p1, ret;
-	
-	long sz = lgefint(p1 = gfloor(n));
+	long sz = lgefint(n = gfloor(n));
 	if (sz <= 4) {
 		if (sz <= 3) {
-			if (signe(n) < 1) {
-				avma = ltop;
-				return gen_0;
-			}
-			ret = utoipos(ucountPowerfulu(itou(p1)));
+			ret = utoipos(ucountPowerfulu(itou(n)));
 			ret = gerepileupto(ltop, ret);
 			return ret;
 		}
 #ifdef LONG_IS_64BIT
 		// Slightly-conservative estimate.
-		else if (cmpii(p1, mkintn(4, 909366712, 745454542, 1225794890, 2766209793)) < 0)
+		else if (cmpii(n, mkintn(4, 909366712, 745454542, 1225794890, 2766209793)) < 0)
 #else
 		// This is the last number such that the result fits in a 32-bit ulong.
-		else if (cmpii(p1, uu32toi(910359010, 4006567939)) <= 0)
+		else if (cmpii(n, uu32toi(910359010, 4006567939)) <= 0)
 #endif
 		{
-			ret = utoipos(ucountPowerfuli(p1));
+			ret = utoipos(ucountPowerfuli(n));
 			ret = gerepileupto(ltop, ret);
 			return ret;
 		}
 	}
-	// ui, 32-bit: 3909962179575504899
-	// ui, 64-bit: ~72047453657149422936422171552392422209
-	if (typ(n) == t_INT)
-		n = itor(n, lgefint(n));	// Is this the right amount of precision?
-	else if (typ(n) != t_REAL)
-		pari_err(typeer, "countPowerful");
-
+	
 	p1 = cuberootint(n);
-	n = gfloor(n);
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	GEN k = gen_0;
 	ret = gen_0;
