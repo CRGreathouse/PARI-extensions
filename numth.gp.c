@@ -330,11 +330,17 @@ issquarefree_small(ulong n)
 }
 
 
+// TODO: Find an expression for the crossover based on n.  This will depend
+// on the efficiency of ucountSquarefree, of course.
 ulong
 ucountPowerfulu(ulong n)
 {
-	ulong k, breakpoint = cuberoot(n >> 2);
-	ulong res = ucountSquarefree(cuberoot(n)) - ucountSquarefree(breakpoint);
+	int crossover = 60;
+	ulong res = 0, k, breakpoint = cuberoot(n / (crossover * crossover));
+	int i;
+	for (i = 1; i <= crossover; i++)
+		res += ucountSquarefree(cuberoot(n / (i * i)));
+	res -= crossover * ucountSquarefree(breakpoint);
 	for (k = 1; k <= breakpoint; k++)
 		if (issquarefree_small(k))
 			res += usqrtsafe(n / k) / k;
@@ -342,6 +348,11 @@ ucountPowerfulu(ulong n)
 }
 
 
+// TODO: Use a sieve to determine if k is squarefree.
+// TODO: Generalize the countSquarefree trick: choose an arbitrary breakpoint
+// and sum the first, second, ... powers above that point with countSquarefree
+// and the numbers below it normally, like in ucountPowerfulu. This depends on
+// an efficient implementation of countSquarefree.
 ulong
 ucountPowerfuli(GEN n)
 {
@@ -376,9 +387,15 @@ countPowerful(GEN n)
 			ret = gerepileupto(ltop, ret);
 			return ret;
 		}
+		// TODO: use bounds on countSquarefree to use this function even
+		// when the return value exceeds wordsize.  Count using
+		// ucountPowerfuli, allowing it to overflow, and calculate the
+		// high-order bits through the asymptotic formula.  Good bounds are
+		// needed to make this work, but these can be found.
 #ifdef LONG_IS_64BIT
-		// Slightly-conservative estimate.
-		// 72047453657149422928610771848621443808
+		// FIXME: Find appropriate breakpoint here.
+		// around 72047453657149422928610771848621443808
+		// Slightly-conservative estimate below.
 		else if (1)	//(cmpii(n, mkintn(4, 909366712, 745454542, 1225794890, 2766209793)) < 0)
 #else
 		// This is the last number such that the result fits in a 32-bit ulong.
