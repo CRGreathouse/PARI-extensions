@@ -1,0 +1,161 @@
+This is a collection of files intended for use with PARI/GP:
+http://pari.math.u-bordeaux.fr/
+
+The main member of this sequence is auto.gp.c, which includes a number of other
+.gp.c files.  When compiled, these files can be read into GP through the
+install command.  The easiest way is to use gp2c:
+
+gp2c-run auto.gp.c
+
+which will compile the files then load them into a special session of gp.
+
+The purpose of this collection is to provide new functions for gp.  Some are
+designed to solve a problem which is not easily done in GP, while others merely
+make a common task easier.  (It's easier to write
+vecgcd(v)
+than
+u=v[1];for(i=2,#v,u=gcd(u,v[i]));u
+even though the former is not appreciably faster than the latter.)
+
+== The Functions ==
+
+The new commands:
+Bell(n): Returns the n-th Bell or exponential number, Sloane's A000110.
+bfile(name, v, offset=1): If v is given, creates a b-file with the values of v,
+    using name as the A-number (given as a number or a filename). If v is not
+    given, open the b-file name (again, as a filename or number) and return a
+    vector of its values.
+bigdiv(a,b,c,d): Does d divide a^b - c? Same as (a^b-c)%d == 0, but faster for
+    large b. Example: bigdiv(2,p,1,d) checks if d divides the p-th Mersenne
+    number.
+bigfactor(a,b,c,lim,{start=2}): Find small prime factors of a^b - c (up to
+    lim). Optional parameter start gives a starting point below which primes
+    are not checked.
+checkcmult(v,{verbose=1}): Is the sequence v completely multiplicative?
+checkdiv(v,{verbose=1}): Is v a divisibility sequence?
+checkmult(v,{verbose=1}): Is the sequence v multiplicative?
+checkVDW(vv): Given a partition vv = [p1, p2, ...] with union(p1, p2, ...) =
+    [1, 2, ..., n], finds a lower-bound proof for van der Waerden numbers based
+    on the partition. Returns 0 if vv is not a partition of any initial
+    segment, and k if vv proves that W(#vv, k) > n.
+composite(n): Returns the n-th composite. Sloane's A002808.
+contfracback(v, terms): Given a continued fraction v, gives the real number
+    back. If terms is given, use only that many terms.
+countPowerful(lim): Number of powerful numbers up to lim. Partial sum of
+    characteristic function of of Sloane's A001694.
+countSquarefree(lim): Counts the number of squarefree numbers up to lim.
+deBruijnXi(x): Helper function for rhoest.  Finds a xi such that e^xi - 1 =
+    x * xi.
+DickmanRho(x): Estimates the value of the Dickman rho function. For x <= 3 the
+    exact values are used, up to rounding; up to 15 the value is interpolated
+    using known values and rhoest; after 15 rhoest is used, along with a
+    correction factor based on the last value in rhoTable.
+diffset(A, B): Set of all numbers of the form a-b, a in A, b in B.
+digits(n): Number of decimal digits in n. Sloane's A055642.
+dsum(n): Digit sum of n. Sloane's A007953.
+Engel(x): Engel expansion of x.
+Eng(n): English name of the number n.
+eps(): Returns machine epsilon for the current precision.
+Faulhaber(e,{a='x}): Returns the polynomial for the sum 1^e + 2^e + ... + x^e,
+    evaluated at a.
+fibmod(n,m): Returns the nth Fibonacci number mod m. Same as finonacci(n)%m,
+    but faster for large n.
+fnice(n): Returns a string with a 'nice' factorization of n.
+forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes
+    between a and b.
+forodd(X=a,b,seq): the sequence is evaluated, X running over the odds between
+    a and b.
+fortwin(X=a,b,seq): the sequence is evaluated, X running over the twin primes
+    between a and b.
+fusc(n): Stern's diatomic series, which has many interpretations. Sloane's
+    A002487.
+gpf(n): The greatest prime factor of a number. Sloane's A006530.
+hamming(n): Hamming weight of n (considered as a binary number). Sloane's
+    A000120.
+isFibonacci(n): Is n a Fibonacci number? Sloane's A010056; characteristic
+    function of Sloane's A000045.
+isHexagonal(n): Is n a hexagonal number? Characteristic function of Sloane's
+    A000384.
+ispow2(n): Is n a power of two? Characteristic function of Sloane's A000079.
+ispow3(n): Is n a power of three? Characteristic function of Sloane's A000244.
+isPowerful(n): Is n powerful (min exponent 2)? Sloane's A112526; characteristic
+    function of Sloane's A001694.
+isprimepower(n): Is n a prime power? Sloane's A010055; characteristic function
+    of Sloane's A000961.
+issemi(n): Is n a semiprime? Sloane's A064911; characteristic function of
+    Sloane's A001358.
+isthree(n): Is the number the sum of three squares? Sloane's A071374;
+    characteristic function of Sloane's A000378.
+isTriangular(n): Is n a triangular number? Sloane's A010054; characteristic
+    function of Sloane's A000217.
+istwo(n): Is the number a sum of two squares? Characteristic function of
+    Sloane's A001481.
+largestSquareFactor(n): Largest square dividing n. Sloane's A008833.
+lg(x): Binary logarithm of x.
+longestProgression1(v): Uses a quadratic algorithm of Jeff Erickson, which is
+    worst-case optimal; better algorithms are available when there are long
+    progressions (> lg #v lg lg #v).
+longestProgression(v): Finds the longest arithmetic progression in v. Assumes
+    that v is a vector of integers sorted from smallest to largest. Uses a
+    space-efficient naive algorithm.
+lpf(n): The least prime factor of a number. Sloane's A020639.
+msb(n): Most significant bit of n: returns the greatest power of 2 <= the
+    number. Sloane's A053644.
+nice(o): Reformats the object o 'nicely' when possible. Currently chokes on
+    multivariable polynomials.
+normd(a,b): Amount of the normal distribution between a and b standard
+    deviations. Plus/minus infinity coded as [+1]/[-1].
+oddres(n): Returns the greatest odd number dividing n.
+primorial(n): Returns the product of each prime less than or equal to n.
+    Sloane's A034386.
+prp(n,b=2): Is n a b-probable prime?
+rad(n): Radical of n, the largest squarefree number dividing n. Sloane's
+    A007947.
+rhoest(x): de Bruijn's asymptotic approximation for rho(x), rewritten as in
+    van de Lune and Wattel 1969.  Curiously, their paper shows values for this
+    estimate that differ from those calculated by this function, often as soon
+    as the second decimal place -- but as the difference is in the direction of
+    the true value, I have not looked further into this.
+rnormal(): Returns a random normal variable with mean 0 and standard deviation
+    1 at the current precision.
+rp(b): Returns a random b-bit prime.
+solvePell(n): Returns a solution to the equation x^2 - ny^2 = 1.
+sopf(n): Sum of distinct prime factors of n. Sloane's A008472.
+sopfr(n): Sum of prime factors of n (with multiplicity). Sloane's A001414.
+sprp(n,b=2): Is n a b-strong probable prime?
+sumformal(X=start,end,expr): Formal version of sum(X=start,end,expr). Start
+    and end can be expressions instead of numbers.
+sumset(A, B): Set of all numbers of the form a+b, a in A, b in B.
+toC(n): Format n for use with the PARI library (e.g., with gp2c programs).
+vecgcd(v): GCD of all elements in the vector v.
+veclcm(v): LCM of all elements in the vector v.
+vecprod(v): Product of the elements of v.
+vecsum(v): Sum of the elements of v.
+ways2(n): Number of ways that n can be represented as a sum of two squares.
+    Sloane's A000161.
+ways3(n): Number of ways that n can be represented as a sum of three squares.
+    Sloane's A000164.
+W(x): Primary branch of Lambert's W function. Finds an L >= -1 such that
+    L * exp(L) = x, where x >= -1/e.
+
+
+Here are other functions that have implementations but which are not complete
+or which have not been tested:
+Mfactor(p,lim,{start=2}): Returns factors of the Mersenne number 2^p-1 up to lim, starting at start, provided p is a prime = 3 mod 4. Same as bigfactor(2,p,1,lim,start) but faster because it checks only factors of the form 2kp+1 that are +/- 1 mod 8.
+forthinprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b, even if b > primelimit. EXPERIMENTAL!
+tetrMod(a,b,M): Returns a^^b mod M.
+poliscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.
+poliscycloproduct(f, {flag=0}): Is f a product of distinct cyclotomic polynomials?  If flag is 1, return the least n such that f | x^n-1.
+istotient(n): Does there exist some m such that eulerphi(m) = n?
+
+
+Here are some internal functions which have been exposed to gp for testing
+purposes.  Some of these may eventually be cleaned up for general use.
+lnBell
+issm3
+consistency
+cP
+cS
+graeffe
+totientHelper
+
