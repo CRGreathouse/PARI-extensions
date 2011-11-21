@@ -6,7 +6,7 @@ long
 istotient(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "istotient");
+		pari_err_TYPE("istotient",n);
 	if (signe(n) < 1)
 		return 0;
 	if(mod2(n))
@@ -104,7 +104,7 @@ Faulhaber(long e, GEN a)
 	if (!a)
 		a = x;
 	else if (!gcmpX(a))
-		pari_err(typeer, "Faulhaber; must be a variable");
+		pari_err_TYPE("Faulhaber", a);
 	pari_sp btop = avma;
 	long i = 0;
 	for (; i <= e; ++i)
@@ -172,7 +172,7 @@ cuberootint(GEN x)
 		ret = gfloor(powrfrac(x, 1, 3));
 		x = gfloor(x);
 	} else {
-		pari_err(typeer, "cuberootint");
+		pari_err_TYPE("cuberootint", x);
 	}
 
 	if (cmpii(powis(ret, 3), x) == 1) {
@@ -387,7 +387,7 @@ timer_delay(&T), res, 100.0 * res / rtodbl(est));
 // zeta(3/2)/zeta(3)*sqrt(n)+zeta(2/3)/zeta(2)*n^(1/3)
 timer_start(&T);
 	if (breakpoint > LONG_MAX)
-		pari_err(talker, "Breakpoint much too large, something funny is going on.");
+		pari_err(e_MISC, "Breakpoint much too large, something funny is going on.");
 	for (k = 1; k <= breakpoint; k++) {
 		if (issquarefree_small(k)) {
 			res += itos(divis(sqrti(divis(n, k)), k));
@@ -408,7 +408,7 @@ countPowerful(GEN n)
 	if (signe(n) < 1)
 		return gen_0;
 	if (typ(n) != t_INT && typ(n) != t_REAL)
-		pari_err(typeer, "countPowerful");
+		pari_err_TYPE("countPowerful", n);
 	
 	GEN ret;
 	pari_sp ltop = avma;
@@ -491,7 +491,7 @@ countSquarefree(GEN lim)
 	if (typ(lim) == t_REAL)
 		lim = gfloor(lim);
 	else if (typ(lim) != t_INT)
-		pari_err(typeer, "countSquarefree");
+		pari_err_TYPE("countSquarefree", lim);
 
 	GEN b, ret = gen_0, p3 = gen_0, p4 = gen_0;
 	b = sqrti(shifti(lim, -1));
@@ -530,22 +530,20 @@ Mfactor(GEN p, GEN lim, GEN start)
 
 	// Check types
 	if (typ(p) != t_INT)
-		pari_err(arither1, "Mfactor");
+		pari_err_TYPE("Mfactor", p);
 	if (typ(lim) == t_REAL)
 		lim = gfloor(lim);
 	else if (typ(lim) != t_INT)
-		pari_err(typeer, "Mfactor");
+		pari_err_TYPE("Mfactor", lim);
 	if (!start)
 		start = gen_2;
 	else if (typ(start) != t_INT)
-		pari_err(arither1, "Mfactor");
+		pari_err_TYPE("Mfactor", start);
 
 	GEN v, k, p1, p2;
 	v = cgetg(1, t_VEC);
-	if (signe(p) < 1)
-		pari_err(talker, "p must be positive");
-	if (!(isprime(p)))
-		pari_err(talker, "p must be prime");
+	if (signe(p) < 1 || !(isprime(p)))
+		pari_err_PRIME("Mfactor", p);
 	if (mod4(p) != 3)
 		pari_warn(warner, "p must be a Mersenne exponent equal to 3 mod 4... I think");
 
@@ -586,19 +584,23 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 
 	GEN v = cgetg(1, t_VEC);
 	GEN p1 = gen_0, p2 = gen_0;
-	if (typ(a) != t_INT || typ(b) != t_INT || typ(c) != t_INT)
-		pari_err(arither1, "bigfactor");
+	if (typ(a) != t_INT)
+		pari_err_TYPE("bigfactor", a);
+	if (typ(b) != t_INT)
+		pari_err_TYPE("bigfactor", b);
+	if (typ(c) != t_INT)
+		pari_err_TYPE("bigfactor", c);
 	if (!start)
 		start = gen_2;
 	else if (typ(start) != t_INT)
-		pari_err(arither1, "bigfactor");
+		pari_err_TYPE("bigfactor", start);
 	if (typ(lim) == t_REAL)
 		lim = gfloor(lim);
 	else if (typ(lim) != t_INT)
-		pari_err(typeer, "bigfactor");
+		pari_err_TYPE("bigfactor", lim);
 	long lm = itos(lim);
 	if (lm > maxprime())
-		pari_err(primer1, lim);
+		pari_err_MAXPRIME(lm);	// TODO: Should be ulong not long
 
 	if (signe(b) < 0)
 	{
@@ -616,7 +618,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 			return p2;
 		}
 		/* a^b not in Z */
-		pari_err(talker, "not an integer power in bigfactor");
+		pari_err_OP("bigfactor", a, b);
 	}
 	long p3 = minss(itos(a), lm);
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
@@ -624,7 +626,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 	byteptr primepointer = diffptr;
 	GEN p5 = gen_0;		/* int */
 	if (p3 > maxprime())
-		pari_err(primer1, stoi(p3));
+		pari_err_MAXPRIME(p3);
 
 	// First loop -- deal with small primes
 	for (;;)
@@ -695,8 +697,14 @@ bigdiv(GEN a, GEN b, GEN c, GEN d)
 {
 	pari_sp ltop = avma;
 	long ret;
-	if (typ(a) != t_INT || typ(b) != t_INT || typ(c) != t_INT || typ(d) != t_INT)
-		pari_err(arither1, "bigdiv");
+	if (typ(a) != t_INT)
+		pari_err_TYPE("bigdiv", a);
+	if (typ(b) != t_INT)
+		pari_err_TYPE("bigdiv", b);
+	if (typ(c) != t_INT)
+		pari_err_TYPE("bigdiv", c);
+	if (typ(d) != t_INT)
+		pari_err_TYPE("bigdiv", d);
 	
 	if (signe(b) < 0)
 	{
@@ -715,7 +723,7 @@ bigdiv(GEN a, GEN b, GEN c, GEN d)
 			return ret;
 		}
 		/* a^b not in Z */
-		pari_err(arither1, "bigdiv");
+		pari_err_OP("bigdiv", a, b);
 	} else if (!signe(b)) {
 		// Does d divide a^0 - c?
 		ret = !signe(modii(signe(a) ? subii(a, c) : subsi(1, c), d));
@@ -728,7 +736,7 @@ bigdiv(GEN a, GEN b, GEN c, GEN d)
 	if (cmpis(d, 2) <= 0)
 	{
 		if (cmpis(d, 0) == 0)
-			pari_err(gdiver, "bigdiv");
+			pari_err(e_INV);
 		if (equali1(d))
 		{
 			// Does 1 divide a^b - c?
@@ -759,7 +767,7 @@ graeffe(GEN f)
 	pari_sp ltop = avma;
 	GEN g, h, ret, x = mkpoln(2, gen_1, gen_0);
 	if (typ(f) != t_POL)
-		pari_err(typeer, "graeffe");
+		pari_err_TYPE("graeffe", f);
 		
 	long d = degpol(f);
 	long gsize = (d >> 1) + 1, hsize = (d + 1) >> 1;
@@ -788,7 +796,7 @@ long
 poliscyclo(GEN f)
 {
 	if (typ(f) != t_POL)
-		pari_err(typeer, "poliscyclo");
+		pari_err_TYPE("poliscyclo", f);
 	if (!isint1(leading_term(f)))
 		return 0;
 	long degree = degpol(f);
@@ -803,7 +811,7 @@ long
 poliscycloproduct(GEN f, long flag)
 {
 	if (typ(f) != t_POL)
-		pari_err(typeer, "poliscyclo");
+		pari_err_TYPE("poliscyclo", f);
 	if (!isint1(leading_term(f)))
 		return 0;
 	long degree = degpol(f);
@@ -816,7 +824,7 @@ poliscycloproduct(GEN f, long flag)
 		return 1;
 	
 	// Determine degree
-	pari_err(impl, "finding the degree");
+	pari_err_IMPL("finding the degree");
 	return NEVER_USED;
 }
 
@@ -882,10 +890,10 @@ GEN
 solvePell(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(typeer, "solvePell");
+		pari_err_TYPE("solvePell", n);
 	if (signe(n) < 1 || Z_issquare(n)) {
 		if (signe(n))
-			pari_err(talker, "invalid argument in solvePell");
+			pari_err(e_MISC, "invalid argument in solvePell");
 	}
 	pari_sp ltop = avma;
 	GEN C, t, x, y;
@@ -926,13 +934,17 @@ solvePell(GEN n)
 GEN
 tetrMod(GEN a, GEN b, GEN M)
 {
-	pari_err(talker, "busted");
+	pari_err_IMPL("tetrMod");
 	// FIXME: Handle the case where gcd(a, M) > 1.
-	if (typ(a) != t_INT || typ(b) != t_INT || typ(M) != t_INT)
-		pari_err(typeer, "tetrMod");
+	if (typ(a) != t_INT)
+		pari_err_TYPE("tetrMod", a);
+	if (typ(b) != t_INT)
+		pari_err_TYPE("tetrMod", b);
+	if (typ(M) != t_INT)
+		pari_err_TYPE("tetrMod", M);
 	switch (signe(b)) {
 		case -1:
-			pari_err(talker, "negative argument");
+			pari_err_OP("tetrMod", a, b);
 		case 0:
 			return gen_1;
 	}
@@ -1006,7 +1018,7 @@ long
 checkmult(GEN v, long verbose)
 {
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "checkmult");
+		pari_err_TYPE("checkmult", v);
 
 	// I suppose [] is a multiplicative sequence... if nothing else guard
 	// against checking v[1] below.
@@ -1025,11 +1037,11 @@ checkmult(GEN v, long verbose)
 	// Require all arguments to be integers
 	for (n = 2; n < 6 && n < l1; ++n)
 		if (typ(gel(v, n)) != t_INT)
-			pari_err(arither1, "checkmult");
+			pari_err_TYPE("checkmult", v);
 			
 	for (n = 6; n < l1; ++n) {
 		if (typ(gel(v, n)) != t_INT)
-			pari_err(arither1, "checkmult");
+			pari_err_TYPE("checkmult", v);
 		if (uisprimepower(n))
 			continue;
 		f = Z_factor(stoi(n));
@@ -1059,7 +1071,7 @@ long
 checkcmult(GEN v, long verbose)
 {
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "checkmult");
+		pari_err_TYPE("checkmult", v);
 
 	// I suppose [] is a (completely) multiplicative sequence... if nothing else
 	// guard against checking v[1] below.
@@ -1078,11 +1090,11 @@ checkcmult(GEN v, long verbose)
 	// Require all arguments to be integers
 	for (n = 2; n < 4 && n < l1; ++n)
 		if (typ(gel(v, n)) != t_INT)
-			pari_err(arither1, "checkmult");
+			pari_err_TYPE("checkmult", v);
 			
 	for (n = 4; n < l1; ++n) {
 		if (typ(gel(v, n)) != t_INT)
-			pari_err(arither1, "checkmult");
+			pari_err_TYPE("checkmult", v);
 		if (uisprime(n))
 			continue;
 		f = Z_factor(stoi(n));
@@ -1115,7 +1127,7 @@ checkdiv(GEN v, long verbose/*=1*/)
 	pari_sp ltop = avma;
 	long l1;	  /* lg */
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "checkdiv");
+		pari_err_TYPE("checkdiv", v);
 
 	l1 = lg(v);
 	pari_sp btop = avma;

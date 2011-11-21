@@ -7,14 +7,14 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   byteptr d = diffptr;
 
   ga = gceil(ga); gb = gfloor(gb);
-  if (typ(ga) != t_INT || typ(gb) != t_INT)
-    pari_err(typeer,"prime_loop_init");
+  if (typ(ga) != t_INT) pari_err_TYPE("prime_loop_init",ga);
+  if (typ(gb) != t_INT) pari_err_TYPE("prime_loop_init",gb);
   if (signe(gb) < 0) return NULL;
   if (signe(ga) < 0) ga = gen_1;
   if (lgefint(ga)>3 || lgefint(gb)>3)
   {
     if (cmpii(ga, gb) > 0) return NULL;
-    pari_err(primer1, 0);
+    pari_err_MAXPRIME(0);
   }
   *a = itou(ga);
   *b = itou(gb); if (*a > *b) return NULL;
@@ -104,7 +104,7 @@ is_char_2(GEN a)
     b = gel(a,1);
     if (!mod2(b))
     {
-      if (!equaliu(b, 2)) pari_err(impl, "issquare for this input");
+      if (!equaliu(b, 2)) pari_err_IMPL( "issquare for this input");
       return 1;
     }
     return 0;

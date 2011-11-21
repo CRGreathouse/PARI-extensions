@@ -55,18 +55,18 @@ bfilein(char* name)
 	FILE *f = fopen(name, "r");
 	if (!f) {
 #if defined(_WIN32) || defined(__CYGWIN32__)
-		pari_err(openfiler, "input", name);
+		pari_err_FILE("input file", name);
 #else
 		if (strlen(name) == 11 && name[0] == 'b' && name[1] >= '0' && name[1] <= '9' && name[2] >= '0' && name[2] <= '9' && name[3] >= '0' && name[3] <= '9' && name[4] >= '0' && name[4] <= '9' && name[5] >= '0' && name[5] <= '9' && name[6] >= '0' && name[6] <= '9' && name[7] == '.' && name[8] == 't' && name[9] == 'x' && name[10] == 't') {
 			char command[65];
 			sprintf(command, "wget http://oeis.org/A%c%c%c%c%c%c/%s", name[1],name[2],name[3],name[4],name[5],name[6],name);
 			int result = system(command);
 			if (result == -1)
-				pari_warn(talker, "Download failed.");
+				pari_warn(warner, "Download failed.");
 		}
 		f = fopen(name, "r");
 		if (!f)
-			pari_err(openfiler, "input", name);
+			pari_err_FILE("input file", name);
 #endif
 	}
 	
@@ -75,7 +75,7 @@ bfilein(char* name)
 	int i = 0;
 	while(fgets(line, MAX_LINELEN, f) != NULL) {
 		if (strlen(line) > MAX_LINELEN - 5)
-			pari_err(talker, "Maximum line length exceeded; b-file probably not valid");
+			pari_err(e_MISC, "Maximum line length exceeded; b-file probably not valid");
 		char* kept = getBValue(line);
 		if (kept == NULL)
 			continue;
@@ -107,7 +107,7 @@ bfile(GEN name, GEN v, GEN offset)
 				v = listtovec_shallow(v);
 				break;
 			default:
-				pari_err(typeer, "bfile");
+				pari_err_TYPE("bfile", v);
 		}
 	}
 	
@@ -116,7 +116,7 @@ bfile(GEN name, GEN v, GEN offset)
 	else if (typ(offset) == t_INT)
 		cur = itos(offset) - 1;
 	else
-		pari_err(typeer, "bfile");
+		pari_err_TYPE("bfile", offset);
 	
 	if (typ(name) == t_INT)
 	{
@@ -135,7 +135,7 @@ bfile(GEN name, GEN v, GEN offset)
 		Anum = strtoGENstr("000000");
 		//Anum = concat(extract0(gtovec(name), stoi(126), NULL), NULL);
 	} else {
-		pari_err(typeer, "bfile");
+		pari_err_TYPE("bfile", name);
 	}
 	
 	char* filename = GSTR(name);
@@ -155,7 +155,7 @@ bfile(GEN name, GEN v, GEN offset)
 	{
 		GEN e = gel(v, i);
 		if (typ(e) != t_INT)
-			pari_err(typeer, "bfile");
+			pari_err_TYPE("bfile", e);
 		if (digits(e) > 1000)
 		{
 			pari_warn(warner, "Next term has %ld digits; exiting.\n", digits(e));
@@ -183,7 +183,7 @@ fnice(GEN n)
 	GEN f, s, s1, p1 = gen_0;
 	long l2;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "fnice");
+		pari_err_TYPE("fnice", n);
 	if (signe(n) < 0)
 	{
 		s = strtoGENstr("-");
@@ -260,7 +260,7 @@ tonice(GEN o, long prec)
 			}
 			o = simplify(o);
 			if (typ(o) != t_INT)
-				pari_err(user, "tonice: cannot display multivariate polynomials!");
+				pari_err_IMPL("multivariate polynomials in nice");
 			o = polcoeff0(o, 0, -1);
 			if (gcmpgs(o, 0) > 0)
 				s = Str(mkvec3(s, strtoGENstr(" + "), o));
@@ -292,7 +292,7 @@ initial(GEN n, char *s)
 	char *l1;		/* str */
 	GEN p2 = gen_0, p3 = gen_0;
 	if (typ(n) != t_INT)
-		pari_err(typeer, "initial");
+		pari_err_TYPE("initial", n);
 	if (cmpis(n, 0) == 0)
 	{
 		l1 = "";
@@ -323,7 +323,7 @@ medial(GEN n, char *s)
 	char *l1;		/* str */
 	GEN p2 = gen_0, p3 = gen_0, p4 = gen_0, p5 = gen_0;
 	if (typ(n) != t_INT)
-		pari_err(typeer, "medial");
+		pari_err_TYPE("medial", n);
 	if (cmpis(n, 0) == 0)
 	{
 		l1 = "";
@@ -359,9 +359,9 @@ monomialnice(GEN coeff, GEN degree, GEN v)
 	pari_sp ltop = avma;
 	GEN p1 = gen_0, p2 = gen_0;
 	if (typ(coeff) != t_INT)
-		pari_err(typeer, "monomialnice");
+		pari_err_TYPE("monomialnice", coeff);
 	if (typ(degree) != t_INT)
-		pari_err(typeer, "monomialnice");
+		pari_err_TYPE("monomialnice", degree);
 	if (!v)
 		v = pol_x(fetch_user_var("x"));
 	if (equali1(coeff))

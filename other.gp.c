@@ -444,7 +444,7 @@ Engel(GEN x, long prec)
 	switch (typ(x)) {
 		case t_INT:
 			if (signe(x) < 0)
-				pari_err(talker, "negative argument");
+				pari_err(e_MISC, "negative argument");
 			long n = itos(x);
 			long i = 1;
 			v = cgetg(n + 1, t_VEC);
@@ -453,13 +453,13 @@ Engel(GEN x, long prec)
 			return v;
 			
 		case t_FRAC:
-			pari_err(impl, "fractions");
+			pari_err_IMPL("fractions in Engel");
 		
 		case t_REAL:
 			break;
 		
 		default:
-			pari_err(typeer, "Engel");
+			pari_err_TYPE("Engel", x);
 	}
 	
 	pari_sp ltop = avma;
@@ -488,7 +488,7 @@ GEN
 Eng(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(typeer, "Eng");
+		pari_err_TYPE("Eng", n);
 
 	if (cmpis(n, 1000000000) >= 0) {
 		pari_sp av = avma;

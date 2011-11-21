@@ -10,11 +10,11 @@ forodd(GEN a, GEN b, GEN code)
 	if (typ(a) == t_REAL)
 		a = gceil(a);
 	else if (typ(a) != t_INT)
-		pari_err(typeer, "forodd");
+		pari_err_TYPE("forodd", a);
 	if (typ(b) == t_REAL)
 		b = gfloor(b);
 	else if (typ(b) != t_INT)
-		pari_err(typeer, "forodd");
+		pari_err_TYPE("forodd", b);
 	
 	if (!mpodd(a))
 		a = gbitor(a, gen_1);
@@ -45,7 +45,7 @@ rev(GEN n, long B)
 {
 	pari_sp av = avma;
 	if (typ(n) != t_INT)
-		pari_err(typeer, "rev");
+		pari_err_TYPE("rev", n);
 	GEN m = modis(n, B);
 	n = divis(n, B);
 	
@@ -112,11 +112,11 @@ forpal(GEN a, GEN b, GEN code)
 	if (typ(a) == t_REAL)
 		a = gceil(a);
 	else if (typ(a) != t_INT)
-		pari_err(typeer, "forpal");
+		pari_err_TYPE("forpal", a);
 	if (typ(b) == t_REAL)
 		b = gfloor(b);
 	else if (typ(b) != t_INT)
-		pari_err(typeer, "forpal");
+		pari_err_TYPE("forpal", b);
 	
 	if (cmpii(a, b) > 0)
 		return;
@@ -168,7 +168,7 @@ push_lex(x, expr);
 		return ret;
 	}
 	if (t != t_POL)
-		pari_err(notpoler, "sumformal; can only handle polynomials, not arbitrary functions");
+		pari_err_TYPE("sumformal", expr);
 
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	long d = degree(expr) + 1;
@@ -266,13 +266,13 @@ forbigprime(GEN ga, GEN gb, GEN code)
 	if (t == t_REAL || t == t_FRAC)
 		ga = gceil(ga);
 	else if (t != t_INT)
-		pari_err(typeer, "forbigprime");
+		pari_err_TYPE("forbigprime", ga);
 
 	t = typ(gb);
 	if (t == t_REAL || t == t_FRAC)
 		gb = gfloor(gb);
 	else if (t != t_INT)
-		pari_err(typeer, "forbigprime");
+		pari_err_TYPE("forbigprime", gb);
 
 	if (signe(gb) < 1)
 	{
@@ -286,7 +286,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 	
 	if (!b) {
 		if (cmpii(ga, gb) <= 0)
-			pari_err(talker, "Only works for single-word integers.");
+			pari_err(e_MISC, "Only works for single-word integers.");
 		avma = av;
 		return;
 	}
@@ -305,7 +305,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 	avma = av;
 #ifdef LONG_IS_64BIT
 	if (maxprime() < 4294967296UL && b > maxprime() * maxprime())
-		pari_err(primer1, stoi(usqrtsafe(b)));
+		pari_err_MAXPRIME(usqrtsafe(b));
 #else
 	// PARI currently guarantees that maxprime() >= 65557, so no check needed
 #endif
@@ -555,13 +555,13 @@ forthinprime(GEN ga, GEN gb, GEN code)
 	if (t == t_REAL || t == t_FRAC)
 		ga = gceil(ga);
 	else if (t != t_INT)
-		pari_err(typeer, "forthinprime");
+		pari_err_TYPE("forthinprime", ga);
 
 	t = typ(gb);
 	if (t == t_REAL || t == t_FRAC)
 		gb = gfloor(gb);
 	else if (t != t_INT)
-		pari_err(typeer, "forthinprime");
+		pari_err_TYPE("forthinprime", gb);
 
 	if (cmpii(ga, gb) > 0) {
 		avma = av;

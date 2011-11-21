@@ -6,7 +6,7 @@ GEN
 oddres(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(typeer, "oddres");
+		pari_err_TYPE("oddres", n);
 	long v = vali(n);
 	return v ? shifti(n, -v) : icopy(n);
 }
@@ -23,7 +23,7 @@ long
 ispow2(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "ispow2");
+		pari_err_TYPE("ispow2", n);
 	if (signe(n) < 1)
 		return 0;
 	
@@ -47,7 +47,7 @@ long
 ispow3(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "ispow3");
+		pari_err_TYPE("ispow3", n);
 
 	// Remove negatives and 25% of random numbers
 	if (signe(n) < 1 || !(10 & (1 << mod8(n))))
@@ -106,7 +106,7 @@ long
 isTriangular(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "isTriangular");
+		pari_err_TYPE("isTriangular", n);
 	pari_sp ltop = avma;
 	long ret = Z_issquare(addis(shifti(n, 3), 1));
 	avma = ltop;
@@ -117,7 +117,7 @@ isTriangular(GEN n)
 long isHexagonal(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "isHexagonal");
+		pari_err_TYPE("isHexagonal", n);
 	if (signe(n) < 1)
 		return signe(n) == 0;	// 0 is hexagonal
 	pari_sp ltop = avma;
@@ -151,7 +151,7 @@ long
 isFibonacci(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "isFibonacci");
+		pari_err_TYPE("isFibonacci", n);
 	if (!is_bigint(n))
 		return isSmallFib(itos(n));
 	pari_sp ltop = avma;
@@ -254,7 +254,7 @@ GEN
 fibomod(long n, GEN m)
 {
 	if (typ(m) != t_INT)
-		pari_err(arither1, "fibomod");
+		pari_err_TYPE("fibomod", m);
 	pari_sp av = avma;
 	GEN a, b;
 	if (!n) return gen_0;
@@ -300,8 +300,10 @@ fibmod(GEN n, GEN m)
 	static const ulong fmod3[] = {0,1,1,2,0,2,2,1};
  	static const ulong fmod4[] = {0,1,1,2,3,1};
 	static const ulong fmod5[] = {0,1,1,2,3,0,3,3,1,4,0,4,4,3,2,0,2,2,4,1};
-	if (typ(n) != t_INT || typ(m) != t_INT)
-		pari_err(arither1, "fibmod");
+	if (typ(n) != t_INT)
+		pari_err_TYPE("fibmod", n);
+	if (typ(m) != t_INT)
+		pari_err_TYPE("fibmod", m);
 	long nn = itos_or_0(n);
 	if (nn) {
 		ulong mm = itou_or_0(m);
@@ -324,7 +326,7 @@ fibmod(GEN n, GEN m)
 		if (signe(m) < 0)
 			m = negi(m);
 		if (!signe(m))
-			pari_err(gdiver, "fibmod");
+			pari_err(e_INV);
 			
 		switch (itos_or_0(m)) {
 		case 1:	
@@ -429,7 +431,7 @@ largestSquareFactor(GEN n)
 	GEN f, res;
 	long l1, e, i;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "largestSquareFactor");
+		pari_err_TYPE("largestSquareFactor", n);
 	if (!signe(n))
 		return gen_0;
 
@@ -484,7 +486,7 @@ hamming(GEN n)
 {
 	pari_sp ltop = avma;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "hamming");
+		pari_err_TYPE("hamming", n);
 	if (!signe(n))
 		return 0;
 
@@ -551,7 +553,7 @@ GEN
 dsum(GEN n)	  /* int */
 {
 	if (typ(n) != t_INT)
-		pari_err(typeer, "dsum");
+		pari_err_TYPE("dsum", n);
 	long nn = itou_or_0(n);
 	if (nn)
 		return utoipos(dsum_small(nn));
@@ -560,7 +562,7 @@ dsum(GEN n)	  /* int */
 #else
 	if (lgefint(n) > 49540182)
 #endif
-		pari_err(overflower, "freaking giant number in dsum");
+		pari_err_OVERFLOW("dsum");
 		// TODO: Handle very large numbers that overflow ulong?
 	
 	pari_sp ltop = avma;
@@ -604,7 +606,7 @@ istwo(GEN n)
 	GEN f = gen_0;
 	long ret, l;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "istwo");
+		pari_err_TYPE("istwo", n);
 	
 	// Remove factors of 2
 	long tmp = vali(n);
@@ -644,7 +646,7 @@ ways2(GEN n)
 {
 	// TODO: Serious improvements available with incremental factoring
 	if (typ(n) != t_INT)
-		pari_err(arither1, "ways2");
+		pari_err_TYPE("ways2", n);
 
 	pari_sp ltop = avma;
 	GEN res = gen_1, f = factor(oddres(n));
@@ -675,7 +677,7 @@ long
 isthree(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "isthree");
+		pari_err_TYPE("isthree", n);
 	if (signe(n) < 0)
 		return 0;
 
@@ -742,7 +744,7 @@ ways3(GEN n)
 	pari_sp ltop = avma;
 	GEN p1, t, res;
 	if (typ(n) != t_INT)
-		pari_err(typeer, "ways3");
+		pari_err_TYPE("ways3", n);
 	if (signe(n) < 1)
 		return signe(n) ? gen_0 : gen_1;
 	
@@ -796,10 +798,10 @@ GEN
 msb(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "msb");
+		pari_err_TYPE("msb", n);
 	if (signe(n) < 1) {
 		if (signe(n))
-			pari_err(talker, "msb: negative argument");	// TODO: What error type to use?
+			pari_err(e_MISC, "msb: negative argument");	// TODO: What error type to use?
 		return gen_0;	// Convention from A053644
 	}
 
@@ -811,7 +813,7 @@ GEN
 fusc(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "fusc");
+		pari_err_TYPE("fusc", n);
 	if (signe(n) < 1)
 		return gen_0;
 	pari_sp ltop = avma;

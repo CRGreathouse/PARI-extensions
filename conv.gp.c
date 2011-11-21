@@ -18,7 +18,7 @@ facmod(long n, long m)
     long p = 0;
     byteptr primepointer = diffptr;	  /* bptr */
     if (l1 > maxprime())
-      pari_err(primer1);
+      pari_err_MAXPRIME(l1);
     for (;;)
     {
       NEXT_PRIME_VIADIFF(p, primepointer);
@@ -56,7 +56,7 @@ facmod(long n, long m)
           long p = 0;
           byteptr primepointer = diffptr;	  /* bptr */
           if (l6 > maxprime())
-            pari_err(primer1);
+            pari_err_MAXPRIME(l6);
           for (;;)
           {
             NEXT_PRIME_VIADIFF(p, primepointer);
@@ -91,7 +91,7 @@ gtor(GEN x, const char* funcName, long prec)
 		case t_FRAC:
 			return cxcompotor(x, prec);
 		default:
-			pari_err(typeer, funcName);
+			pari_err_TYPE(funcName, x);
 	}
 	return NEVER_USED;
 }
@@ -103,7 +103,7 @@ vecsum(GEN v)
 	pari_sp ltop = avma;
 	GEN p2 = gen_0;
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "vecsum");
+		pari_err_TYPE("vecsum", v);
 	long l1 = lg(v);
 	pari_sp btop = avma;
 	long i;
@@ -124,7 +124,7 @@ vecprod(GEN v)
 	pari_sp ltop = avma;
 	GEN p2 = gen_1;
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "vecprod");
+		pari_err_TYPE("vecprod", v);
 	long l1 = lg(v);
 
 	pari_sp btop = avma;
@@ -145,7 +145,7 @@ vecgcd(GEN v)
 	pari_sp ltop = avma;
 	GEN l = gen_0;
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "veclcm");
+		pari_err_TYPE("veclcm", v);
 	long l1 = lg(v);
 	pari_sp btop = avma;
 	long i;
@@ -165,7 +165,7 @@ veclcm(GEN v)
 	pari_sp ltop = avma;
 	GEN l = gen_1;
 	if (!is_matvec_t(typ(v)))
-		pari_err(typeer, "veclcm");
+		pari_err_TYPE("veclcm", v);
 	long l1 = lg(v);
 	long i;
 	for (i = 1; i < l1; ++i)
@@ -184,7 +184,7 @@ void
 toC(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(typeer, "toC");
+		pari_err_TYPE("toC", n);
 	if (cmpis(n, 3) < 0)
 	{
 		if (cmpis(n, 2) == 0)
@@ -196,7 +196,7 @@ toC(GEN n)
 		else if (equalim1(n))
 			pari_printf("gen_m1\n");
 		else
-			pari_err(alarmer, "can't handle negatives yet"); // white lie
+			pari_err_IMPL("negatives in toC"); // white lie
 		return;
 	}
 	if (ispow2(n)) {

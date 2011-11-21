@@ -7,7 +7,7 @@ long
 issemiprime(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "issemiprime");
+		pari_err_TYPE("issemiprime", n);
 	if (signe(n) <= 0)
 		return 0;
 	
@@ -80,7 +80,7 @@ issemiprime(GEN n)
 		return ret;
 	}
 	
-	pari_err(talker, "Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...", fac, n);
+	pari_err(e_MISC, "Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...", fac, n);
 	avma = ltop;
 	return NEVER_USED;
 }
@@ -92,7 +92,7 @@ dostuff(GEN lm) {
 	ulong p = 0, q = 0;
 	ulong lim = maxprime();
 	if (lim < 1000000)
-		pari_err(primer1, "<-- you really should have a billion primes precalculated for this function, but you need at least a million or so.");
+		pari_err_MAXPRIME(1000000);
 	lim -= 1000000;
 	
 	lim = minuu(itou_or_0(lm), lim);
@@ -267,7 +267,7 @@ rad(GEN n)
 	pari_sp ltop = avma;
 	GEN ret;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "rad");
+		pari_err_TYPE("rad", n);
 	if (signe(n) < 0)
 		n = negi(n);
 	ret = vecprod(gel(Z_factor(n), 1));
@@ -283,7 +283,7 @@ isprimepower(GEN n)
 	pari_sp ltop = avma;
 	long ret;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "isprimepower");
+		pari_err_TYPE("isprimepower", n);
 	else if (signe(n) < 1)
 		return 0;
 	else if (!mod2(n))
@@ -493,7 +493,7 @@ long
 isPowerful(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "isPowerful");
+		pari_err_TYPE("isPowerful", n);
 	ulong nn = itou_or_0(n);
 	if (nn)
 		return isPowerful_small(nn);
@@ -562,7 +562,7 @@ long
 isPowerfulCorrect(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "isPowerful");
+		pari_err_TYPE("isPowerful", n);
 
 	if (!signe(n) || is_pm1(n))
 		return 1;
@@ -629,11 +629,11 @@ prp(GEN n, GEN b)
 {
 	pari_sp ltop = avma;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "prp");
+		pari_err_TYPE("prp", n);
 	if (!b)
 		b = gen_2;
 	else if (typ(b) != t_INT)
-		pari_err(arither1, "prp");
+		pari_err_TYPE("prp", b);
 	long ret = gequal1(powgi(gmodulo(b, n), subis(n, 1)));
 	avma = ltop;
 	return ret;
@@ -647,13 +647,13 @@ sprp(GEN n, GEN b)
 	GEN d;
 	long ret;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "sprp");
+		pari_err_TYPE("sprp", n);
 	else if (cmpis(n, 3) < 0)
 		return cmpis(n, 1) > 0;		// Doesn't like even primes
 	if (!b)
 		b = gen_2;
 	else if (typ(b) != t_INT)
-		pari_err(arither1, "sprp");
+		pari_err_TYPE("sprp", b);
 
 	d = subis(n, 1);
 	long s = vali(d);
@@ -691,7 +691,7 @@ sopf(GEN n)
 	GEN f, ret = gen_0;
 	long l1;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "sopf");
+		pari_err_TYPE("sopf", n);
 	f = Z_factor(n);
 	l1 = glength(gel(f, 1));
 	long i;
@@ -711,7 +711,7 @@ sopfr(GEN n)
 	GEN f, ret = gen_0;
 	long l1;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "sopfr");
+		pari_err_TYPE("sopfr", n);
 	f = Z_factor(n);
 	l1 = glength(gel(f, 1));
 	long i;
@@ -728,7 +728,7 @@ GEN
 gpf(GEN n)
 {
 	if (typ(n) != t_INT)
-		pari_err(arither1, "gpf");
+		pari_err_TYPE("gpf", n);
 	if (is_pm1(n))
 		return gen_1;
 	if (!signe(n))
@@ -794,7 +794,7 @@ prodtree(GEN A, long start, long stop)
 			ret = mulii(a, b);
 			break;
 		default:
-			pari_err(talker, "prodtree passed small argument");
+			pari_err(e_MISC, "prodtree passed small argument");
 	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -852,7 +852,7 @@ prodtree_small(GEN A, long start, long stop)
 			ret = mulss(a, b);
 			break;
 		default:
-			pari_err(talker, "prodtree_small passed small argument");
+			pari_err(e_MISC, "prodtree_small passed small argument");
 	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -881,13 +881,13 @@ primorial(GEN n)
 	} else if (typ(n) == t_INT) {
 		nn = itos_or_0(n);
 	} else {
-		pari_err(arither1, "primorial");
+		pari_err_TYPE("primorial", n);
 	}
 	
 	if (signe(n) <= 0)
 		return gen_1;
 	if (nn > maxprime() || nn == 0)	// nn == 0 if n didn't fit into a word
-		pari_err(primer1, n);
+		pari_err_MAXPRIME(nn);
 #ifdef LONG_IS_64BIT
 	if (nn < 37)
 #else
@@ -916,7 +916,7 @@ lpf(GEN n)
 	pari_sp ltop = avma;
 	GEN res;
 	if (typ(n) != t_INT)
-		pari_err(arither1, "lpf");
+		pari_err_TYPE("lpf", n);
 	if (!signe(n))
 		return gen_0;	// My choice of convention: lpf(0) = 0
 	if (!mod2(n))
@@ -956,7 +956,7 @@ ucomposite(long n)
 {
 	if (n < 2) {
 		if (n < 1)
-			pari_err(talker, "n-th composite meaningless if n = %ld", n);
+			pari_err(e_MISC, "n-th composite meaningless if n = %ld", n);
 		return 4;
 	}
 	double l = 1.0/log(n);

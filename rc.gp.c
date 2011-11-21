@@ -15,7 +15,7 @@ Bell(long n)
 	};
 	if (n < 2) {
 		if (n < 0)
-			pari_err(talker, "negative argument to Bell");
+			pari_err(e_MISC, "negative argument to Bell");
 		return gen_1;
 	}
 	pari_sp ltop = avma;
@@ -57,7 +57,7 @@ Bell(long n)
 			
 			// Sanity check on the floating-point arithmetic
 			if (mod32(Br) != BellMod32[n % 96])
-				pari_err(talker, "Bell(%d) failed verification mod 32, please report", n);
+				pari_err(e_BUG, "Bell(%d) failed verification mod 32, please report", n);
 			if (DEBUGLEVEL > 4) {
 				pari_printf("Precision for Bell(%d): %d (%d digits), an excess of %d (%d digits)\n", n, sz - 2, prec2ndec(sz), sz - expi(Br) / BITS_IN_LONG - 3, prec2ndec(sz - expi(Br) / BITS_IN_LONG - 1));
 			}
@@ -77,7 +77,7 @@ lnBell(long n)
 {
 	if (n < 2) {
 		if (n < 0)
-			pari_err(talker, "negative argument to lnBell");
+			pari_err(e_MISC, "negative argument to lnBell");
 		return 0.0;
 	}
 	double Blog = 0.0, flog = 0.0, tlog;
@@ -112,7 +112,7 @@ deBruijnXi(GEN x)
 {
 	double xx = rtodbl(x), left, right;
 	if (xx < 1)
-		pari_err(talker, "deBruijnXi: Can't find a xi given x < 1.");
+		pari_err(e_MISC, "deBruijnXi: Can't find a xi given x < 1.");
 	if (xx > 1)
 		left = log(xx);
 	else
@@ -220,7 +220,7 @@ log_2(GEN x, long prec)
 			ret = mplog(cxcompotor(x, prec));
 			break;
 		default:
-			pari_err(typeer, "lg");
+			pari_err_TYPE("lg", x);
 	}
 	ret = divrr(ret, mplog2(prec));
 	ret = gerepileupto(ltop, ret);
@@ -239,7 +239,7 @@ contfracback(GEN v, GEN terms)
 	else if (typ(terms) == t_INT)
 		tterms = itos(terms);
 	else
-		pari_err(typeer, "contfracback");
+		pari_err_TYPE("contfracback", terms);
 	x = gel(v, tterms + 1);
 	if (tterms == 1)
 		x = gcopy(x);
@@ -266,7 +266,7 @@ W_small(double x)
 		if (x == -exp(-1))
 			return -1.0;	// otherwise, sometimes sqrt becomes complex?
 		if (x < -exp(-1))
-			pari_err(talker, "out of range");
+			pari_err(e_MISC, "out of range");
 	}
 	double e, w, t = 1.0;
 	
@@ -303,7 +303,7 @@ W(GEN x, long prec)
 	if (typ(x) == t_INT)
 		x = itor(x, prec);
 	else if (typ(x) != t_REAL)
-		pari_err(typeer, "W");
+		pari_err_TYPE("W", x);
 	prec = precision(x);
 	
 	if (signe(x) <= 0)
@@ -320,7 +320,7 @@ W(GEN x, long prec)
 		if (!c)
 			return real_m1(prec);	// otherwise, sometimes sqrt becomes complex
 		if (c > 0)	// x < -1/e
-			pari_err(talker, "out of range");
+			pari_err(e_MISC, "out of range");
 		// TODO: Parabolic iteration rather than Halley in this case?
 	}
 	t = real_1(prec);
@@ -398,7 +398,7 @@ GEN
 normd(GEN a, GEN b, long prec)
 {
 	if (!isExtendedReal(a) || !isExtendedReal(b))
-		pari_err(talker, "incorrect endpoint in normd");
+		pari_err(e_MISC, "incorrect endpoint in normd");
 	pari_sp ltop = avma;
 	long tmp;
 	GEN ret = NEVER_USED;
@@ -420,12 +420,12 @@ pari_warn(warner, "Doesn't work properly with infinities");
 			if (infinite(b) == 1)
 				ret = gen_1;
 			else
-				pari_err(talker, "incorrect endpoint in normd");
+				pari_err(e_MISC, "incorrect endpoint in normd");
 		}
 	} else if ((tmp = infinite(b))) {	// Assignment and test-if-0
 pari_warn(warner, "Doesn't work properly with infinities");
 		if (tmp < 0)	// (a, -oo)
-			pari_err(talker, "incorrect endpoint in normd");
+			pari_err(e_MISC, "incorrect endpoint in normd");
 		ret = gdivgs(gerfc(mpdiv(a, gsqrt(gen_2, prec)), prec), 2);
 	} else {
 		GEN root2 = gsqrt(gen_2, prec);
