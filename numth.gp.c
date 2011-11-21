@@ -330,14 +330,18 @@ issquarefree_small(ulong n)
 }
 
 
-// TODO: Find an expression for the crossover based on n.  This will depend
-// on the efficiency of ucountSquarefree, of course.
 ulong
 ucountPowerfulu(ulong n)
 {
-	int crossover = 60;
+	if (n < 4)	/* avoid log(0) */
+		return n > 0;
+	int i, crossover = (int)exp(log(n) * 0.14);
 	ulong res = 0, k, breakpoint = cuberoot(n / (crossover * crossover));
-	int i;
+/*
+pari_printf("Counting squarefrees until %d, values ranging from %lu to %lu;\n",
+crossover, breakpoint, cuberoot(n));
+pari_printf("Counting directly to %lu.\n", breakpoint);
+*/
 	for (i = 1; i <= crossover; i++)
 		res += ucountSquarefree(cuberoot(n / (i * i)));
 	res -= crossover * ucountSquarefree(breakpoint);
@@ -348,23 +352,51 @@ ucountPowerfulu(ulong n)
 }
 
 
+// Assumption: n > 1 and cuberoot(n) fits into a word.
+// Output: the *least significant word* of the number of powerful numbers up to
+// n.  If there is overflow, let the calling function handle it if the actual
+// number (not mod 2^32 or 2^64) is desired.
 // TODO: Use a sieve to determine if k is squarefree.
-// TODO: Generalize the countSquarefree trick: choose an arbitrary breakpoint
-// and sum the first, second, ... powers above that point with countSquarefree
-// and the numbers below it normally, like in ucountPowerfulu. This depends on
-// an efficient implementation of countSquarefree.
 ulong
 ucountPowerfuli(GEN n)
 {
+#define uCBRTis(n,k) itou(cuberootint(divii((n), mulss(k,k))))
 	pari_sp ltop = avma;
-	ulong k, breakpoint = itou(cuberootint(shifti(n, -2)));
-	ulong res = itou(countSquarefree(cuberootint(n))) - ucountSquarefree(breakpoint);
-	for (k = 1; k <= breakpoint; k++)
+	int i, crossover = (int)exp(dbllog2r(itor(n, MEDDEFAULTPREC)) * 0.09);
+	ulong k, res = 0;
+	ulong breakpoint = uCBRTis(n, crossover);
+pari_printf("Counting squarefrees until %d, values ranging from %lu to %lu, ",crossover, breakpoint, itou(cuberootint(n)));
+pari_printf("then counting directly to %lu.\n", breakpoint);
+	avma = ltop;
+pari_timer T;
+timer_start(&T);
+	for (i = 1; i <= crossover; i++) {
+		res += ucountSquarefree(uCBRTis(n, i));
+		avma = ltop;
+	}
+	res -= crossover * ucountSquarefree(breakpoint);
+GEN est = divrr(czeta(gdiv(stoi(3), gen_2), MEDDEFAULTPREC),czeta(stoi(3), MEDDEFAULTPREC));
+est = gmul(est, sqrtr(itor(n, MEDDEFAULTPREC)));
+GEN correction = divrr(czeta(gdiv(gen_2, stoi(3)), MEDDEFAULTPREC),czeta(gen_2, MEDDEFAULTPREC));
+correction = gmul(correction, powrfrac(itor(n, MEDDEFAULTPREC), 1, 3));
+est = gadd(est, correction);
+est = gerepileupto(ltop, est);
+err_printf("Estimate: %Ps\n", gfloor(est));
+err_printf("Squarefree time:   %6ld ms; partial sum = %lu (%.2f%% of estimated total)\n",
+timer_delay(&T), res, 100.0 * res / rtodbl(est));
+// zeta(3/2)/zeta(3)*sqrt(n)+zeta(2/3)/zeta(2)*n^(1/3)
+timer_start(&T);
+	if (breakpoint > LONG_MAX)
+		pari_err(talker, "Breakpoint much too large, something funny is going on.");
+	for (k = 1; k <= breakpoint; k++) {
 		if (issquarefree_small(k)) {
 			res += itos(divis(sqrti(divis(n, k)), k));
 			avma = ltop;
 		}
+	}
+err_printf("Direct count time: %6ld ms\n", timer_delay(&T));
 	return res;
+#undef uCBRTis
 }
 
 

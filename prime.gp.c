@@ -480,7 +480,10 @@ isPowerful_small(ulong n)
 	// If the input was a powerful number, n is now the square of a prime or the
 	// cube of a prime.
 	pari_sp btop = avma;
-	long ret = n == 1 || Z_isanypower(utoipos(n), NULL);	// FIXME: Check for correctness and speed, something was wrong here.
+	ulong mask = 0x1;	// check for cubes
+	GEN ignored;
+	GEN gn = utoipos(n);
+	long ret = Z_issquareall(gn, NULL) || is_357_power(gn, &ignored, &mask);
 	avma = btop;
 	return ret;
 }

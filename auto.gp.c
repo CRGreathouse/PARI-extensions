@@ -1,8 +1,11 @@
 /*-*- compile-command: "/usr/bin/gcc -c -o auto.gp.o -O3 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC -I"/usr/local/include" auto.gp.c && /usr/bin/gcc -o auto.gp.so -shared -O3 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari"; -*-*/
 #include <pari/pari.h>
 #include <pari/paripriv.h>
-#include "float.h"
+#include <float.h>
+#include <limits.h>
 /*
+GP;install("facmod","LL","facmod","./auto.gp.so");
+GP;install("glnBell","L","lnBell", "./auto.gp.so");
 GP;install("issm3","lL","issm3","./auto.gp.so");
 GP;install("Bell","L","Bell","./auto.gp.so");
 GP;addhelp(Bell, "Bell(n): Returns the n-th Bell or exponential number, Sloane's A000110.");
@@ -24,11 +27,11 @@ GP;addhelp(sopf, "sopf(n): Sum of distinct prime factors of n. Sloane's A008472.
 GP;install("sopfr","G","sopfr","./auto.gp.so");
 GP;addhelp(sopfr, "sopfr(n): Sum of prime factors of n (with multiplicity). Sloane's A001414.");
 GP;install("primorial","G","primorial","./auto.gp.so");
-GP;addhelp(primorial, "Returns the product of each prime less than or equal to n. Sloane's A034386.");
+GP;addhelp(primorial, "primorial(n): Returns the product of each prime less than or equal to n. Sloane's A034386.");
 GP;install("gpf","G","gpf","./auto.gp.so");
-GP;addhelp(gpf, "The greatest prime factor of a number. Sloane's A006530.");
+GP;addhelp(gpf, "gpf(n): The greatest prime factor of a number. Sloane's A006530.");
 GP;install("lpf","G","lpf","./auto.gp.so");
-GP;addhelp(lpf, "The least prime factor of a number. Sloane's A020639.");
+GP;addhelp(lpf, "lpf(n): The least prime factor of a number. Sloane's A020639.");
 GP;install("isTriangular","lG","isTriangular","./auto.gp.so");
 GP;addhelp(isTriangular, "isTriangular(n): Is n a triangular number? Sloane's A010054; characteristic function of Sloane's A000217.");
 GP;install("isHexagonal","lG","isHexagonal","./auto.gp.so");
@@ -46,13 +49,13 @@ GP;addhelp(ispow3, "ispow3(n): Is n a power of three? Characteristic function of
 GP;install("issemiprime","lG","issemi","./auto.gp.so");
 GP;addhelp(issemi, "issemi(n): Is n a semiprime? Sloane's A064911; characteristic function of Sloane's A001358.");
 GP;install("istwo","lG","istwo","./auto.gp.so");
-GP;addhelp(istwo, "Is the number a sum of two squares? Characteristic function of Sloane's A001481.");
-coGP;install("ways2","G","ways2","./auto.gp.so");
-GP;addhelp(ways2, "Number of ways that n can be represented as a sum of two squares. Sloane's A000161.");
+GP;addhelp(istwo, "istwo(n): Is the number a sum of two squares? Characteristic function of Sloane's A001481.");
+GP;install("ways2","G","ways2","./auto.gp.so");
+GP;addhelp(ways2, "ways2(n): Number of ways that n can be represented as a sum of two squares. Sloane's A000161.");
 GP;install("isthree","lG","isthree","./auto.gp.so");
 GP;addhelp(isthree, "isthree(n): Is the number the sum of three squares? Sloane's A071374; characteristic function of Sloane's A000378.");
 GP;install("ways3","G","ways3","./auto.gp.so");
-GP;addhelp(ways3, "Number of ways that n can be represented as a sum of three squares. Sloane's A000164.");
+GP;addhelp(ways3, "ways3(n): Number of ways that n can be represented as a sum of three squares. Sloane's A000164.");
 GP;install("msb","G","msb","./auto.gp.so");
 GP;addhelp(msb, "msb(n): Most significant bit of n: returns the greatest power of 2 <= the number. Sloane's A053644.");
 GP;install("Faulhaber","LDG","Faulhaber","./auto.gp.so");
@@ -78,25 +81,25 @@ GP;addhelp(vecsum, "vecsum(v): Sum of the elements of v.");
 GP;install("vecprod","G","vecprod","./auto.gp.so");
 GP;addhelp(vecprod, "vecprod(v): Product of the elements of v.");
 GP;install("vecgcd","G","vecgcd","./auto.gp.so");
-GP;addhelp(vecgcd, "Vector gcd: returns the gcd of all elements in the vector.");
+GP;addhelp(vecgcd, "vecgcd(v): GCD of all elements in the vector v.");
 GP;install("veclcm","G","veclcm","./auto.gp.so");
-GP;addhelp(veclcm, "Vector lcm: returns the lcm of all elements in the vector.");
+GP;addhelp(veclcm, "veclcm(v): LCM of all elements in the vector v.");
 GP;install("oddres","G","oddres","./auto.gp.so");
 GP;addhelp(oddres, "oddres(n): Returns the greatest odd number dividing n.");
 GP;install("toC","vG","toC","./auto.gp.so");
-GP;addhelp(toC, "toC(n): Format n for use with the Pari library (e.g., with gp2c programs).");
+GP;addhelp(toC, "toC(n): Format n for use with the PARI library (e.g., with gp2c programs).");
 GP;install("digits","lG","digits","./auto.gp.so");
 GP;addhelp(digits, "digits(n): Number of decimal digits in n. Sloane's A055642.");
 GP;install("eps","p","eps","./auto.gp.so");
-GP;addhelp(eps, "Returns machine epsilon for the current precision.");
+GP;addhelp(eps, "eps(): Returns machine epsilon for the current precision.");
 GP;install("fnice","G","fnice","./auto.gp.so");
 GP;addhelp(fnice, "fnice(n): Returns a string with a 'nice' factorization of n.");
 GP;install("tonice","D0,G,p","nice","./auto.gp.so");
 GP;addhelp(nice, "nice(o): Reformats the object o 'nicely' when possible. Currently chokes on multivariable polynomials.");
 GP;install("sumset","D0,G,D0,G,","sumset","./auto.gp.so");
-GP;addhelp(sumset, "sumset(A, B) is the set of all numbers of the form a+b, a in A, b in B.");
+GP;addhelp(sumset, "sumset(A, B): Set of all numbers of the form a+b, a in A, b in B.");
 GP;install("diffset","D0,G,D0,G,","diffset","./auto.gp.so");
-GP;addhelp(diffset, "diffset(A, B) is the set of all numbers of the form a-b, a in A, b in B.");
+GP;addhelp(diffset, "diffset(A, B): Set of all numbers of the form a-b, a in A, b in B.");
 GP;install("normd","D0,G,D0,G,p","normd","./auto.gp.so");
 GP;addhelp(normd, "normd(a,b): Amount of the normal distribution between a and b standard deviations. Plus/minus infinity coded as [+1]/[-1].");
 GP;install("rnormal","p","rnormal","./auto.gp.so");
@@ -116,7 +119,7 @@ GP;addhelp(fortwin, "fortwin(X=a,b,seq): the sequence is evaluated, X running ov
 GP;install("forthinprime","vV=GGI","forthinprime","./auto.gp.so");
 GP;addhelp(forthinprime, "forthinprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b, even if b > primelimit. EXPERIMENTAL!");
 GP;install("forbigprime","vV=GGI","forbigprime","./auto.gp.so");
-GP;addhelp(forbigprime, "forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b. EXPERIMENTAL!");
+GP;addhelp(forbigprime, "forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b.");
 GP;install("sumformal","V=GGG","sumformal","./auto.gp.so");
 GP;addhelp(sumformal, "sumformal(X=start,end,expr): Formal version of sum(X=start,end,expr). Start and end can be expressions instead of numbers.");
 GP;install("fibmod","GG","fibmod","./auto.gp.so");
@@ -142,9 +145,9 @@ GP;addhelp(composite, "composite(n): Returns the n-th composite. Sloane's A00280
 GP;install("deBruijnXi","G","deBruijnXi","./auto.gp.so");
 GP;addhelp(deBruijnXi, "deBruijnXi(x): Helper function for rhoest.  Finds a xi such that e^xi - 1 = x * xi.");
 GP;install("rhoest","Gp","rhoest","./auto.gp.so");
-GP;addhelp(rhoest, "de Bruijn's asymptotic approximation for rho(x), rewritten as in van de Lune and Wattel 1969.  Curiously, their paper shows values for this estimate that differ from those calculated by this function, often as soon as the second decimal place -- but as the difference is in the direction of the true value, I have not looked further into this.");
+GP;addhelp(rhoest, "rhoest(x): de Bruijn's asymptotic approximation for rho(x), rewritten as in van de Lune and Wattel 1969.  Curiously, their paper shows values for this estimate that differ from those calculated by this function, often as soon as the second decimal place -- but as the difference is in the direction of the true value, I have not looked further into this.");
 GP;install("DickmanRho","Gp","DickmanRho","./auto.gp.so");
-GP;addhelp(DickmanRho, "Estimates the value of the Dickman rho function. For x <= 3 the exact values are used, up to rounding; up to 15 the value is interpolated using known values and rhoest; after 15 rhoest is used, along with a correction factor based on the last value in rhoTable.");
+GP;addhelp(DickmanRho, "DickmanRho(x): Estimates the value of the Dickman rho function. For x <= 3 the exact values are used, up to rounding; up to 15 the value is interpolated using known values and rhoest; after 15 rhoest is used, along with a correction factor based on the last value in rhoTable.");
 // New \/
 GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
 GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
@@ -168,7 +171,6 @@ GP;install("totientHelper","lGDG","totientHelper","./auto.gp.so");
 // Removed: //GP;addhelp(pBounds, "pBounds(n, verbose=0): Estimates the nth prime. Set verbose=1 to get a list of sources for the results.");
 
 
-
 //////////////////////////////////////////////////////////// New
 GEN graeffe(GEN f);
 long BradfordDavenport(GEN f);
@@ -177,6 +179,7 @@ long poliscyclo(GEN f);
 long poliscycloproduct(GEN f, long flag);
 long istotient(GEN n);
 long totientHelper(GEN n, GEN m);
+GEN Bell(long n);
 //////////////////////////////////////////////////////////// New
 
 
@@ -243,6 +246,7 @@ GEN Mfactor(GEN p, GEN lim, GEN start);
 GEN bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start);
 long bigdiv(GEN a, GEN b, GEN c, GEN d);
 GEN contfracback(GEN v, GEN terms);
+double W_small(double x);
 GEN W(GEN x, long prec);
 GEN vecsum(GEN v);
 GEN vecprod(GEN v);
@@ -278,7 +282,8 @@ GEN bfilein(char* name);
 void fortwin(GEN ga, GEN gb, GEN code);
 void forbigprime(GEN ga, GEN gb, GEN code);
 void forbigprime_sieve(ulong a, ulong b, GEN code);
-void forthinprime(ulong a, ulong b, GEN code);
+void forthinprime(GEN ga, GEN gb, GEN code);
+void forthinprimeuu(ulong a, ulong b, GEN code);
 INLINE GEN gtor(GEN x, const char* funcName, long prec);
 void init_auto(void);
 /*End of prototype*/
@@ -304,9 +309,6 @@ init_auto(void)
 }
 
 
-/*
- * TODO: upload to website, maybe github?
-*/
 
 /*
 default(debug,4)

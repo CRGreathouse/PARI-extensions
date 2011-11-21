@@ -39,6 +39,115 @@ forodd(GEN a, GEN b, GEN code)
 }
 
 
+// Digit reversal
+GEN
+rev(GEN n, long B)
+{
+	pari_sp av = avma;
+	if (typ(n) != t_INT)
+		pari_err(typeer, "rev");
+	GEN m = modis(n, B);
+	n = divis(n, B);
+	
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	while (signe(n)) {
+		m = addis(mulis(m, B), smodis(n, B));
+		n = divis(n, B);
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+			gerepileall(btop, 2, &m, &n);
+	}
+	m = gerepilecopy(av, m);
+	return m;
+}
+
+
+// Return value: Did the user break out of the loop?
+// Not stack clean.
+int palhelper(long digits, GEN a, GEN b, GEN code)
+{
+	GEN p10 = powuu(10, (digits+1)>>1);
+	GEN aLeft = divii(a, p10);
+	GEN bLeft = divii(b, p10);
+	GEN cur;
+
+	// TODO: Handle case of digits odd (middle digit)
+	
+	pari_sp btop = avma, lim = stack_lim(btop,1);
+	cur = addii(mulii(aLeft, p10), rev(aLeft, 10));
+	if (cmpii(cur, a) < 0) {
+		aLeft = addis(aLeft, 1);
+		cur = addii(mulii(aLeft, p10), rev(aLeft, 10));
+	}
+	
+	push_lex(cur, code);
+	while (cmpii(aLeft, bLeft) < 0)
+	{
+		closure_evalvoid(code);
+		if (loop_break()) {
+			pop_lex(1);
+			return(1);
+		}
+		//cur = get_lex(-1);	// Allow the user to modify the variable
+		aLeft = addis(aLeft, 1);
+		cur = addii(mulii(aLeft, p10), rev(aLeft, 10));
+		set_lex(-1, cur);	// Set the variable atop the stack to the current value
+
+		if (low_stack(lim, stack_lim(btop,1)))
+		{
+			if (DEBUGMEM>1) pari_warn(warnmem,"forpal");
+			cur = gerepileupto(btop,cur);
+		}
+	}
+	// TODO: Handle final few numbers
+	pop_lex(1);
+	return 0;
+}
+
+
+void
+forpal(GEN a, GEN b, GEN code)
+{
+	pari_sp av = avma;
+
+	if (typ(a) == t_REAL)
+		a = gceil(a);
+	else if (typ(a) != t_INT)
+		pari_err(typeer, "forpal");
+	if (typ(b) == t_REAL)
+		b = gfloor(b);
+	else if (typ(b) != t_INT)
+		pari_err(typeer, "forpal");
+	
+	if (cmpii(a, b) > 0)
+		return;
+	
+	long lower_digits = digits(a);
+	long upper_digits = digits(b);
+	if (lower_digits == upper_digits) {
+		palhelper(lower_digits, a, b, code);
+		avma = av;
+		return;
+	}
+	
+	pari_sp btop = avma;
+	if (palhelper(lower_digits, a, powuu(10, lower_digits), code)) {
+		avma = av;
+		return;
+	}
+	avma = btop;
+	long d = lower_digits + 1;
+	for (; d < upper_digits; d++) {
+		if (palhelper(d, powuu(10, d-1), powuu(10, d), code)) {
+			avma = av;
+			return;
+		}
+		avma = btop;
+	}
+	palhelper(upper_digits, powuu(10, upper_digits-1), b, code);
+	avma = av;
+}
+
+
 // TODO: Cleanup
 // FIXME: Doesn't work if the user gives the 'wrong' variable (other than x).
 // http://pari.math.u-bordeaux.fr/archives/pari-dev-1002/msg00025.html
@@ -149,7 +258,6 @@ fortwin(GEN ga, GEN gb, GEN code)
 
 
 // TODO: Make a function that allows GENs, especially in the specialized case of 64-bit primes in a 32-bit environment
-// TODO: Use gtofp for conversions?
 void
 forbigprime(GEN ga, GEN gb, GEN code)
 {
@@ -440,7 +548,42 @@ CLEANUP:
 
 // Like forprime, but for b-a small. Assumes a is large -- should be above maxprime.
 void
-forthinprime(ulong a, ulong b, GEN code)
+forthinprime(GEN ga, GEN gb, GEN code)
+{
+	pari_sp av = avma;
+	long t = typ(ga);
+	if (t == t_REAL || t == t_FRAC)
+		ga = gceil(ga);
+	else if (t != t_INT)
+		pari_err(typeer, "forthinprime");
+
+	t = typ(gb);
+	if (t == t_REAL || t == t_FRAC)
+		gb = gfloor(gb);
+	else if (t != t_INT)
+		pari_err(typeer, "forthinprime");
+
+	if (cmpii(ga, gb) > 0) {
+		avma = av;
+		return;
+	}
+	
+	ulong a = itou_or_0(ga);
+	ulong b = itou_or_0(gb);
+	
+	if (b) {
+		avma = av;
+		forthinprimeuu(a, b, code);
+		return;
+	}
+	
+	/////////////////
+}
+
+
+// Like forprime, but for b-a small. Assumes a is large -- should be above maxprime.
+void
+forthinprimeuu(ulong a, ulong b, GEN code)
 {
 	pari_sp ltop = avma;
 	long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};	// A GEN representing a prime to be passed to the code; its value is in p[2].
@@ -449,6 +592,7 @@ forthinprime(ulong a, ulong b, GEN code)
 
 	a |= 1;	// Make a odd (round up)
 	b = (b-1)|1;	// Make b odd (round down)
+pari_printf("%d to %d\n", a, b);
 	for (; a <= b; a+= 2) {
 		if(!uisprime(a))
 			continue;
