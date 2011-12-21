@@ -36,7 +36,7 @@ term(n)={
 addhelp(term, "term(n): Is n a terminating decimal?");
 
 
-digitsToNum(v:vec,B=10)={
+digitsToNum(v:vec,B:int=10)={
 	my(s=v[1]);
 	for(i=2,#v,
 		s = B*s + v[i]
@@ -46,7 +46,7 @@ digitsToNum(v:vec,B=10)={
 addhelp(digitsToNum, "digitsToNum(v, {B=10}): Transforms a vector of base-B digits into the number it represents.");
 
 
-numToDigits(n:int, B=10)={
+numToDigits(n:int, B:int=10)={
 	if(B == 10,
 		eval(Vec(Str(n)))
 	,
@@ -61,7 +61,7 @@ numToDigits(n:int, B=10)={
 addhelp(numToDigits, "numToDigits(n): Transforms a number to a vector of the digits.");
 
 
-glue(a,b)={
+glue(a:int,b:int)={
 	a*10^digits(b)+b
 };
 addhelp(glue, "glue(a, b): Returns the (decimal) concatenation of a and b.");
@@ -108,19 +108,6 @@ ssd(n:int)={
 };
 addhelp(ssd, "ssd(n): Sum of squared digits of n. Sloane's A003132.");
 
-/*
-dsumTable=[1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10,11,3,4,5,6,7,8,9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,9,10,11,12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,10,11,12,13,14,15,16,17,18];
-dsum(n:int)={
-	my(s=0,tmp);
-	while(n>9,
-		tmp = n%100;
-		s += if (tmp < 10, tmp, dsumTable[tmp]);
-		n \= 100
-	);
-	s+n
-};
-addhelp(dsum, "dsum(n): Digit sum of n. Sloane's A007953.");
-*/
 
 dprod(n:int)={
 	my(t=1,k);

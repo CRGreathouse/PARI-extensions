@@ -6,6 +6,19 @@ default(timer, 0);
 \\ for example giving code to others who cannot load the .run files.
 
 
+dsumTable=[1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10,11,3,4,5,6,7,8,9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,9,10,11,12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,10,11,12,13,14,15,16,17,18];
+dsum(n:int)={
+	my(s=0,tmp);
+	while(n>9,
+		tmp = n%100;
+		s += if (tmp < 10, tmp, dsumTable[tmp]);
+		n \= 100
+	);
+	s+n
+};
+addhelp(dsum, "dsum(n): Digit sum of n. Sloane's A007953.");
+
+
 \\ Really bad performance here: >= 32 bits per number in sieve, about 100 times
 \\ the size of a basic wheel mod 6
 forbigprime(from,to,ff)={
@@ -207,6 +220,7 @@ Pisano(p:int,e:small)={
 	);
 	t * p^(e-1)
 };
+addhelp(Pisano, "Pisano(p, e): Returns a multiple of the period of the Fibonacci numbers mod p^e. Assumes p is prime and e is a (small) positive integer.");
 
 
 \\ Version 2... worse, I think?
@@ -557,7 +571,7 @@ addhelp(bigdiv, "bigdiv(a,b,c,d): Does d divide a^b - c?  Same as (a^b-c)%d == 0
 \\ *				Real and complex functions					*
 \\ ***************************************************************************************************
 
-Bell1(n:small)={
+Bell(n:small)={
 	my(pr:small=default(realprecision),B:real,Br:int,sz:small);
 	sz = n * lg(n/exp(1)) \ lg(10) + 5;	\\ estimate of # of bits needed
 	default(realprecision, sz);
