@@ -291,13 +291,6 @@ Lquad(D, s)={
 };
 
 
-
-
-
-
-
-
-
 forpseudo(ff)={
 	if(default(parisize) < 2e8,
 		print("Not enough memory!  Resizing, please rerun command.");
@@ -305,7 +298,7 @@ forpseudo(ff)={
 	);
 	for(i=0,89,
 		read(concat("psp/psp-chunk", i));
-		trap(user,
+		trap(e_USER,
 			print("User error, ending loop...");
 			pspChunk=0;
 			return()
@@ -483,11 +476,25 @@ vdiff(v1,v2)={
 };
 */
 
-rec(v:vec)={
-	my(c=trap(,0,findrec(v)),d=(#v-1)>>1);
+rec(v:vec, offset:int=1)={
+	my(c=0,d);
+	
+	if (type(v) == "t_VEC",
+		c=trap(,0,findrec(v));
+	,
+		if (type(v) != "t_CLOSURE", error("Input must be a vector or closure."));
+		my(f=v);
+		v=vector(20,i,f(i-1+offset));
+		while(c===0 && #v < 80,
+			v=concat(v,vector(10,i,f(i-1+#v+offset)));
+			c=trap(,0,findrec(v))
+		);
+		print("Using terms "offset".."#offset+#v-1".");
+	);
+	d=(#v-1)>>1;
 	
 	\\ Can't find a recurrence: why?
-	if(!c,
+	if(c === 0,
 		if (#v < 3,
 			print("rec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again.")
 		,
@@ -510,7 +517,7 @@ rec(v:vec)={
 	);
 	print(s".");
 
-	\\ Check if sequence is recurrence.  Eventually, this should use
+	\\ Check if sequence is periodic.  Eventually, this should use
 	\\ poliscycloproduct, which will find more periodic sequences (and should
 	\\ allow sequences to be certified as non-periodic).
 	if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
@@ -518,7 +525,7 @@ rec(v:vec)={
 	,
 		my(g=0);
 		for(i=1,#c,
-			if(c[i] != 0, g = gcd(g, i))
+			if(c[i], g = gcd(g, i))
 		);
 		/*
 		if (g > 1,
@@ -544,35 +551,39 @@ rec(v:vec)={
 	\\ Degrees of freedom: how certain are we of the result?
 	print((#v-2*#c)" d.f.");
 
-	\\ Characteristic polynomial
+	\\ Characteristic polynomial (unless sequence, itself, is a polynomial)
 	my(poly='x^#c-sum(i=1,#c,c[i]*'x^(#c-i)),f=factor(poly));
-	print("Characteristic polynomial: "poly);
-	if(#f[,1] > 1 || f[1,2] > 1, print("\t= "f))
+	if (#f[,1] == 1 && f[1,1] == 'x - 1,
+		my(P=polinterpolate(vector(#v,i,i-1+offset),v,'n));
+		print("Sequence is a polynomial of degree "f[1,2]"; with offset "offset":");
+		print("  "nice(P));
+		print("= "P)
+	,
+		print("Characteristic polynomial: "nice(poly));
+		if(#f[,1] > 1 || f[1,2] > 1,
+			print("\t= "f);
+		)
+	)
 };
-addhelp(findrec, "findrec(v, {verbose=1}): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+addhelp(findrec, "findrec(v): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
 
 
-findrec(v:vec, verbose:bool=1)={
+findrec(v:vec)={
 	my(c,d = (#v - 1) >> 1, firstNonzero = 0);
 	forstep(i=d,1,-1,
 		if(v[i] != 0, firstNonzero = i)
 	);
-	if(firstNonzero == 0,
-		if(verbose,
-			print1("Recurrence relation is a(n) = 0.");
-		);
-		return([0]~);
-	);
+	if(firstNonzero == 0,return([0]~));
 	for (i=firstNonzero,d,
-		c = findrecd(v,i,verbose);
+		c = findrecd(v,i);
 		if(c,return(c))
 	);
 	0
 };
-addhelp(findrec, "findrec(v, {verbose=1}): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+addhelp(findrec, "findrec(v): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
 
 
-findrecd(v:vec, d:int, verbose:bool=1)={
+findrecd(v:vec, d:int)={
 	my(M,c);
 	if (#v < 2*d,
 		warning("findrecd: Not enough information to determine if the sequence is a "d"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again.");
@@ -587,7 +598,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 	);
 	c
 };
-addhelp(findrecd, "findrecd(v, d, {verbose=1}): Helper function for findrec. Tries to find a d-coefficient homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+addhelp(findrecd, "findrecd(v, d): Helper function for findrec. Tries to find a d-coefficient homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
 
 
 dotproduct(a:vec, b:vec)={
@@ -641,15 +652,16 @@ rsp(b:small,flag:small=0)={
 			lower=1<<((b-2)/2);
 			upper=sqrtint(1<<(b+1));
 		);
-		while(p = precprime(random(upper - lower) + lower);
+		while(1,
+			p = precprime(random(upper - lower) + lower);
 			q = nextprime(random(upper - lower) + lower);
 			if (p > q,
 				t = p;
 				p = q;
 				q = t;
 			);
-			p * 2 < q || #binary(p * q) != b
-		,);
+			if (2*p > q && #binary(p * q) == b, break)
+		);
 		return(if(bitand(flag,1),
 			if(p==q,
 				matrix(1,2,i,j,if(j==1,p,2))
@@ -713,7 +725,12 @@ addhelp(bestappr2, "bestappr2(x, n): Work-in-progress.  Should determine the bes
 
 
 primezeta(s)={
-	suminf(k=1,moebius(k)/k*log(abs(zeta(k*s))))
+	if (type(s) == "t_COMPLEX" || s <= 1,
+		suminf(k=1,moebius(k)/k*log(abs(zeta(k*s))))
+	,
+		my(t=s*log(2),iter=W(t/eps())\t);
+		sum(k=1,iter,moebius(k)/k*log(abs(zeta(k*s))))
+	)
 };
 addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 
@@ -797,7 +814,7 @@ addhelp(R, "Riemann's R function, an estimate for primepi.");
 li(x)=-eint1(-log(x));
 addhelp(li, "Logarithmic integral.");
 
-Li(x)=eint1(-2) - eint1(-log(x));
+Li(x)=eint1(-log(2)) - eint1(-log(x));
 addhelp(Li, "Offset logarithmic integral, an estimate for primepi. Crandall and Pomerance call this li_0.");
 
 piBounds(x,verbose:bool=0)={
@@ -951,7 +968,7 @@ Psi(x, B)={
 		);
 		return (result);
 	);
-	if (x <= B,
+	if (B >= x,
 		if(x < 0, return(0));
 		return(if (x * eps() < 2,
 			floor (x)
@@ -959,13 +976,9 @@ Psi(x, B)={
 			x
 		))
 	);
-	if (B < 100,
-		\\ Buchstab identity
-		return(sum(i=2,primepi(B),Psi(x\prime(i),prime(i)))+Psi(x,2))
-	);
 
-	if (B >= sqrt(x),
-		trap(accurer,,
+	if (B^2 >= x,
+		trap(/*accurer*/,,
 			return (floor(x) - primepi(x) + primepi(B))
 		);
 		if (x - B <= 10000,
@@ -995,6 +1008,12 @@ Psi(x, B)={
 		)
 	);
 
+	if (B < 257,
+		\\ Buchstab identity
+		return(sum(i=2,primepi(B),Psi(x\prime(i),prime(i)))+Psi(x,2))
+	);
+	error("B too large: "B);
+	
 	\\ B^3 > x section?
 
 	if (x <= 1e6,
@@ -1024,7 +1043,7 @@ Psi(x, B)={
 	print ("Asymptotic estimate using Dickman's rho.");
 	x * DickmanRho(u)
 };
-addhelp(Psi, "Calculates or estimates the count of smooth number up to the given bound. Psi(1000, 10) is the number of 10-smooth numbers up to 1000.");
+addhelp(Psi, "Psi(x, B): Calculates or estimates the count of B-smooth number up to x. Psi(1000, 10) counts the number of numbers up to 1000 which have no prime factor greater than 10.");
 
 
 default(timer, timervalue);
