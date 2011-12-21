@@ -7,6 +7,90 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
+diff(v:vec)={
+	vector(#v-1,i,v[i+1]-v[i])
+};
+addhelp(diff, "diff(v): First difference of the vector v.");
+
+
+shortestPath(G, startAt)={
+	my(n=#G[,1],dist=vector(n,i,9e99),prev=dist,Q=2^n-1);
+	dist[startAt]=0;
+	while(Q,
+		my(t=vecmin(vecextract(dist,Q)),u);
+		if(t==9e99, break);
+		for(i=1,#v,if(dist[i]==t && bittest(Q,i-1), u=i; break));
+		Q-=1<<(u-1);
+		for(i=1,n,
+			if(!G[u,i],next);
+			my(alt=dist[u]+G[u,i]);
+			if (alt < dist[i],
+				dist[i]=alt;
+				prev[i]=u;
+			)
+		)
+	);
+	dist
+};
+
+
+gammainv(x:real)={
+	if(x<2,return(solve(y=1,3,gamma(y)-x)));
+	my(L=log(x));
+	solve(y=L,max(4,L^2),lngamma(y)-L)
+};
+addhelp(gammainv, "gammainv(x): Inverse gamma function.");
+
+
+findCycle(f, x)={
+	my(power=1,lam=1,tort=x,hare=f(x),mu);
+	while(tort != hare,
+		if(power == lam,
+			tort = hare;
+			power <<= 1;
+			lam = 0;
+		);
+		hare = f(hare);
+		lam++
+	);
+	tort = hare = x;
+    for(i=1, lam, hare = f(hare));
+	while(tort != hare,
+		tort = f(tort);
+		hare = f(hare);
+        mu++
+	);
+	[lam, mu]
+};
+addhelp(findCycle, "findCycle(f, x): Given a starting element x and a function f, return the length of the cycle that x, f(x), f(f(x)), ... ends in along with the number of elements reached before starting the cycle as a two-element array.");
+
+
+rand(b:small)={
+	if(b<30,b--;return(factor(random(1<<b)+1<<b)));
+	while(1,
+		my(t=1,v=List());
+		forprime(p=2,127,	\\ prime factors with up to 7 bits
+			while(!random(p),t*=p; listput(v,p))
+		);
+		if (#binary(t)>b, next);
+		if(#binary(t)==b,return(list2fac(v)));
+		for(n=8,b,
+			my(lambda=log(n/(n-1)),x=random(1.)/exp(-lambda),k=0);
+			while(1,
+				x-=lambda^k/k!;
+				if(x<0,break);
+				listput(v,rp(n));
+				t*=v[#v];
+				if(#binary(t)>b,next(3));
+				if(#binary(t)==b,return(list2fac(v)));
+			)
+		);
+			
+	)
+};
+addhelp(rand, "rand(b): Gives a random factored n-bit integer.");
+
+
 coin(v:vec)={
 	if(type(v)!="t_VEC", error("Must be a vector"));
 	for(i=1,#v,
