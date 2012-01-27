@@ -137,28 +137,6 @@ period(n)={
 };
 
 
-smallestNeededToAdd(v:vec,n:int)={
-	v=vecsort(v,,8);
-	if(v[1] <= 0,
-		if(v[1]==0,v=vecextract(v,"2.."));
-		if(v[1]<0,error("can't handle negatives"))
-	);
-	if(v[1]==1,
-		snta1(v,n,#v)
-	,
-		error("not implemented")
-	)
-};
-snta1(v:vec,n:int,a:small)={
-	if(a==1,return(n));
-	my(best=snta1(v,n,a-1),t);
-	for(k=1,n\v[a],
-		t=k+snta1(v,n-v[a]*k,a-1);
-		if(t<best,best=t)
-	);
-	best
-};
-
 complement(v:vec)={
 	my(u=List(),i=1,n=1);
 	while(i<#v,
@@ -375,6 +353,28 @@ Lquad(D, s)={
 };
 
 
+forgap(ff)={
+	if(default(parisize) < 1e8,
+		print("Not enough memory!  Resizing, please rerun command.");
+		allocatemem(100<<20)	\\ Need ~200 MB of stack space!
+	);
+	for(i=0,13,
+		read(Str("gap200-chunk", if(i<10,"0",""), i));
+		trap(e_USER,
+			print("User error, ending loop...");
+			pg=0;
+			return()
+		,
+			for(j=1,#pg,
+				ff(pg[j])
+			)
+		);
+		pg=0
+	)
+};
+addhelp(forgap, "forgap(ff): Runs the command (closure) ff on each prime 2 < p < 10^12 starting a prime gap of length 200 or greater.");
+
+
 forpseudo(ff)={
 	if(default(parisize) < 2e8,
 		print("Not enough memory!  Resizing, please rerun command.");
@@ -559,21 +559,29 @@ vdiff(v1,v2)={
 	);
 };
 */
+AA(n)={
+	my(k=sqrtint(n));
+	k*(n-(2*k+5)/6*(k-1))
+};
 
 rec(v:vec, offset:int=1)={
 	my(c=0,d);
 	
 	if (type(v) == "t_VEC",
+		if(!#v, return); \\ Called with empty vector, exit
 		c=trap(,0,findrec(v));
 	,
-		if (type(v) != "t_CLOSURE", error("Input must be a vector or closure."));
-		my(f=v);
-		v=vector(20,i,f(i-1+offset));
-		while(c===0 && #v < 80,
-			v=concat(v,vector(10,i,f(i-1+#v+offset)));
-			c=trap(,0,findrec(v))
+		if (type(v) == "t_CLOSURE" || type(v) == "t_POL",
+			my(f=if(type(v)=="t_POL",n->subst(v,variable(v),n),v));
+			v=vector(20,i,f(i-1+offset));
+			while(c===0 && #v < 80,
+				v=concat(v,vector(10,i,f(i-1+#v+offset)));
+				c=trap(,0,findrec(v))
+			);
+			print("Using terms "offset".."#offset+#v-1".")
+		,
+			error("Input must be a vector, polynomial, or closure.")
 		);
-		print("Using terms "offset".."#offset+#v-1".");
 	);
 	d=(#v-1)>>1;
 	
@@ -638,12 +646,12 @@ rec(v:vec, offset:int=1)={
 	\\ Characteristic polynomial (unless sequence, itself, is a polynomial)
 	my(poly='x^#c-sum(i=1,#c,c[i]*'x^(#c-i)),f=factor(poly));
 	if (#f[,1] == 1 && f[1,1] == 'x - 1,
-		my(P=polinterpolate(vector(#v,i,i-1+offset),v,'n));
-		print("Sequence is a polynomial of degree "f[1,2]"; with offset "offset":");
-		print("  "nice(P));
-		print("= "P)
+		my(P=polinterpolate(vector(#v,i,i-1+offset),v,'n),nP=nice(P));
+		print("Sequence is a polynomial of degree "f[1,2]-1"; with offset "offset":");
+		print("  "nP);
+		if(nP!=Str(P),print("= "P))
 	,
-		print("Characteristic polynomial: "nice(poly));
+		print("Characteristic polynomial: ",nice(poly));
 		if(#f[,1] > 1 || f[1,2] > 1,
 			print("\t= "f);
 		)
