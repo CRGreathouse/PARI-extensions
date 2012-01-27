@@ -7,6 +7,48 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
+Eisenstein(P:pol)={
+	my(d=poldegree(P),x=variable(P),g,t);
+	P/=content(P);
+	while(1,
+		g=0;
+		for(i=0,d-1,
+			g=gcd(g,polcoeff(P,i));
+			if(g==1,break)
+		);
+		while((t=gcd(g,polcoeff(P,d)))>1,
+			g/=t
+		);
+		g=factor(g)[,1];
+		for(i=1,#g,if(polcoeff(P,0)%g[i]^2,return([g[i],P])));
+		P=subst(P,x,x+1)
+	)
+};
+
+plt(mn,mx,ff,flags:small=0,n:small=0)={
+	my(o=mn\1-1,k);
+	if(mx-mn < 2*n || (!n && mx-mn < 500),
+		my(v=vector(ceil(mx)-o,i,ff(i+o)));
+		ploth(x=max(mn,mn\1+eps()),min(mx,ceil(mx)-eps()),
+			k=x\1;v[k-o]*(k+1-x)+v[k-o+1]*(x-k), flags, n
+		)
+	,
+		ploth(x=max(mn,mn\1+eps()),min(mx,ceil(mx)-eps()),
+			k=x\1;ff(k-o)*(k+1-x)+ff(k-o+1)*(x-k), flags, n
+		)
+	)
+};
+addhelp(plt, "plt(mn, mx, ff, flags, n): Make a high-resolution plot of the int
+
+
+isrec(v:vec,r)={
+	if(type(r)=="t_POL",
+		
+	);
+	if(type(r)!="t_VEC", error("Bad type"));
+};
+
+
 diff(v:vec)={
 	vector(#v-1,i,v[i+1]-v[i])
 };
