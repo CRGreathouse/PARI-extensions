@@ -1017,12 +1017,14 @@ tetrMod_tiny(ulong a, ulong b, ulong M)
 long
 checkmult(GEN v, long verbose)
 {
+	pari_sp ltop = avma;
 	if (!is_matvec_t(typ(v)))
-		pari_err_TYPE("checkmult", v);
+		pari_err_TYPE("checkcmult", v);
+	RgV_check_ZV(v, "checkcmult");
+	long n, l1 = lg(v), l2;
 
 	// I suppose [] is a multiplicative sequence... if nothing else guard
 	// against checking v[1] below.
-	long n, l1 = lg(v), l2;
 	if (l1 == 1)
 		return 1;
 	
@@ -1031,27 +1033,21 @@ checkmult(GEN v, long verbose)
 	if (!gequalgs(gel(v, 1), 1))
 		return 0;
 		
-	pari_sp ltop = avma;
-	GEN f, target;
+	GEN f, target, pr, ex;
 
-	// Require all arguments to be integers
-	for (n = 2; n < 6 && n < l1; ++n)
-		if (typ(gel(v, n)) != t_INT)
-			pari_err_TYPE("checkmult", v);
-			
 	for (n = 6; n < l1; ++n) {
-		if (typ(gel(v, n)) != t_INT)
-			pari_err_TYPE("checkmult", v);
 		if (uisprimepower(n))
 			continue;
-		f = Z_factor(stoi(n));
-		l2 = glength(gel(f, 1));
+		f = factoru(n);
+		pr = gel(f, 1);
+		ex = gel(f, 2);
+		l2 = lg(pr);
 		long i;
 		
 		// Set target = prod v[p^e] for each p^e || n
 		target = gen_1;
-		for (i = 1; i <= l2; ++i)
-			target = mulii(target, gel(v, itos(powii(gcoeff(f, i, 1), gcoeff(f, i, 2)))));
+		for (i = 1; i < l2; ++i)
+			target = mulii(target, gel(v, itos(powuu(pr[i], ex[i]))));
 		
 		// If v[n] is not equal to the target, the sequence is not multiplicative.
 		if (!gequal(gel(v, n), target)) {
@@ -1070,12 +1066,14 @@ checkmult(GEN v, long verbose)
 long
 checkcmult(GEN v, long verbose)
 {
+	pari_sp ltop = avma;
 	if (!is_matvec_t(typ(v)))
-		pari_err_TYPE("checkmult", v);
+		pari_err_TYPE("checkcmult", v);
+	RgV_check_ZV(v, "checkcmult");
+	long n, l1 = lg(v), l2;
 
 	// I suppose [] is a (completely) multiplicative sequence... if nothing else
 	// guard against checking v[1] below.
-	long n, l1 = lg(v), l2;
 	if (l1 == 1)
 		return 1;
 	
@@ -1084,27 +1082,21 @@ checkcmult(GEN v, long verbose)
 	if (!gequalgs(gel(v, 1), 1))
 		return 0;
 		
-	pari_sp ltop = avma;
-	GEN f, target;
+	GEN f, target, pr, ex;
 
-	// Require all arguments to be integers
-	for (n = 2; n < 4 && n < l1; ++n)
-		if (typ(gel(v, n)) != t_INT)
-			pari_err_TYPE("checkmult", v);
-			
 	for (n = 4; n < l1; ++n) {
-		if (typ(gel(v, n)) != t_INT)
-			pari_err_TYPE("checkmult", v);
 		if (uisprime(n))
 			continue;
-		f = Z_factor(stoi(n));
-		l2 = glength(gel(f, 1));
+		f = factoru(n);
+		pr = gel(f, 1);
+		ex = gel(f, 2);
+		l2 = lg(pr);
 		long i;
 		
-		// Set target = prod v[p^e] for each p^e || n
+		// Set target = prod v[p]^e for each p^e || n
 		target = gen_1;
-		for (i = 1; i <= l2; ++i)
-			target = mulii(target, gel(v, itos(powii(gcoeff(f, i, 1), gcoeff(f, i, 2)))));
+		for (i = 1; i < l2; ++i)
+			target = mulii(target, powiu(gel(v, pr[i]), ex[i]));
 		
 		// If v[n] is not equal to the target, the sequence is not
 		// completely multiplicative.
@@ -1125,32 +1117,22 @@ long
 checkdiv(GEN v, long verbose/*=1*/)
 {
 	pari_sp ltop = avma;
-	long l1;	  /* lg */
 	if (!is_matvec_t(typ(v)))
 		pari_err_TYPE("checkdiv", v);
-
-	l1 = lg(v);
-	pari_sp btop = avma;
-	long n, l2;
-	long l3;	  /* lg */
+	RgV_check_ZV(v, "checkdiv");
+	long n, l1 = lg(v);
 	for (n = 1; n < l1; ++n) {
-		l2 = n + n;
-		l3 = lg(v);
-{
-		pari_sp btop = avma;
-		GEN i = gen_0;
-		long l4 = n > 0;	  /* bool */
-		for (i = stoi(l2); l4?gcmpgs(i, l3-1) <= 0:gcmpgs(i, l3-1) >= 0; i = gaddgs(i, n)) {
-			if (!gequal0(gmod(gel(v, gtos(i)), gel(v, n)))) {
+		GEN vn = gel(v, n);
+		long i;
+		for (i = n + n; i < l1; i += n) {
+			if (!dvdii(gel(v, i), vn)) {
 				if (verbose)
-					pariprintf("Not a divisibility sequence: a(%ld) = %Ps does not divide a(%Ps) = %Ps.\n", n, gel(v, n), i, gel(v, gtos(i)));
+					pariprintf("Not a divisibility sequence: a(%ld) = %Ps does not divide a(%ld) = %Ps.\n", n, gel(v, n), i, gel(v, i));
 				avma = ltop;
 				return 0;
 			}
-			i = gerepileupto(btop, i);
 		}
-}
-		avma = btop;
+		avma = ltop;
 	}
 	avma = ltop;
 	return 1;

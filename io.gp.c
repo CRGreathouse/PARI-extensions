@@ -219,6 +219,8 @@ fnice(GEN n)
 }
 
 
+// FIXME: When removing content, most divide by it or it appears twice!
+// 2/3*x+2/3 is 2(x+1)/3, not 2(2x+2)/3.
 GEN
 tonice(GEN o, long prec)
 {
