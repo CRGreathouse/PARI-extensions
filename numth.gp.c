@@ -2,6 +2,82 @@
 /**												 Other number theory															**/
 /******************************************************************************/
 
+
+long
+isfactorial(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err_TYPE("isfactorial",n);
+	if (signe(n) < 1)
+		return 0;
+	if(mod2(n))
+		return isint1(n);
+	
+	// Remove small factorials with a combined binary-linear search
+	long nn = itou_or_0(n);
+	if (nn) {
+		return
+#ifdef LONG_IS_64BIT
+		nn < 6227020800 ? (
+#endif
+		nn < 40320 ?
+			nn==2 || nn==6 || nn==24 || nn==120 || nn==720 || nn==5040
+		:
+			nn==40320 || nn==362880 || nn==3628800 || nn==39916800 || nn==479001600
+#ifdef LONG_IS_64BIT
+		) : nn < 355687428096000 ?
+			nn==6227020800 || nn==87178291200 || nn==1307674368000 || nn==20922789888000
+		:
+			nn==355687428096000 || nn==6402373705728000 || nn==121645100408832000 || nn==2432902008176640000
+#endif
+		;
+	}
+	
+	// 
+	pari_sp ltop = avma;
+	long v2 = vali(n);	// 2-adic valuation of n: 2^k || n.
+#ifdef LONG_IS_64BIT
+	if (v2 < 18)
+#else
+	if (v2 < 10)
+#endif
+		return 0;
+
+	long mn = v2 + 1, mx = mn + expi(utoipos(v2)), t, c;
+	
+	while (mx - mn > 1) {
+		t = mn + (mx - mn)/2;
+		c = factorial_lval(t, 2);
+		if (c < v2)
+			mn = t+1;
+		else if (c > v2)
+			mx = t-1;
+		else {
+			mx = t|1;
+			mn = mx==mn ? mx : mx-1;
+		}
+	}
+	if (mn < mx) {
+		long p = itos(lpf(stoi(mx)));	// Doesn't really need to be the smallest, just some prime factor
+		avma = ltop;
+		t = Z_lval(n, p);
+		c = factorial_lval(mx, p);
+		if (t > c)
+			return 0;
+		
+		if (t == c)
+			mn = mx;
+		else if (t == c - u_lval(mx, p))
+			mx = mn;
+		else
+			return 0;
+	}
+	c = equalii(mpfact(mn), n);
+	avma = ltop;
+	return c;
+}
+
+
 long
 istotient(GEN n)
 {
@@ -1058,7 +1134,6 @@ checkmult(GEN v, long verbose)
 		}
 		avma = ltop;
 	}
-	avma = ltop;
 	return 1;
 }
 
@@ -1108,7 +1183,6 @@ checkcmult(GEN v, long verbose)
 		}
 		avma = ltop;
 	}
-	avma = ltop;
 	return 1;
 }
 

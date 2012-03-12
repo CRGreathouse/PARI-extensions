@@ -4,6 +4,8 @@
 #include <float.h>
 #include <limits.h>
 /*
+GP;install("isfactorial","lG","isfactorial","./auto.gp.so");
+GP;addhelp(isfactorial, "isfactorial(n): Is n a factorial? Sloane's A012245; characteristic function of Sloane's A000142.");
 GP;install("facmod","LL","facmod","./auto.gp.so");
 GP;install("glnBell","L","lnBell", "./auto.gp.so");
 GP;install("issm3","lL","issm3","./auto.gp.so");
