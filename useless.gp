@@ -3,6 +3,112 @@
 \\ ***************************************************************************************************
 
 
+res(f)={
+	if(type(f)!="t_POL",error("need poly"));if(poldegree(f)!=4,error("bad deg"));my(u=polroots(f),r);r=[u[1]*u[2]+u[3]*u[4],u[1]*u[3]+u[2]*u[4],u[1]*u[4]+u[2]*u[3]];print(r[1]"\n"r[2]"\n"r[3]);(x-r[1])*(x-r[2])*(x-r[3])
+};
+addhelp(res, "Resolvant cubic");
+
+
+dosomething(lim,startAt)={
+	my(q=precprime(startAt-2),p=precprime(q-1),k,pr=primorial(200)/6);
+	forbigprime(r=q+2,lim,
+		if(r-p!=6 || r-q!=2 || (k=r+2)%715,
+			p=q;
+			q=r;
+			next
+		,
+			p=q;
+			q=r;
+		);
+		\\k=q+2;
+		if(gcd((k-32)*(k-64)*(k-128)*(k-256)*(k-512)*(k-1024)*(k-2048)*(k-4096),pr)>1,next);
+		for(x=4,13,if(!isprime(k-2^x),next(2)));
+		return(k)
+	)
+};
+
+
+\\ Right now this generates A187060, though it could easily be modified to generate similar sequences.
+makeList(lim,startAt=2)={
+	my(v=vector(14),u=List(),p);
+	v[2]=nextprime(startAt);
+	for(i=3,#v,v[i]=nextprime(v[i-1]+1);lim=nextprime(lim+1));
+	lim=nextprime(nextprime(lim+1)+1);
+	forbigprime(q=v[#v]+1,lim,
+		v=concat(vecextract(v,16382),q);
+		p=v[1];
+		if(v[3]!=p+6 || v[2]!=p+2, next);
+		for(x=3,7,if(!setsearch(v,p+x+x^2),next(2)));
+		listput(u,p)
+	);
+	Vec(u)
+};
+
+
+\\ Functions for displaying + and * tables for finite fields
+randpol(p,n)={
+	my(P=Pol(vector(n+1,i,random(p)))*Mod(1,p),x='x);
+	if(!polcoeff(P,0),P+=1);
+	if(!polcoeff(P,n),P+=x^n*Mod(1,p));
+	while(!polisirreducible(P) || poldegree(P)<n,
+		P+=x^random(n+1)*Mod(1,p)
+	);
+	P
+};
+tables(P)={	\\ tables(randpol(5,2))
+	my(p=polcoeff(P,0).mod,n=poldegree(P),v=vector(p^n,i,Polrev(vector(n,j,(i-1)\p^(j-1)%p))),S,t,disp);
+	disp=if(p^n-p<=26,
+		t->my(n=sum(i=0,n-1,polcoeff(t,i)*p^i));if(n<p,n,Strchr([97+n-p]))
+	,
+		t->my(n=sum(i=0,n-1,polcoeff(t,i)*p^i));if(n<p,n,Str("e_{",n-p,"}"))
+	);
+	
+	print1("\\begin{tabular}{");
+	for(i=0,p^n,print1("c"));
+	print1("}\n$+$&");
+	for(i=0,p^n-2,
+		print1(disp(i)"&")
+	);
+	print(disp(p^n-1),"\\\\ ");
+	for(i=1,p^n,
+		print1(disp(i-1));
+		for(j=1,p^n,
+			t=disp(lift(v[i]+v[j]*Mod(1,p)));
+			print1("&"t)
+		);
+		print("\\\\ ")
+	);
+	print("\\end{tabular}");
+
+	print("\\vspace{1em}");
+
+	print1("\\begin{tabular}{");
+	for(i=0,p^n,print1("c"));
+	print1("}\n$\\times$&");
+	for(i=0,p^n-2,
+		print1(disp(i)"&")
+	);
+	print(disp(p^n-1),"\\\\ ");
+	for(i=1,p^n,
+		print1(disp(i-1));
+		for(j=1,p^n,
+			t=disp(lift(v[i]*v[j]*Mod(1,p)));
+			print1("&"t)
+		);
+		print("\\\\ ")
+	);
+	print("\\end{tabular}");
+};
+
+rootsmod(f:pol,m:int)={
+	my(v=List(),x=variable(f));
+	for(n=0,m-1,
+		if(subst(f,x,Mod(n,m))==0,listput(v,n))
+	);
+	Vec(v)
+};
+
+
 smallestNeededToAdd(v:vec,n:int)={
 	v=vecsort(v,,8);
 	if(v[1] <= 0,
