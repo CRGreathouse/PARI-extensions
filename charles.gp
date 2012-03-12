@@ -7,8 +7,14 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
+Aitken(v:vec)={
+	vector(#v-2,i,(v[i+2]*v[i]-v[i+1]^2)/(v[i+2]-2*v[i+1]+v[i]))
+};
+addhelp(Aitken, "Aitken(v): Run Aitken's delta-squared process on the vector v.");
+
+
 Eisenstein(P:pol)={
-	my(d=poldegree(P),x=variable(P),g,t);
+	my(d=poldegree(P),x=variable(P),g,t,times);
 	P/=content(P);
 	while(1,
 		g=0;
@@ -20,10 +26,12 @@ Eisenstein(P:pol)={
 			g/=t
 		);
 		g=factor(g)[,1];
-		for(i=1,#g,if(polcoeff(P,0)%g[i]^2,return([g[i],P])));
+		for(i=1,#g,if(polcoeff(P,0)%g[i]^2,return([g[i],times,P])));
+		times++;
 		P=subst(P,x,x+1)
 	)
 };
+
 
 plt(mn,mx,ff,flags:small=0,n:small=0)={
 	my(o=mn\1-1,k);
@@ -38,7 +46,7 @@ plt(mn,mx,ff,flags:small=0,n:small=0)={
 		)
 	)
 };
-addhelp(plt, "plt(mn, mx, ff, flags, n): Make a high-resolution plot of the int
+addhelp(plt, "plt(mn, mx, ff, flags, n): Make a high-resolution plot of the int");
 
 
 isrec(v:vec,r)={
