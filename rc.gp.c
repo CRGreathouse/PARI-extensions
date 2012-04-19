@@ -452,16 +452,14 @@ rnormal(long prec)
 		}
 	}
 	pari_sp ltop = avma;
-	GEN u1, u2, ret, outside, inside, cos_inside;
+	GEN u1, u2, ret, left, rightS, rightC;
 	u1 = randomr(prec);
 	u2 = randomr(prec);
-	outside = sqrtr_abs(shiftr(mplog(u1), 1));
-	inside = mulrr(shiftr(mppi(prec), 1), u2);
-	cos_inside = mpcos(inside);
+	left = sqrtr_abs(shiftr(mplog(u1), 1));
+	mpsincos(mulrr(shiftr(mppi(prec), 1), u2), &rightS, &rightC);
 	
-	ret = mulrr(outside, cos_inside);
-	rnormal_cached = gclone(ret);	// Cache for later use
-	ret = mulrr(outside, cos_inside);
+	rnormal_cached = gclone(mulrr(left, rightS));	// Cache for later use
+	ret = mulrr(left, rightC);
 	ret = gerepileupto(ltop, ret);
-		return ret;
+	return ret;
 }
