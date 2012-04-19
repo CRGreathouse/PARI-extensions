@@ -139,44 +139,6 @@ vecprod(GEN v)
 }
 
 
-GEN
-vecgcd(GEN v)
-{
-	pari_sp ltop = avma;
-	GEN l = gen_0;
-	if (!is_matvec_t(typ(v)))
-		pari_err_TYPE("veclcm", v);
-	long l1 = lg(v);
-	pari_sp btop = avma;
-	long i;
-	for (i = 1; i < l1; ++i)
-	{
-		l = ggcd(l, gel(v, i));
-		l = gerepileupto(btop, l);
-	}
-	l = gerepileupto(ltop, l);
-	return l;
-}
-
-
-GEN
-veclcm(GEN v)
-{
-	pari_sp ltop = avma;
-	GEN l = gen_1;
-	if (!is_matvec_t(typ(v)))
-		pari_err_TYPE("veclcm", v);
-	long l1 = lg(v);
-	long i;
-	for (i = 1; i < l1; ++i)
-	{
-		l = glcm(l, gel(v, i));
-		l = gerepileupto(ltop, l);
-	}
-	return l;
-}
-
-
 // TODO (possibly): give 32- and 64-bit specific code if it would differ, since
 // sometimes code needs to be split anyway (or only one is relevant, etc.).
 // TODO: Handle negatives, and possibly non-integer types?

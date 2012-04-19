@@ -72,6 +72,8 @@ fusc(n): Stern's diatomic series, which has many interpretations. Sloane's
 gpf(n): The greatest prime factor of a number. Sloane's A006530.
 hamming(n): Hamming weight of n (considered as a binary number). Sloane's
     A000120.
+isfactorial(n): Is n a factorial? Sloane's A012245; characteristic function of
+    Sloane's A000142.
 isFibonacci(n): Is n a Fibonacci number? Sloane's A010056; characteristic
     function of Sloane's A000045.
 isHexagonal(n): Is n a hexagonal number? Characteristic function of Sloane's
@@ -127,8 +129,6 @@ sumformal(X=start,end,expr): Formal version of sum(X=start,end,expr). Start
     and end can be expressions instead of numbers.
 sumset(A, B): Set of all numbers of the form a+b, a in A, b in B.
 toC(n): Format n for use with the PARI library (e.g., with gp2c programs).
-vecgcd(v): GCD of all elements in the vector v.
-veclcm(v): LCM of all elements in the vector v.
 vecprod(v): Product of the elements of v.
 vecsum(v): Sum of the elements of v.
 ways2(n): Number of ways that n can be represented as a sum of two squares.
