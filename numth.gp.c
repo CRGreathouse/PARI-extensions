@@ -43,7 +43,7 @@ isfactorial(GEN n)
 #endif
 		return 0;
 
-	long mn = v2 + 1, mx = mn + expi(utoipos(v2)), t, c;
+	long mn = v2 + 1, mx = mn + __builtin_clzl(v2), t, c;
 	
 	while (mx - mn > 1) {
 		t = mn + (mx - mn)/2;

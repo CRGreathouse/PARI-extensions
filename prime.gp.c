@@ -898,13 +898,22 @@ primorial(GEN n)
 	ulong primeCount = uprimepi(nn);
 	GEN pr = primes_zv(primeCount);
 #ifdef LONG_IS_64BIT
-	if (primeCount >= 146144319)
+	if (primeCount < 146144319)
 #else
-	if (primeCount >= 4793)
+	if (primeCount < 4793)
 #endif
-		ret = prodtree(pr, 1, primeCount);	// Possible TODO: Free memory from latter half of array once its product is calculated?
-	else
+	{
 		ret = prodtree_small(pr, 1, primeCount);
+	} else {
+		/*
+		pari_sp btop;
+		GEN right = prodtree(pr, primeCount>>1 + 1, primeCount);
+		// how to mark latter half of pr as unallocated?
+		right = gerepileupto(btop, right);
+		ret = mulii(prodtree(pr, 1, primeCount>>1), right);
+		*/
+		ret = prodtree(pr, 1, primeCount);	// Possible TODO: Free memory from latter half of array once its product is calculated?
+	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
