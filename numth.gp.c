@@ -195,18 +195,6 @@ Faulhaber(long e, GEN a)
 }
 
 
-GEN
-rp(long b)
-{
-	pari_sp ltop = avma;
-	GEN ret;
-	GEN B = int2n(b - 1);
-	ret = gnextprime(addii(B, randomi(B)));
-	ret = gerepileupto(ltop, ret);
-	return ret;
-}
-
-
 ulong
 cuberoot(ulong n)
 {
@@ -528,16 +516,6 @@ countPowerful(GEN n)
 			gerepileall(btop, 2, &ret, &k);
 	}
 	ret = gerepileupto(ltop, ret);
-	return ret;
-}
-
-
-INLINE long
-moebiusu(ulong n)
-{
-	pari_sp ltop = avma;
-	long ret = moebius(utoi(n));
-	avma = ltop;
 	return ret;
 }
 
@@ -867,100 +845,6 @@ graeffe(GEN f)
 	return ret;
 }
 
-
-long
-poliscyclo(GEN f)
-{
-	if (typ(f) != t_POL)
-		pari_err_TYPE("poliscyclo", f);
-	if (!isint1(leading_term(f)))
-		return 0;
-	long degree = degpol(f);
-	if (degree < 2)
-		return degree == 1 && is_pm1(constant_term(f));
-	
-	return RgX_is_ZX(f) && BradfordDavenport(f) && gisirreducible(f) == gen_1;
-}
-
-
-long
-poliscycloproduct(GEN f, long flag)
-{
-	if (typ(f) != t_POL)
-		pari_err_TYPE("poliscyclo", f);
-	if (!isint1(leading_term(f)))
-		return 0;
-	long degree = degpol(f);
-	if (degree < 2)
-		return degree == 1 && is_pm1(constant_term(f));
-	
-	if (!RgX_is_ZX(f) || !BradfordDavenportProduct(f))
-		return 0;
-	if (flag == 0)
-		return 1;
-	
-	// Determine degree
-	pari_err_IMPL("finding the degree");
-	return NEVER_USED;
-}
-
-
-// Checks if f is a cyclotomic polynomial.  Assumes f is an irreducible t_POL
-// of t_INTS with degree > 1.
-long
-BradfordDavenport(GEN f) {
-	pari_sp ltop = avma;
-	GEN f1, f2, fn, mx;
-	
-	f1 = graeffe(f);
-	if (polequal(f, f1)) {
-		avma = ltop;
-		return 1;
-	}
-
-	// Set up variables
-	long var = varn(f);	// Variable number in polynomial
-	mx = mkpoln(2, gen_m1, gen_0);	// -x
-	setvarn(mx, var);
-	
-	fn = gsubst(f, var, mx);
-	if (ZX_equal(f1, fn) && BradfordDavenport(fn)) {
-		avma = ltop;
-		return 1;
-	}
-	long ret = polissquareall(f1, &f2) && BradfordDavenport(f2);
-	avma = ltop;
-	return ret;
-}
-
-
-// Checks if f is a product of distinct cyclotomic polynomials.  Assumes f is
-// a t_POL of t_INTS with degree > 1.
-long
-BradfordDavenportProduct(GEN f) {
-	pari_sp ltop = avma;
-	GEN f1, f2, fn, mx;
-	
-	f1 = graeffe(f);
-	if (polequal(f, f1)) {
-		avma = ltop;
-		return 1;
-	}
-
-	// Set up variables
-	long var = varn(f);	// Variable number in polynomial
-	mx = mkpoln(2, gen_m1, gen_0);	// -x
-	setvarn(mx, var);
-	
-	fn = gsubst(f, var, mx);
-	if (ZX_equal(f1, fn) && BradfordDavenport(fn)) {
-		avma = ltop;
-		return 1;
-	}
-	long ret = polissquareall(f1, &f2) && BradfordDavenport(f2);
-	avma = ltop;
-	return ret;
-}
 
 GEN
 solvePell(GEN n)

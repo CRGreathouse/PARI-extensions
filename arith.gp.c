@@ -548,56 +548,6 @@ static const ulong DS[] ={
 };
 
 
-// TODO: Binary splitting first, then by thousands.
-GEN
-dsum(GEN n)	  /* int */
-{
-	if (typ(n) != t_INT)
-		pari_err_TYPE("dsum", n);
-	long nn = itou_or_0(n);
-	if (nn)
-		return utoipos(dsum_small(nn));
-#ifdef LONG_IS_64BIT
-	if (lgefint(n) > 4003199668773774)
-#else
-	if (lgefint(n) > 49540182)
-#endif
-		pari_err_OVERFLOW("dsum");
-		// TODO: Handle very large numbers that overflow ulong?
-	
-	pari_sp ltop = avma;
-	ulong s = 0;
-	GEN t, ret;
-	GEN thou = stoi(1000);
-	
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-	while (signe(n) > 0)
-	{
-		t = divrem(n, thou, -1);
-		s += DS[itos(gel(t, 2))];
-		n = gel(t, 1);
-		if (low_stack(st_lim, stack_lim(btop, 1)))
-			gerepileall(btop, 1, &n);
-	}
-	ret = stoi(s);
-	ret = gerepileuptoint(ltop, ret);
-	return ret;
-}
-
-
-ulong
-dsum_small(ulong n)
-{
-	ulong s = 0;
-	while (n)
-	{
-		s += DS[n % 1000];
-		n /= 1000;
-	}
-	return s;
-}
-
-
 long
 istwo(GEN n)
 {
@@ -688,14 +638,6 @@ isthree(GEN n)
 	long l1 = mod8(shifti(n, -tmp)) != 7;
 	avma = ltop;
 	return l1;
-}
-
-
-INLINE long
-uissquare(ulong n)
-{
-	ulong ignore;
-	return uissquareall(n, &ignore);
 }
 
 
