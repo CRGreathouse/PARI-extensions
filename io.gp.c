@@ -219,8 +219,7 @@ fnice(GEN n)
 }
 
 
-// FIXME: When removing content, most divide by it or it appears twice!
-// 2/3*x+2/3 is 2(x+1)/3, not 2(2x+2)/3.
+/* Can handle only single-variable polynomials. */
 GEN
 tonice(GEN o, long prec)
 {
@@ -229,8 +228,8 @@ tonice(GEN o, long prec)
 	GEN p4 = gen_0;		/* genstr */
 	if (typ(o) == t_POL)
 	{
-		/* Can handle only single-variable polynomials. */
 		t = content(o);
+		o = gdiv(o, t);
 		if (gequal1(denom(t)))
 		{
 			v = gpolvar(o);
