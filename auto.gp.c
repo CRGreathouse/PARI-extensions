@@ -105,14 +105,10 @@ GP;install("fusc","D0,G,","fusc","./auto.gp.so");
 GP;addhelp(fusc, "fusc(n): Stern's diatomic series, which has many interpretations. Sloane's A002487.");
 GP;install("forodd","vV=GGI","forodd","./auto.gp.so");
 GP;addhelp(forodd, "forodd(X=a,b,seq): the sequence is evaluated, X running over the odds between a and b.");
-GP;install("fortwin","vV=GGI","fortwin","./auto.gp.so");
-GP;addhelp(fortwin, "fortwin(X=a,b,seq): the sequence is evaluated, X running over the twin primes between a and b.");
 GP;install("forthinprime","vV=GGI","forthinprime","./auto.gp.so");
 GP;addhelp(forthinprime, "forthinprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b, even if b > primelimit. EXPERIMENTAL!");
 GP;install("forbigprime","vV=GGI","forbigprime","./auto.gp.so");
 GP;addhelp(forbigprime, "forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b.");
-GP;install("sumformal","V=GGG","sumformal","./auto.gp.so");
-GP;addhelp(sumformal, "sumformal(X=start,end,expr): Formal version of sum(X=start,end,expr). Start and end can be expressions instead of numbers.");
 GP;install("fibmod","GG","fibmod","./auto.gp.so");
 GP;addhelp(fibmod, "fibmod(n,m): Returns the nth Fibonacci number mod m. Same as finonacci(n)%m, but faster for large n.");
 GP;install("bfile","GDGDG","bfile","./auto.gp.so");
@@ -144,15 +140,12 @@ GP;alias(dsum, sumdigits);
 // New \/
 GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
 GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
-GP;install("istotient","lG","istotient","./auto.gp.so");
-GP;addhelp(istotient, "istotient(n): Does there exist some m such that eulerphi(m) = n?");
 * // New /\
 // No associated help
 GP;install("init_auto","v","init_auto","./auto.gp.so");
 GP;install("consistency","l","consistency","./auto.gp.so");
 GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
 GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
-GP;install("totientHelper","lGDG","totientHelper","./auto.gp.so");
 */
 
 // Removed: //GP;install("pBounds","vD0,G,DGp","pBounds","./auto.gp.so");
@@ -160,8 +153,6 @@ GP;install("totientHelper","lGDG","totientHelper","./auto.gp.so");
 
 
 //////////////////////////////////////////////////////////// New
-long istotient(GEN n);
-long totientHelper(GEN n, GEN m);
 GEN Bell(long n);
 //////////////////////////////////////////////////////////// New
 
@@ -212,7 +203,6 @@ long isthree(GEN n);
 long sways3s(ulong n);
 GEN ways3(GEN n);
 GEN msb(GEN n);
-GEN sumformal(GEN expr, GEN start, GEN end);
 GEN Faulhaber(long e, GEN a);
 GEN rp(long b);
 GEN countPowerful(GEN lim);
@@ -255,7 +245,6 @@ void forodd(GEN a, GEN b, GEN code);
 char* getBValue(char*);
 GEN bfile(GEN name, GEN v, GEN offset);
 GEN bfilein(char* name);
-void fortwin(GEN ga, GEN gb, GEN code);
 void forbigprime(GEN ga, GEN gb, GEN code);
 void forbigprime_sieve(ulong a, ulong b, GEN code);
 void forthinprime(GEN ga, GEN gb, GEN code);

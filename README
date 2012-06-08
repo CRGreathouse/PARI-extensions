@@ -65,8 +65,6 @@ forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes
     between a and b.
 forodd(X=a,b,seq): the sequence is evaluated, X running over the odds between
     a and b.
-fortwin(X=a,b,seq): the sequence is evaluated, X running over the twin primes
-    between a and b.
 fusc(n): Stern's diatomic series, which has many interpretations. Sloane's
     A002487.
 gpf(n): The greatest prime factor of a number. Sloane's A006530.
@@ -125,8 +123,6 @@ solvePell(n): Returns a solution to the equation x^2 - ny^2 = 1.
 sopf(n): Sum of distinct prime factors of n. Sloane's A008472.
 sopfr(n): Sum of prime factors of n (with multiplicity). Sloane's A001414.
 sprp(n,b=2): Is n a b-strong probable prime?
-sumformal(X=start,end,expr): Formal version of sum(X=start,end,expr). Start
-    and end can be expressions instead of numbers.
 sumset(A, B): Set of all numbers of the form a+b, a in A, b in B.
 toC(n): Format n for use with the PARI library (e.g., with gp2c programs).
 vecprod(v): Product of the elements of v.
@@ -144,9 +140,6 @@ or which have not been tested:
 Mfactor(p,lim,{start=2}): Returns factors of the Mersenne number 2^p-1 up to lim, starting at start, provided p is a prime = 3 mod 4. Same as bigfactor(2,p,1,lim,start) but faster because it checks only factors of the form 2kp+1 that are +/- 1 mod 8.
 forthinprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b, even if b > primelimit. EXPERIMENTAL!
 tetrMod(a,b,M): Returns a^^b mod M.
-poliscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.
-poliscycloproduct(f, {flag=0}): Is f a product of distinct cyclotomic polynomials?  If flag is 1, return the least n such that f | x^n-1.
-istotient(n): Does there exist some m such that eulerphi(m) = n?
 
 
 Here are some internal functions which have been exposed to gp for testing
@@ -157,5 +150,4 @@ consistency
 cP
 cS
 graeffe
-totientHelper
 

@@ -1,27 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef S_SPLINT_S
-// A private function from language/sumiter.c
-static byteptr
-prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
-{
-  byteptr d = diffptr;
-
-  ga = gceil(ga); gb = gfloor(gb);
-  if (typ(ga) != t_INT) pari_err_TYPE("prime_loop_init",ga);
-  if (typ(gb) != t_INT) pari_err_TYPE("prime_loop_init",gb);
-  if (signe(gb) < 0) return NULL;
-  if (signe(ga) < 0) ga = gen_1;
-  if (lgefint(ga)>3 || lgefint(gb)>3)
-  {
-    if (cmpii(ga, gb) > 0) return NULL;
-    pari_err_MAXPRIME(0);
-  }
-  *a = itou(ga);
-  *b = itou(gb); if (*a > *b) return NULL;
-  maxprime_check(*b);
-  *p = init_primepointer(*a, 0, &d); return d;
-}
-
 
 // A private function from basemath/prime.c
 static ulong
