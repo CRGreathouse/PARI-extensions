@@ -743,7 +743,7 @@ msb(GEN n)
 		pari_err_TYPE("msb", n);
 	if (signe(n) < 1) {
 		if (signe(n))
-			pari_err(e_MISC, "msb: negative argument");	// TODO: What error type to use?
+			pari_err_DOMAIN("msb", "n", "<", gen_0, n);
 		return gen_0;	// Convention from A053644
 	}
 

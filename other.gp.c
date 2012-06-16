@@ -444,7 +444,7 @@ Engel(GEN x, long prec)
 	switch (typ(x)) {
 		case t_INT:
 			if (signe(x) < 0)
-				pari_err(e_MISC, "negative argument");
+				pari_err_DOMAIN("Engel", "x", "<", gen_0, x);
 			long n = itos(x);
 			long i = 1;
 			v = cgetg(n + 1, t_VEC);

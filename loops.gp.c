@@ -177,7 +177,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 	
 	if (!b) {
 		if (cmpii(ga, gb) <= 0)
-			pari_err(e_MISC, "Only works for single-word integers.");
+			pari_err(e_IMPL, "Only works for single-word integers.");
 		avma = av;
 		return;
 	}

@@ -358,7 +358,7 @@ timer_delay(&T), res, 100.0 * res / rtodbl(est));
 // zeta(3/2)/zeta(3)*sqrt(n)+zeta(2/3)/zeta(2)*n^(1/3)
 timer_start(&T);
 	if (breakpoint > LONG_MAX)
-		pari_err(e_MISC, "Breakpoint much too large, something funny is going on.");
+		pari_err_OVERFLOW("Breakpoint much too large, something funny is going on.");
 	for (k = 1; k <= breakpoint; k++) {
 		if (issquarefree_small(k)) {
 			res += itos(divis(sqrti(divis(n, k)), k));
@@ -758,10 +758,10 @@ solvePell(GEN n)
 {
 	if (typ(n) != t_INT)
 		pari_err_TYPE("solvePell", n);
-	if (signe(n) < 1 || Z_issquare(n)) {
-		if (signe(n))
-			pari_err(e_MISC, "invalid argument in solvePell");
-	}
+	if (signe(n) < 1)
+		pari_err_DOMAIN("solvePell", "n", "<=", gen_0, n);
+	if (Z_issquare(n))
+		pari_err_IMPL("square Pell solutions");
 	pari_sp ltop = avma;
 	GEN C, t, x, y;
 	long k = 1;

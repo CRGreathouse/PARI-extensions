@@ -80,7 +80,7 @@ issemiprime(GEN n)
 		return ret;
 	}
 	
-	pari_err(e_MISC, "Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...", fac, n);
+	pari_err_BUG(pari_sprintf("Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...", fac, n));
 	avma = ltop;
 	return NEVER_USED;
 }
@@ -794,7 +794,7 @@ prodtree(GEN A, long start, long stop)
 			ret = mulii(a, b);
 			break;
 		default:
-			pari_err(e_MISC, "prodtree passed small argument");
+			pari_err_BUG("prodtree passed small argument");
 	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -852,7 +852,7 @@ prodtree_small(GEN A, long start, long stop)
 			ret = mulss(a, b);
 			break;
 		default:
-			pari_err(e_MISC, "prodtree_small passed small argument");
+			pari_err_BUG("prodtree_small passed small argument");
 	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -965,7 +965,7 @@ ucomposite(long n)
 {
 	if (n < 2) {
 		if (n < 1)
-			pari_err(e_MISC, "n-th composite meaningless if n = %ld", n);
+			pari_err_DOMAIN("ucomposite", "n", "<", gen_1, utoi(n));
 		return 4;
 	}
 	double l = 1.0/log(n);

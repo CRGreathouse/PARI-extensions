@@ -15,7 +15,7 @@ Bell(long n)
 	};
 	if (n < 2) {
 		if (n < 0)
-			pari_err(e_MISC, "negative argument to Bell");
+			pari_err_DOMAIN("Bell", "n", "<", gen_0, n);
 		return gen_1;
 	}
 	pari_sp ltop = avma;
@@ -77,7 +77,7 @@ lnBell(long n)
 {
 	if (n < 2) {
 		if (n < 0)
-			pari_err(e_MISC, "negative argument to lnBell");
+			pari_err_DOMAIN("lnBell", "n", "<", gen_0, stoi(n));
 		return 0.0;
 	}
 	double Blog = 0.0, flog = 0.0, tlog;
@@ -112,7 +112,7 @@ deBruijnXi(GEN x)
 {
 	double xx = rtodbl(x), left, right;
 	if (xx < 1)
-		pari_err(e_MISC, "deBruijnXi: Can't find a xi given x < 1.");
+		pari_err_DOMAIN("deBruijnXi", "x", "<", gen_1, x);
 	if (xx > 1)
 		left = log(xx);
 	else
@@ -266,7 +266,7 @@ W_small(double x)
 		if (x == -exp(-1))
 			return -1.0;	// otherwise, sometimes sqrt becomes complex?
 		if (x < -exp(-1))
-			pari_err(e_MISC, "out of range");
+			pari_err_DOMAIN("W_small", "x", "<", gneg(gexp(gen_m1, DEFAULTPREC)), dbltor(x));
 	}
 	double e, w, t = 1.0;
 	
@@ -320,7 +320,7 @@ W(GEN x, long prec)
 		if (!c)
 			return real_m1(prec);	// otherwise, sometimes sqrt becomes complex
 		if (c > 0)	// x < -1/e
-			pari_err(e_MISC, "out of range");
+			pari_err_DOMAIN("W", "x", "<", gneg(gexp(gen_m1, DEFAULTPREC)), x);
 		// TODO: Parabolic iteration rather than Halley in this case?
 	}
 	t = real_1(prec);
@@ -397,6 +397,7 @@ isExtendedReal(GEN x)
 GEN
 normd(GEN a, GEN b, long prec)
 {
+	// Error type follows that of intnum in language/intnum.c
 	if (!isExtendedReal(a) || !isExtendedReal(b))
 		pari_err(e_MISC, "incorrect endpoint in normd");
 	pari_sp ltop = avma;
@@ -421,11 +422,13 @@ pari_warn(warner, "Doesn't work properly with infinities");
 				ret = gen_1;
 			else
 				pari_err(e_MISC, "incorrect endpoint in normd");
+				// Error type follows that of intnum in language/intnum.c
 		}
 	} else if ((tmp = infinite(b))) {	// Assignment and test-if-0
 pari_warn(warner, "Doesn't work properly with infinities");
 		if (tmp < 0)	// (a, -oo)
 			pari_err(e_MISC, "incorrect endpoint in normd");
+			// Error type follows that of intnum in language/intnum.c
 		ret = gdivgs(gerfc(mpdiv(a, gsqrt(gen_2, prec)), prec), 2);
 	} else {
 		GEN root2 = gsqrt(gen_2, prec);
