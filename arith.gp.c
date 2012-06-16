@@ -788,6 +788,25 @@ static const ulong fuscBA[] ={
 static const ulong fuscBB[] ={
 	1,1,2,1,3,2,3,1,4,3,5,2,5,3,4,1,5,4,7,3,8,5,7,2,7,5,8,3,7,4,5,1,6,5,9,4,11,7,10,3,11,8,13,5,12,7,9,2,9,7,12,5,13,8,11,3,10,7,11,4,9,5,6,1,7,6,11,5,14,9,13,4,15,11,18,7,17,10,13,3,14,11,19,8,21,13,18,5,17,12,19,7,16,9,11,2,11,9,16,7,19,12,17,5,18,13,21,8,19,11,14,3,13,10,17,7,18,11,15,4,13,9,14,5,11,6,7,1,8,7,13,6,17,11,16,5,19,14,23,9,22,13,17,4,19,15,26,11,29,18,25,7,24,17,27,10,23,13,16,3,17,14,25,11,30,19,27,8,29,21,34,13,31,18,23,5,22,17,29,12,31,19,26,7,23,16,25,9,20,11,13,2,13,11,20,9,25,16,23,7,26,19,31,12,29,17,22,5,23,18,31,13,34,21,29,8,27,19,30,11,25,14,17,3,16,13,23,10,27,17,24,7,25,18,29,11,26,15,19,4,17,13,22,9,23,14,19,5,16,11,17,6,13,7,8,1
 };
+
+
+#define fusc8bits(a, b, idx) {int i = (idx) & 0xFF; int newA = a*fuscAA[i] + b*fuscAB[i]; b = a*fuscBA[i] + b*fuscBB[i]; a = newA;}
+static void
+fusc_word(ulong u, ulong *a, ulong *b) {
+	*a = fuscAA[u & 0xFF];
+	*b = 0;
+	fusc8bits(*a, *b, u >> 8)
+	fusc8bits(*a, *b, u >> 16)
+	fusc8bits(*a, *b, u >> 24)
+#ifdef LONG_IS_64BIT
+	fusc8bits(*a, *b, u >> 32)
+	fusc8bits(*a, *b, u >> 40)
+	fusc8bits(*a, *b, u >> 48)
+	fusc8bits(*a, *b, u >> 56)
+#endif
+}
+
+
 ulong
 fusc_small(GEN n)
 {
@@ -795,30 +814,16 @@ fusc_small(GEN n)
 	pari_sp ltop = avma;
 	
 	GEN xp = int_LSW(n);
-	long lx = lgefint(n);
-	ulong u = *xp;
-	
-	#define fusc8bits(a, b, idx) {int i = (idx) & 0xFF; int newA = a*fuscAA[i] + b*fuscAB[i]; b = a*fuscBA[i] + b*fuscBB[i]; a = newA;}
 	
 	// If n has two words, handle the least-significant one (otherwise it has
 	// only one word).
-	if (lx > 3)
+	if (lgefint(n) > 3)
 	{
-		a = fuscAA[u & 0xFF];
-		fusc8bits(a, b, u >> 8)
-		fusc8bits(a, b, u >> 16)
-		fusc8bits(a, b, u >> 24)
-#ifdef LONG_IS_64BIT
-		fusc8bits(a, b, u >> 32)
-		fusc8bits(a, b, u >> 40)
-		fusc8bits(a, b, u >> 48)
-		fusc8bits(a, b, u >> 56)
-#endif
+		fusc_word(*xp, &a, &b);
 		xp=int_nextW(xp);
-		u = *xp;
 	}
 	
-	ulong tmp = u;
+	ulong tmp = *xp;
 	while (tmp)
 	{
 		fusc8bits(a, b, tmp)
@@ -836,11 +841,29 @@ fusc_large(GEN n)
 {
 	pari_sp ltop = avma;
 	GEN a = gen_1, b = gen_0;
-	#define fusc8bits(a, b, idx) {ulong i = (idx); GEN newA = addii(muliu(a, fuscAA[i]), muliu(b, fuscAB[i])); b = addii(muliu(a, fuscBA[i]), muliu(b, fuscBB[i])); a = newA;}
-	while (signe(n))
+	#define fusc8bits(a, b, idx) {ulong i = (idx) & 0xFF; GEN newA = addii(muliu(a, fuscAA[i]), muliu(b, fuscAB[i])); b = addii(muliu(a, fuscBA[i]), muliu(b, fuscBB[i])); a = newA;}
+	GEN xp = int_LSW(n);
+	int len = lgefint(n);
+	
+	while(1)
 	{
-		fusc8bits(a, b, mod64(n))
-		n = shifti(n, -8);	// TODO: Step through number as in fusc_small rather than shifting
+		ulong u = *xp;
+		// TODO: Rather than work with large numbers directly, compute the
+		// (wordsize) coefficients for 1 word's worth of bits then do the
+		// GEN multiplications all at once.
+		fusc8bits(a, b, u)
+		fusc8bits(a, b, u >> 8)
+		fusc8bits(a, b, u >> 16)
+		fusc8bits(a, b, u >> 24)
+#ifdef LONG_IS_64BIT
+		fusc8bits(a, b, u >> 32)
+		fusc8bits(a, b, u >> 40)
+		fusc8bits(a, b, u >> 48)
+		fusc8bits(a, b, u >> 56)
+#endif
+		if (--len < 3)
+			break;
+		xp=int_nextW(xp);
 	}
 	b = gerepileupto(ltop, b);
 	return b;
