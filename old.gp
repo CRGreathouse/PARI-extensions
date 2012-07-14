@@ -143,6 +143,12 @@ addhelp(rcd, "fcd(n): (Forward) concatenation of the divisors of n. Sloane's A03
 \\ *                                   Obscure base-related functions                                *
 \\ ***************************************************************************************************
 
+res(f)={
+	if(type(f)!="t_POL",error("need poly"));if(poldegree(f)!=4,error("bad deg"));my(u=polroots(f),r);r=[u[1]*u[2]+u[3]*u[4],u[1]*u[3]+u[2]*u[4],u[1]*u[4]+u[2]*u[3]];print(r[1]"\n"r[2]"\n"r[3]);(x-r[1])*(x-r[2])*(x-r[3])
+};
+addhelp(res, "Resolvant cubic");
+
+
 has666(n)={
 	my(tmp);
 	while(n>665,

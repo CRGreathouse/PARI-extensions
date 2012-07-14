@@ -3,10 +3,28 @@
 \\ ***************************************************************************************************
 
 
-res(f)={
-	if(type(f)!="t_POL",error("need poly"));if(poldegree(f)!=4,error("bad deg"));my(u=polroots(f),r);r=[u[1]*u[2]+u[3]*u[4],u[1]*u[3]+u[2]*u[4],u[1]*u[4]+u[2]*u[3]];print(r[1]"\n"r[2]"\n"r[3]);(x-r[1])*(x-r[2])*(x-r[3])
+\\ A015704
+\\ best(p, cur) gives an upper bound on the value of sigma(n)/n in [0..L]
+\\ for numbers divisible by cur but not divisible by p.
+best(avoid,cur=1,L=336280120525440)={
+	my(q=2,r,rAt,t);
+	if(q==avoid,q=nextprime(q+1));
+	while(cur<L,
+		r=0;
+		forprime(p=2,q,
+			if(p==avoid,next);
+			t=valuation(cur,p);
+			t=sigma(p^(t+1),-1)/sigma(p^t,-1);
+			if(t>r,r=t;rAt=p)
+		);
+		cur*=rAt;
+		if(rAt==q,
+			q=nextprime(q+1);
+			if(q==avoid,q=nextprime(q+1))
+		)
+	);
+	sigma(cur,-1)
 };
-addhelp(res, "Resolvant cubic");
 
 
 dosomething(lim,startAt)={

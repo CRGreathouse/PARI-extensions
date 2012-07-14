@@ -181,7 +181,7 @@ addhelp(Eng, "Eng(n): English name of the number n.");
 
 
 fibmod(n:int, m:int)={
-	return(((Mod([1,1;1,0],m))^n)[1,2]);
+	((Mod([1,1;1,0],m))^n)[1,2]
 	/*
 	my(f,t);
 	if (m < 6,
