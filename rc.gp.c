@@ -15,7 +15,7 @@ Bell(long n)
 	};
 	if (n < 2) {
 		if (n < 0)
-			pari_err_DOMAIN("Bell", "n", "<", gen_0, n);
+			pari_err_DOMAIN("Bell", "n", "<", gen_0, stoi(n));
 		return gen_1;
 	}
 	pari_sp ltop = avma;
