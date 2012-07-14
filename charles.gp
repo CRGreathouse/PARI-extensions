@@ -7,12 +7,6 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
-Aitken(v:vec)={
-	vector(#v-2,i,(v[i+2]*v[i]-v[i+1]^2)/(v[i+2]-2*v[i+1]+v[i]))
-};
-addhelp(Aitken, "Aitken(v): Run Aitken's delta-squared process on the vector v.");
-
-
 Eisenstein(P:pol)={
 	my(d=poldegree(P),x=variable(P),g,t,times);
 	P/=content(P);
@@ -49,20 +43,6 @@ plt(mn,mx,ff,flags:small=0,n:small=0)={
 addhelp(plt, "plt(mn, mx, ff, flags, n): Make a high-resolution plot of the int");
 
 
-isrec(v:vec,r)={
-	if(type(r)=="t_POL",
-		
-	);
-	if(type(r)!="t_VEC", error("Bad type"));
-};
-
-
-diff(v:vec)={
-	vector(#v-1,i,v[i+1]-v[i])
-};
-addhelp(diff, "diff(v): First difference of the vector v.");
-
-
 shortestPath(G, startAt)={
 	my(n=#G[,1],dist=vector(n,i,9e99),prev=dist,Q=2^n-1);
 	dist[startAt]=0;
@@ -90,29 +70,6 @@ gammainv(x:real)={
 	solve(y=L,max(4,L^2),lngamma(y)-L)
 };
 addhelp(gammainv, "gammainv(x): Inverse gamma function.");
-
-
-findCycle(f, x)={
-	my(power=1,lam=1,tort=x,hare=f(x),mu);
-	while(tort != hare,
-		if(power == lam,
-			tort = hare;
-			power <<= 1;
-			lam = 0;
-		);
-		hare = f(hare);
-		lam++
-	);
-	tort = hare = x;
-    for(i=1, lam, hare = f(hare));
-	while(tort != hare,
-		tort = f(tort);
-		hare = f(hare);
-        mu++
-	);
-	[lam, mu]
-};
-addhelp(findCycle, "findCycle(f, x): Given a starting element x and a function f, return the length of the cycle that x, f(x), f(f(x)), ... ends in along with the number of elements reached before starting the cycle as a two-element array.");
 
 
 rand(b:small)={
@@ -168,48 +125,6 @@ coin(v:vec)={
 	error("not implemented")
 };
 addhelp(coin, "coin(v): What is the largest number such that change cannot be made with zero or more coins of denomination v[1], v[2], .., v[#v]?  Usually called the coin problem or the Frobenius problem.");
-
-
-period(n)={
-	if(issquare(n),return(0));
-	my(s=sqrt(n),alpha=s,f=floor(s),P=[0],Q=[1],k);
-	while(1,
-		k=#P;
-		P=concat(P,f*Q[k]-P[k]);
-		Q=concat(Q,(n-P[k+1]^2)/Q[k]);
-		k++;
-		for(i=1,k-1,
-			if(P[i]==P[k] && Q[i]==Q[k], return(k-i))
-		);
-		alpha=(P[k]+s)/Q[k];
-		f=floor(alpha)
-	)
-};
-
-
-complement(v:vec)={
-	my(u=List(),i=1,n=1);
-	while(i<#v,
-		if(v[i]>n,
-			listput(u,n)
-		,
-			i++
-		);
-		n++
-	);
-	Vec(u)
-};
-
-LinearRecurrence(sig:vec, initial:vec, terms:small)={
-	if(terms<=#initial, return(vector(terms,i,initial[i])));
-	if(#sig>#initial, error("Not enough terms to uniquely determine sequence"));
-	my(v=vector(terms));
-	for(i=1,#initial,v[i]=initial[i]);
-	for(i=#initial+1,terms,
-		v[i]=sum(j=1,#sig,sig[j]*v[i-j])
-	);
-	v
-};
 
 
 cons(x:real)={
@@ -287,7 +202,7 @@ addhelp(ConjectureFEmp, "ConjectureFEmp(a,b,c,{lim}): Helper function for Conjec
 ConjectureF(a:int,b:int,c:int,lim=1e6)={
 	my(D=b^2-4*a*c,g=gcd(a,b),f);
 print("Delta = "D);
-	if (a <= 0 | issquare(D) | gcd(g,c) > 1, return(0));
+	if (a <= 0 || issquare(D) || gcd(g,c) > 1, return(0));
 	if ((a+b)%2 ==0 & c%2 == 0, return(0));
 
 	f=factor(g)[,1];
@@ -614,134 +529,6 @@ AA(n)={
 	k*(n-(2*k+5)/6*(k-1))
 };
 
-rec(v:vec, offset:int=1)={
-	my(c=0,d);
-	
-	if (type(v) == "t_VEC",
-		if(!#v, return); \\ Called with empty vector, exit
-		c=trap(,0,findrec(v));
-	,
-		if (type(v) == "t_CLOSURE" || type(v) == "t_POL",
-			my(f=if(type(v)=="t_POL",n->subst(v,variable(v),n),v));
-			v=vector(20,i,f(i-1+offset));
-			while(c===0 && #v < 80,
-				v=concat(v,vector(10,i,f(i-1+#v+offset)));
-				c=trap(,0,findrec(v))
-			);
-			print("Using terms "offset".."#offset+#v-1".")
-		,
-			error("Input must be a vector, polynomial, or closure.")
-		);
-	);
-	d=(#v-1)>>1;
-	
-	\\ Can't find a recurrence: why?
-	if(c === 0,
-		if (#v < 3,
-			print("rec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again.")
-		,
-			print("Cannot be described by a homogeneous linear recurrence relation with "d" or fewer coefficients.")
-		);
-		return
-	);
-	
-	\\ Print out recurrence in standard form.
-	my(init=1,s);
-	print1("Recurrence relation is a(n) = ");
-	for(i=1,#c,
-		if(c[i] == 0, next);
-		if(init,
-			s = initial(c[i], Str("a(n-", i, ")"));
-			init = 0
-		,
-			s = Str(s, medial(c[i], Str("a(n-", i, ")")))
-		)
-	);
-	print(s".");
-
-	\\ Check if sequence is periodic.  Eventually, this should use
-	\\ poliscycloproduct, which will find more periodic sequences (and should
-	\\ allow sequences to be certified as non-periodic).
-	if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
-		print("Sequence has period "#c".");		
-	,
-		my(g=0);
-		for(i=1,#c,
-			if(c[i], g = gcd(g, i))
-		);
-		/*
-		if (g > 1,
-			my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
-			for(i=1,#gvec,
-				if(gvec[i] == 0, next);
-				if(init,
-					s = initial(gvec[i], Str("a(n - ", i, ")"));
-					init = 0
-				,
-					s = Str(s, medial(gvec[i], Str("a(n - ", i, ")")))
-				)
-			);
-			print("Can be thought of as "g" interlocking sequences, each of the form a(n) = "s".")
-		)*/
-	);
-	
-	\\ Print out Sloane index link with signature.
-	print1("<a href=\"/index/Rea#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
-	for(i=2,#c,print1(","c[i]));
-	print(").");
-	
-	\\ Degrees of freedom: how certain are we of the result?
-	print((#v-2*#c)" d.f.");
-
-	\\ Characteristic polynomial (unless sequence, itself, is a polynomial)
-	my(poly='x^#c-sum(i=1,#c,c[i]*'x^(#c-i)),f=factor(poly));
-	if (#f[,1] == 1 && f[1,1] == 'x - 1,
-		my(P=polinterpolate(vector(#v,i,i-1+offset),v,'n),nP=nice(P));
-		print("Sequence is a polynomial of degree "f[1,2]-1"; with offset "offset":");
-		print("  "nP);
-		if(nP!=Str(P),print("= "P))
-	,
-		print("Characteristic polynomial: ",nice(poly));
-		if(#f[,1] > 1 || f[1,2] > 1,
-			print("\t= "f);
-		)
-	)
-};
-addhelp(findrec, "findrec(v): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
-
-
-findrec(v:vec)={
-	my(c,d = (#v - 1) >> 1, firstNonzero = 0);
-	forstep(i=d,1,-1,
-		if(v[i] != 0, firstNonzero = i)
-	);
-	if(firstNonzero == 0,return([0]~));
-	for (i=firstNonzero,d,
-		c = findrecd(v,i);
-		if(c,return(c))
-	);
-	0
-};
-addhelp(findrec, "findrec(v): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
-
-
-findrecd(v:vec, d:int)={
-	my(M,c);
-	if (#v < 2*d,
-		warning("findrecd: Not enough information to determine if the sequence is a "d"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again.");
-		return
-	);
-	M = matrix(d,d,x,y,v[d+x-y]);
-	\\print(M" * c = "vector(d,i,v[d+i])~);
-	if(matdet(M) == 0, return(0));	\\ Non-invertible matrix, no solutions for this d
-	c = matsolve(M,vector(d,i,v[d+i])~);
-	for(n=2*d+1,#v,
-		if(v[n] != sum(i=1,d,v[n-i] * c[i]),return(0))
-	);
-	c
-};
-addhelp(findrecd, "findrecd(v, d): Helper function for findrec. Tries to find a d-coefficient homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
-
 
 dotproduct(a:vec, b:vec)={
 	if(#a != #b,
@@ -877,7 +664,210 @@ primezeta(s)={
 addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 
 
-initial(n:int, s:genstr)={
+\\ ***************************************************************************************************
+\\ *                               Operations on generic lists                                       *
+\\ ***************************************************************************************************
+
+chop(v:vec,n:int)={
+	if(#v<n,v,vector(n,i,v[i]))
+	\\ vecextract?
+};
+addhelp(chop, "chop(v, n): Returns the first n terms of v, or all the terms if n > #v.");
+
+
+Aitken(v:vec)={
+	vector(#v-2, i, (v[i+2]*v[i]-v[i+1]^2)/(v[i+2]-2*v[i+1]+v[i]))
+};
+addhelp(Aitken, "Aitken(v): Applies Aitken's delta-squared process to v. The precision of v needs to be at least twice the desired precision to get meaningful results.");
+
+
+LIP(X=0,Y)={
+	my(n=#Y);
+	if(type(X)!="t_VEC",X=vector(n,i,i));	\\ Default to X = [1,2,3,...]
+	if (#X!=n, error("Vectors must be the same size!"));
+	sum(j=1,n,
+		Y[j]*prod(k=1,n,if(j==k,1,(x-X[k])/(X[j]-X[k])))
+	)
+};
+addhelp(LIP, "LIP(X,Y): Gives the Lagrange interpolating polynomial for X=[x1,x2,...] and Y=[y1,y2,...]. If X is omitted, use [1,2,...].");
+
+
+isperiodic(v:vec)={
+	\\ k is the period
+	for(k=1,(#v+1)\2,
+		for(i=k+1,#v,if(v[i]!=v[i-k], next(2)));
+		return(k)
+	)
+};
+
+
+isrec(v:vec,P:pol)={
+	my(d=poldegree(P),c=vector(d,i,-polcoeff(P,d-i)));
+	if (#v < 2*d,
+		warning(Str("isrec: Not enough information to determine if the sequence is a ",d,"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again."));
+		return
+	);
+	for(n=d+1,#v,
+		if(v[n] != sum(i=1,d,v[n-i] * c[i]),return(0))
+	);
+	1
+};
+addhelp(isrec, "isrec(v, P): Is the vector v a recurrence relation with characteristic polynomial P?");
+
+
+minrec(v:vec,P:pol)={
+	if (!isrec(v,P),error("Sequence is not generated by the given recurrence."));
+	my(f=factor(P));
+	for(i=1,#f[,1],
+		for(j=1,f[i,2],
+			if(!isrec(v,P/f[i,1]),break);
+			P/=f[i,1]
+		)
+	);
+	P
+};
+addhelp(minrec, "minrec(v, P): Given a vector v which is a recurrence relation with characteristic polynomial P, return the lowest-degree polynomial which represents a recurrence relation for v.");
+
+
+ggf(v)={
+	my( p, q, B=#v\2 ); if( B<4, "Need at least 8 values!",
+ if( !#q=qflll(matrix(B,B,x,y,v[x-y+B+1]),4)[1], "QFLLL returned empty result.",
+  polcoeff(p=Ser(q[,1]),0)<0 && p=-p; /* adjust sign */
+  q=Pol(Ser(v)*p);
+  if( Ser(v)==q/=Pol(p), q,
+   Str("I guessed ",q,", but it doesn't reproduce the last value!")
+)))
+};
+pgf(f)={
+	my(p=P->concat( vecextract( Vec(Str( P+O(x^99) )), "..-11")));
+	Str("(",p(numerator(f)),")/(",p(denominator(f)),")")  /* prettyprint rational g.f. */
+};
+
+
+\\ Helper function.
+tidy(x)={
+	if(type(x) == "t_COMPLEX",
+		if(abs(imag(x))<=eps(), x=real(x));
+		if(abs(real(x))<=eps(), x=imag(x)*I);
+		return(x)
+	);
+	if(type(x) == "t_VEC",
+		vector(#x,i,tidy(x[i]))
+	,
+		x
+	)
+};
+
+
+\\ Only works in the case of distinct roots -- doesn't know about polynomials
+findBinet(v:vec,offset:int=1)={
+	my(c=findrec(v,0),poly=Pol(concat(-1,c)),t=polroots(poly),roots=tidy(t),coeff);
+	coeff=matsolve(matrix(#c,#c,i,j,roots[i]^(j+offset-1)),vectorv(#c,i,v[i]));
+	coeff=tidy(coeff);
+	for(i=1,#c,
+		print("("coeff[i]") * ("roots[i]")^n")
+	);
+	coeff
+};
+addhelp(findBinet, "findBinet(v, {offset}): Find a Binet-style formula for a linear recurrence given by the terms in the vector v. Assumes the roots are distinct -- no polynomial multipliers.");
+
+
+findrec(v:vec, verbose:bool=1)={
+	my(c,d = (#v - 1) >> 1, firstNonzero = 0);
+	if (#v < 3,
+		warning(Str("findrec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again."));
+		return
+	);
+	forstep(i=d,1,-1,
+		if(v[i] != 0, firstNonzero = i)
+	);
+	if(firstNonzero == 0,
+		if(verbose,
+			print1("Recurrence relation is a(n) = 0.");
+		);
+		return([0]~);
+	);
+	for (i=firstNonzero,d,
+		c = findrecd(v,i,verbose);
+		if(c, return(c))
+	);
+	if(verbose,print("Cannot be described by a homogeneous linear recurrence relation with "d" or fewer coefficients."));
+	0
+};
+addhelp(findrec, "findrec(v, {verbose=1}): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+
+
+rec(v:vec, verbose:bool=1)={
+	my(c=findrec(v,verbose),gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly));
+	if(c == 0, return(0));
+	print("G.f. denominator: "gf);
+	print("Roots have magnitude up to "precision(vecmax(abs(roots)),9)".");
+	print("Roots: "roots);
+	if(#f[,1]>1 || f[1,2]>1,
+		print("Polynomial factors as: "nice(f));
+	);
+	c
+};
+
+
+findrecd(v:vec, d:int, verbose:bool=1)={
+	my(M,c);
+	if (#v < 2*d,
+		warning(Str("findrec: Not enough information to determine if the sequence is a "d"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again."));
+		return
+	);
+	M = matrix(d,d,x,y,v[d+x-y]);
+	\\print(M" * c = "vector(d,i,v[d+i])~);
+	if(matdet(M) == 0, return(0));	\\ Non-invertible matrix, no solutions for this d
+	c = matsolve(M,vector(d,i,v[d+i])~);
+	for(n=2*d+1,#v,
+		if(v[n] != sum(i=1,d,v[n-i] * c[i]),return(0))
+	);
+	if(verbose,
+		my(init=1,s);
+		print1("Recurrence relation is a(n) = ");
+		for(i=1,#c,
+			if(c[i] == 0, next);
+			if(init,
+				s = initial(c[i], Str("a(n-", i, ")"));
+				init = 0
+			,
+				s = Str(s, medial(c[i], Str("a(n-", i, ")")))
+			)
+		);
+		print(s".");
+		if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
+			print("Sequence has period "#c".");		
+		,
+			my(g=0);
+			for(i=1,#c,
+				if(c[i] != 0, g = gcd(g, i))
+			);
+			if (g > 1,
+				my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
+				for(i=1,#gvec,
+					if(gvec[i] == 0, next);
+					if(init,
+						s = initial(gvec[i], Str("a(n - ", i, ")"));
+						init = 0
+					,
+						s = Str(s, medial(gvec[i], Str("a(n - ", i, ")")))
+					)
+				);
+				print("Can be though of as "g" interlocking sequences, each of the form a(n) = "s".")
+			)
+		);
+		print1("<a href=\"/index/Rea#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
+		for(i=2,#c,print1(","c[i]));
+		print(").");
+		print((#v-2*d)" d.f.")
+	);
+	c
+};
+addhelp(findrecd, "findrecd(v, d, {verbose=1}): Helper function for findrec. Tries to find a d-coefficient homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+
+
+initial(n:int, s:str)={	\\ Helper function
 	if (n == 0, return(""));
 	if (n == -1, return(Str("-", s)));
 	if (n == 1, return(s));
@@ -885,12 +875,75 @@ initial(n:int, s:genstr)={
 };
 
 
-medial(n:int, s:genstr)={
+medial(n:int, s:genstr)={	\\ Helper function
 	if (n == 0, return(""));
 	if (n == -1, return(Str(" - ", s)));
 	if (n == 1, return(Str(" + ", s)));
 	Str(if (n < 0, " - ", " + "), abs(n), s)
 };
+
+
+diff(v:vec)={
+	vector(#v-1,i,v[i+1]-v[i])
+};
+addhelp(diff, "diff(v): First difference of the vector v.");
+
+
+complement(v:vec)={
+	my(u=List(),n=1,i=1);
+	while(i<=#v,
+		if(v[i]==n,
+			i++;
+			n++
+		,
+			listput(u,n);
+			n++
+		)
+	);
+	Vec(u)
+};
+addhelp(complement, "complement(v): Returns to complement of v with respect to {1, 2, ..., v[#v]}. Assumes v is sorted.");
+
+
+findCycle(ff:closure,startAt)={
+	my(power=1,len=1,tortoise=startAt,hare=ff(startAt));
+	while (tortoise != hare,
+		if (power == len,
+			tortoise = hare;
+			power <<= 1;
+			len = 0
+		);
+		hare = ff(hare);
+		len++
+	);
+	
+	my (mu=0);
+	tortoise=hare=startAt;
+	for (i=1,len,
+		hare = ff(hare)
+	);
+	while(tortoise != hare,
+		tortoise=ff(tortoise);
+		hare=ff(hare);
+		mu++
+	);
+print("mu = "mu);
+	len
+};
+addhelp(findCycle, "findCycle(ff, startAt): Finds the length of the first cycle that startAt, ff(startAt), ff(ff(startAt)), ... enters into. Prints the prefix length (steps taken before the cycle begins).");
+
+
+LinearRecurrence(sig:vec, initial:vec, terms:small)={
+	if(terms<=#initial, return(vector(terms,i,initial[i])));
+	if(#sig>#initial, error("Not enough terms to uniquely determine sequence"));
+	my(v=vector(terms));
+	for(i=1,#initial,v[i]=initial[i]);
+	for(i=#initial+1,terms,
+		v[i]=sum(j=1,#sig,sig[j]*v[i-j])
+	);
+	v
+};
+addhelp(LinearRecurrence, "LinearRecurrence(sig, initial, terms): Given a signature sig and a vector of initial terms, gives the first terms terms of that linear recurrence.");
 
 
 \\ ***************************************************************************************************
@@ -1030,7 +1083,7 @@ addhelp(piBounds, "piBounds(x, verbose=0): Bounds on primepi(x). Set verbose=1 t
 
 
 pBounds(n, verbose:bool=0)={
-	my(lower,upper,appx,l,ll);
+	my(lower,upper,appx,l,ll,ali=x->solve(y=x*log(x),x*log(x)*log(log(x)),x+eint1(-log(y))));
 	if (n < 6548,
 		return(if (n < 1,
 			print("There are no negative primes.");
@@ -1050,7 +1103,8 @@ pBounds(n, verbose:bool=0)={
 	if (n > 13196,
 		lower = n * (l + ll - 1 + ll/l - 2.25/l)	\\ Dusart, n >= 2
 	);
-	appx  = n * (l + ll - 1 + ll/l - 2/l - ll^2/2/l^2 + 3*ll/l^2 + 11/2/l^2);	\\ + O(ll^3/l^3)
+	\\appx  = n * (l + ll - 1 + ll/l - 2/l - ll^2/2/l^2 + 3*ll/l^2 + 11/2/l^2);	\\ + O(ll^3/l^3)
+	appx = ali(n);
 	upper = n * (l + ll);							\\ ?, n >= 6
 	if (n >= 27076,
 		upper = n * (l + ll - 1 + ll/l - 1.8/l)		\\ Dusart, n >= 27076
@@ -1092,13 +1146,13 @@ Psi(x, B)={
 	local(log3x, log2, tmp, u, result);
 	if (x < 1, return (0));
 	if (B < 7,
-		if (B < 2, return (B >= 1));
+		if (B < 2, return (B >= 1 && x >= 1));
 		log2 = log(2);
-		if (B < 3, return (floor(log(x) / log2) + 1));
+		if (B < 3, return (floor(log(x\1+.5) / log2) + 1));
 		log3x = log(x) / log(3) + 1;	\\ The + 1 accounts for the pure powers of 2.
 		tmp = log2 / log(3);
 		if (B < 5,
-			\\ Snould rewrite with loop up to log_3 (x) for improved speed
+			\\ Should rewrite with loop up to log_3 (x) for improved speed
 			return (sum(n=0, log(x) / log2, floor(log3x - tmp * n)))
 		);
 		result = 0;
