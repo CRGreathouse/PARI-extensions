@@ -886,8 +886,8 @@ checkmult(GEN v, long verbose)
 {
 	pari_sp ltop = avma;
 	if (!is_matvec_t(typ(v)))
-		pari_err_TYPE("checkcmult", v);
-	RgV_check_ZV(v, "checkcmult");
+		pari_err_TYPE("checkmult", v);
+	RgV_check_ZV(v, "checkmult");
 	long n, l1 = lg(v), l2;
 
 	// I suppose [] is a multiplicative sequence... if nothing else guard
@@ -969,6 +969,103 @@ checkcmult(GEN v, long verbose)
 		if (!gequal(gel(v, n), target)) {
 			if (verbose)
 				pari_printf("Not completely multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+			avma = ltop;
+			return 0;
+		}
+		avma = ltop;
+	}
+	return 1;
+}
+
+
+long
+checkadd(GEN v, long verbose)
+{
+	pari_sp ltop = avma;
+	if (!is_matvec_t(typ(v)))
+		pari_err_TYPE("checkadd", v);
+	RgV_check_ZV(v, "checkadd");
+	long n, l1 = lg(v), l2;
+
+	// I suppose [] is an additive sequence... if nothing else guard
+	// against checking v[1] below.
+	if (l1 == 1)
+		return 1;
+	
+	// At the moment v[1] must be equal to 0; definitions vary but this seems
+	// sensible.
+	if (!gequalgs(gel(v, 1), 0))
+		return 0;
+		
+	GEN f, target, pr, ex;
+
+	for (n = 6; n < l1; ++n) {
+		if (uisprimepower(n))
+			continue;
+		f = factoru(n);
+		pr = gel(f, 1);
+		ex = gel(f, 2);
+		l2 = lg(pr);
+		long i;
+		
+		// Set target = sum v[p^e] for each p^e || n
+		target = gen_0;
+		for (i = 1; i < l2; ++i)
+			target = addii(target, gel(v, itos(powuu(pr[i], ex[i]))));
+		
+		// If v[n] is not equal to the target, the sequence is not multiplicative.
+		if (!gequal(gel(v, n), target)) {
+			if (verbose)
+				pari_printf("Not additive at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+			avma = ltop;
+			return 0;
+		}
+		avma = ltop;
+	}
+	return 1;
+}
+
+
+long
+checkcadd(GEN v, long verbose)
+{
+	pari_sp ltop = avma;
+	if (!is_matvec_t(typ(v)))
+		pari_err_TYPE("checkcadd", v);
+	RgV_check_ZV(v, "checkcadd");
+	long n, l1 = lg(v), l2;
+
+	// I suppose [] is a (completely) additive sequence... if nothing else
+	// guard against checking v[1] below.
+	if (l1 == 1)
+		return 1;
+	
+	// At the moment v[1] must be equal to 0; definitions vary but this seems
+	// sensible.
+	if (!gequalgs(gel(v, 1), 0))
+		return 0;
+		
+	GEN f, target, pr, ex;
+
+	for (n = 4; n < l1; ++n) {
+		if (uisprime(n))
+			continue;
+		f = factoru(n);
+		pr = gel(f, 1);
+		ex = gel(f, 2);
+		l2 = lg(pr);
+		long i;
+		
+		// Set target = sum v[p]*e for each p^e || n
+		target = gen_0;
+		for (i = 1; i < l2; ++i)
+			target = addii(target, muliu(gel(v, pr[i]), ex[i]));
+		
+		// If v[n] is not equal to the target, the sequence is not
+		// completely multiplicative.
+		if (!gequal(gel(v, n), target)) {
+			if (verbose)
+				pari_printf("Not completely additive at n = %Ps = %ld.\n", fnice(stoi(n)), n);
 			avma = ltop;
 			return 0;
 		}
