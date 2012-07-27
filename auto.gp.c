@@ -249,6 +249,7 @@ void forodd(GEN a, GEN b, GEN code);
 char* getBValue(char*);
 GEN bfile(GEN name, GEN v, GEN offset);
 GEN bfilein(char* name);
+void bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset);
 void forbigprime(GEN ga, GEN gb, GEN code);
 void forbigprime_sieve(ulong a, ulong b, GEN code);
 void forthinprime(GEN ga, GEN gb, GEN code);

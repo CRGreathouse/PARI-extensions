@@ -141,6 +141,15 @@ bfile(GEN name, GEN v, GEN offset)
 	char* filename = GSTR(name);
 	if (!v)
 		return bfilein(filename);
+	bfileout(filename, name, v, Anum, cur+1);
+	avma = ltop;
+	return gnil;
+}
+
+
+void
+bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset)
+{
 	FILE *f = fopen(filename, "r");
 	if (f) {
 		pari_warn(warner, "File `%Ps' already exists. Moving to bfile.old...", name);
@@ -149,8 +158,7 @@ bfile(GEN name, GEN v, GEN offset)
 	}
 	
 	f = fopen(filename, "w+");
-	long l1 = lg(v);
-	long i;
+	long l1 = lg(v), cur = offset-1, i;
 	for (i = 1; i < l1; ++i)
 	{
 		GEN e = gel(v, i);
@@ -167,12 +175,7 @@ bfile(GEN name, GEN v, GEN offset)
 		pari_free(num);
 	}
 	fclose(f);
-	if(offset)
-		pari_printf("A%Ps: Terms %Ps..%ld written to %s\n", Anum, offset, cur, filename);
-	else
-		pari_printf("A%Ps: Terms 1..%ld written to %s\n", Anum, cur, filename);
-	avma = ltop;
-	return gnil;
+	pari_printf("A%Ps: Terms %ld..%ld written to %s\n", Anum, offset, cur, filename);
 }
 
 
