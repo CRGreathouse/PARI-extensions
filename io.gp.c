@@ -44,6 +44,7 @@ getBValue(char* line)
 	return line + start;
 }
 
+
 #define MAX_VECLEN 180000
 #define MAX_LINELEN 5000
 // Returns at most 18,000 values (warning the user if there are more left)
@@ -79,7 +80,14 @@ bfilein(char* name)
 		char* kept = getBValue(line);
 		if (kept == NULL)
 			continue;
-		GEN value = strtoi(kept);
+		
+		GEN value;
+		if (kept[0] == '-') {
+			value = strtoi(kept+1);
+			setsigne(value, -1);
+		} else {
+			value = strtoi(kept);
+		}
 		if (++i > MAX_VECLEN) {
 			pari_warn(warner, "only %d terms used; b-file has unread terms", MAX_VECLEN);
 			break;
