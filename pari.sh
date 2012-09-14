@@ -1,0 +1,1 @@
+/home/charles/pari.sh
