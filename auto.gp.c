@@ -178,8 +178,6 @@ long issemiprime(GEN n);
 long uissemiprime(ulong n);
 GEN phiset(GEN v);
 GEN rad(GEN n);
-long isprimepower(GEN n);
-long uisprimepower(ulong n);
 INLINE long valu(ulong n);
 long isPowerful_small(ulong n);
 long prp(GEN n, GEN b);
