@@ -121,8 +121,8 @@ forpal(GEN a, GEN b, GEN code)
 	if (cmpii(a, b) > 0)
 		return;
 	
-	long lower_digits = digits(a);
-	long upper_digits = digits(b);
+	long lower_digits = countdigits(a);
+	long upper_digits = countdigits(b);
 	if (lower_digits == upper_digits) {
 		palhelper(lower_digits, a, b, code);
 		avma = av;

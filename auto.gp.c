@@ -168,6 +168,7 @@ GEN Eng(GEN n);
 GEN Eng_small(long n);
 GEN Eng_tiny(long n);
 GEN Edigit(long n);
+long countdigits(GEN x);
 GEN composite(long n);
 GEN deBruijnXi(GEN x);
 GEN rhoest(GEN x, long prec);

@@ -210,6 +210,17 @@ toC(GEN n)
 }
 
 
+long
+countdigits(GEN x)
+{
+	pari_sp av = avma;
+	long s = sizedigit(x) - 1;
+	if (gcmp(x, powis(stoi(10), s)) >= 0)
+	s++;
+	avma = av;
+	return s;
+}
+
 GEN
 eps(long prec)
 {

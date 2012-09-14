@@ -172,9 +172,9 @@ bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset)
 		GEN e = gel(v, i);
 		if (typ(e) != t_INT)
 			pari_err_TYPE("bfile", e);
-		if (digits(e) > 1000)
+		if (countdigits(e) > 1000)
 		{
-			pari_warn(warner, "Next term has %ld digits; exiting.\n", digits(e));
+			pari_warn(warner, "Next term has %ld digits; exiting.\n", countdigits(e));
 			break;
 		}
 
