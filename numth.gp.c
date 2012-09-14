@@ -903,7 +903,7 @@ checkmult(GEN v, long verbose)
 	GEN f, target, pr, ex;
 
 	for (n = 6; n < l1; ++n) {
-		if (uisprimepower(n))
+		if (uisprimepower(n, NULL))
 			continue;
 		f = factoru(n);
 		pr = gel(f, 1);
@@ -1000,7 +1000,7 @@ checkadd(GEN v, long verbose)
 	GEN f, target, pr, ex;
 
 	for (n = 6; n < l1; ++n) {
-		if (uisprimepower(n))
+		if (uisprimepower(n, NULL))
 			continue;
 		f = factoru(n);
 		pr = gel(f, 1);
