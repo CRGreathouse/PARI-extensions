@@ -843,6 +843,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 			for(i=1,#c,
 				if(c[i] != 0, g = gcd(g, i))
 			);
+			/*
 			if (g > 1,
 				my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
 				for(i=1,#gvec,
@@ -855,7 +856,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 					)
 				);
 				print("Can be though of as "g" interlocking sequences, each of the form a(n) = "s".")
-			)
+			)*/
 		);
 		print1("<a href=\"/index/Rea#recLCC\">Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
 		for(i=2,#c,print1(","c[i]));
