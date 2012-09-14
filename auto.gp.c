@@ -15,8 +15,6 @@ GP;install("log_2","Gp","lg","./auto.gp.so");
 GP;addhelp(lg, "lg(x): Binary logarithm of x.");
 GP;install("rad","G","rad","./auto.gp.so");
 GP;addhelp(rad, "rad(n): Radical of n, the largest squarefree number dividing n. Sloane's A007947.");
-GP;install("isprimepower","lG","isprimepower","./auto.gp.so");
-GP;addhelp(isprimepower, "isprimepower(n): Is n a prime power? Sloane's A010055; characteristic function of Sloane's A000961.");
 GP;install("prp","lGDG","prp","./auto.gp.so");
 GP;addhelp(prp, "prp(n,b=2): Is n a b-probable prime?");
 GP;install("sprp","lGDG","sprp","./auto.gp.so");
