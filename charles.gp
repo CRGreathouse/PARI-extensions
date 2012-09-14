@@ -7,6 +7,40 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
+polygonArea(v:vec)={
+       if(type(v)!="t_VEC", error("Not a vector!"));
+       if(#v<6 || #v%2, error("Need an even number of coordinates representing at least 3 points."));
+       abs(sum(i=1,#v/2-1,v[2*i+2]*v[2*i-1]-v[2*i]*v[2*i+1],v[#v-1]*v[2]-v[#v]*v[1]))/2
+};
+addhelp(polygonArea, "polygonArea(v): Find the area of the polygon with points (v[1], v[2]), (v[3], v[4]), ..., (v[#v-1], v[#v]).");
+
+
+chVec(u:vec,v:vec,umod:int=0,vmod:int=0)={
+	if(umod,u=apply(n->Mod(n,umod),u));
+	if(vmod,v=apply(n->Mod(n,vmod),v));
+	vector(#u*#v,i,chinese(u[(i-1)%#u+1],v[(i-1)\#u+1]))
+};
+addhelp(chVec, "chVec(v, u, umod, vmod): Given a vector v mod vmod and a vector u mod umod, return a vector with one representative mod lcm(umod, vmod) which is u[i] mod umod and v[j] mod vmod.");
+
+
+isWardC(v:vec)={
+	my(aux=vector(#v),t);
+	if(#v==0,return(1));
+	aux[1]=v[1];
+	for(n=2,#v,
+		t=v[n];
+		fordiv(n,d,if(d<n,t/=aux[d]));
+		if(denominator(t)>1,
+			print("Not a Property C sequence at n = "n", value should be a multiple of "v[n]/t);
+			return(0);
+		);
+		aux[n]=t
+	);
+	aux
+};
+addhelp(isWardC, "isWardC(v): Does the vector v have Ward's (1939) property C? If not, return 0; if so, return the auxiliary sequence.");
+
+
 Eisenstein(P:pol)={
 	my(d=poldegree(P),x=variable(P),g,t,times);
 	P/=content(P);
