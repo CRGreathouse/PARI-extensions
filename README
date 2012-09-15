@@ -7,7 +7,8 @@ install command.  The easiest way is to use gp2c:
 
 gp2c-run auto.gp.c
 
-which will compile the files then load them into a special session of gp.
+which will compile the files then load them into a special session of gp. A
+better solution is the script pari.sh which compiles them into a custom session.
 
 The purpose of this collection is to provide new functions for gp.  Some are
 designed to solve a problem which is not easily done in GP, while others merely
@@ -51,7 +52,6 @@ DickmanRho(x): Estimates the value of the Dickman rho function. For x <= 3 the
     using known values and rhoest; after 15 rhoest is used, along with a
     correction factor based on the last value in rhoTable.
 diffset(A, B): Set of all numbers of the form a-b, a in A, b in B.
-digits(n): Number of decimal digits in n. Sloane's A055642.
 dsum(n): Digit sum of n. Sloane's A007953.
 Engel(x): Engel expansion of x.
 Eng(n): English name of the number n.
@@ -80,8 +80,6 @@ ispow2(n): Is n a power of two? Characteristic function of Sloane's A000079.
 ispow3(n): Is n a power of three? Characteristic function of Sloane's A000244.
 isPowerful(n): Is n powerful (min exponent 2)? Sloane's A112526; characteristic
     function of Sloane's A001694.
-isprimepower(n): Is n a prime power? Sloane's A010055; characteristic function
-    of Sloane's A000961.
 issemi(n): Is n a semiprime? Sloane's A064911; characteristic function of
     Sloane's A001358.
 isthree(n): Is the number the sum of three squares? Sloane's A071374;
