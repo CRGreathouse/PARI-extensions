@@ -15,10 +15,6 @@ Priority classification (first column): [subjective and debatable]
 
 ***********************  From the PARI standard TODO ************************
 
-5  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
-   in large intervals, sieve out multiple of small primes there, then use
-   isprime() on the rest] (4)
-
 4  changing primelimit from within forprime loop yields unpredictable results
 
 4  implement Jebelean-Krandick diviiexact (5)
@@ -64,4 +60,3 @@ Priority classification (first column): [subjective and debatable]
 3  Script (function?) to deal 'nicely' with recurrence relations, finding Binet
    forms and searching for cycles (using cyclotomic junk above).
 
-3  Decent polisirreducible() that stops as soon as it finds a factor
