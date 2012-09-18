@@ -7,6 +7,20 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
+src(funcName:genstr)={
+	my(cmd=Str("egrep --color=auto --after-context=10 -R '^", funcName, "'"),C,t);
+	C=[Str(cmd, " basemath"), Str(cmd, " kernel/gmp"), Str(cmd, " ."), Str("egrep --color=auto --after-context=3 -R '#define.*", funcName, "' .")];
+	for(i=1,#C,
+		t=Str("cd ~/mth/pari/src;", C[i]);
+		if (#externstr(t),
+			system(t);
+			return()
+		)
+	)
+};
+addhelp(src, "src(funcName): Search the PARI source for a function (or #define) called funcName and display with context.");
+
+
 polygonArea(v:vec)={
        if(type(v)!="t_VEC", error("Not a vector!"));
        if(#v<6 || #v%2, error("Need an even number of coordinates representing at least 3 points."));
