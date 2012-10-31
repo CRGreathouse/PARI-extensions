@@ -6,4 +6,5 @@
   primelimit = 100M
   parisize = 52428800
   factor_add_primes = 1
+  read "auto.gp.run"
   read "charles.gp"

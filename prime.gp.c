@@ -171,7 +171,7 @@ uissemiprime(ulong n)
 	#endif
 #endif
 #if CUTOFF < 661
-	#error uissemiprime misconfigured, needs more primes to use uisprime_nosmalldiv.
+	#error uissemiprime misconfigured, needs more primes to use uisprime_661.
 #endif
 
 	// Remove even numbers. Half of random inputs are caught here.
@@ -216,7 +216,7 @@ uissemiprime(ulong n)
 	}
 
 	// Test for primality. About 27% of 661-rough numbers are caught here.
-	if (uisprime_nosmalldiv(n))
+	if (uisprime_661(n))
 		return 0;
 	
 	// Check for a small prime factor with rho. Catches about 70% of remaining
@@ -228,7 +228,7 @@ uissemiprime(ulong n)
 	} else if (typ(fac) == t_INT) {
 		ulong f = itou(fac);
 		avma = ltop;
-		return uisprime_nosmalldiv(f) && uisprime_nosmalldiv(n / f);
+		return uisprime_661(f) && uisprime_661(n / f);
 	} else if (typ(fac) == t_VEC) {
 		// TODO: Slight speedup possible by paying attention to format instead
 		// of just taking first factor:
@@ -237,7 +237,7 @@ uissemiprime(ulong n)
 		//   for unknown or zero for known composite)"
 		ulong f = itou(gel(fac, 1));
 		avma = ltop;
-		return uisprime_nosmalldiv(f) && uisprime_nosmalldiv(n / f);
+		return uisprime_661(f) && uisprime_661(n / f);
 	}
 	
 	// Second part of trial division loop: avoids the cube root calculation
@@ -251,7 +251,7 @@ uissemiprime(ulong n)
 		if (p > lim)
 			break;
 		if (n%p == 0)
-			return uisprime_nosmalldiv(n / p);
+			return uisprime_661(n / p);
 		NEXT_PRIME_VIADIFF(p, primepointer);
 	}
 	
