@@ -3,6 +3,81 @@
 /******************************************************************************/
 
 
+// This uses a fairly naive method. See
+// H. Cohen, High Precision Computation of Hardy-Littlewood Constants
+// for a beter method.
+GEN
+primezeta(GEN s, long prec)
+{
+	switch (typ(s)) {
+	case t_COMPLEX:
+		return primezeta_complex(s);
+	case t_REAL:
+		break;
+	case t_FRAC:
+		s = fractor(s, prec);
+		break;
+	case t_INT:
+		s = itor(s, prec);
+		break;
+	default:
+		pari_err_TYPE("primezeta", s);
+	}
+	
+	if (cmprs(s, 1) > 1)
+		return primezeta_real(s);
+	else
+		return primezeta_complex(s);
+}
+
+
+static GEN
+primezeta_complex_helper(void * _cargs, GEN k)
+{
+	long mu = moebius(k);
+	if (!mu)
+		return gen_0;
+	pari_sp ltop = avma;
+	GEN _args = (GEN) _cargs;
+	GEN s = gel(_args,1);
+	long prec = gtos(gel(_args,2));
+	GEN ret = gzeta(gmul(k, s), prec);
+	ret = gdiv(glog(gabs(ret, prec), prec), k);
+	ret = gerepileupto(ltop, ret);
+	
+	if (mu < 0)
+		togglesign(ret);
+	return ret;
+}
+
+
+GEN
+primezeta_complex(GEN s)
+{
+	long prec = precision(s);
+	return suminf(mkvec2(s, stoi(prec)), primezeta_complex_helper, gen_1, prec);
+}
+
+
+GEN
+primezeta_real(GEN s)
+{
+	long prec = precision(s);
+	GEN t = shiftr(mulrr(rtor(s, DEFAULTPREC), dbltor(M_LN2)), 1 - precision(s));
+	GEN iter = gdivent(W(shiftr(t, 1 - prec), FAKE_PREC), t);
+	ulong k, mx = itou(iter);
+	GEN accum = real_0(prec);
+	for (k = 1; k <= mx; k++) {
+		long mu = moebiusu(k);
+		if (mu) {
+			accum = addrr(accum, divrs(mplog(absr(czeta(mulrs(s, k), prec))), k*mu));
+			// TODO: Add GC
+		}
+	}
+	return accum;
+}
+
+
 // Checked up to 10,000 with the 64-bit version.
 GEN
 Bell(long n)

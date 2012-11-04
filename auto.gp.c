@@ -4,6 +4,8 @@
 #include <float.h>
 #include <limits.h>
 /*
+GP;install("primezeta","D0,G,p","primezeta","./auto.gp.so");
+GP;addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 GP;install("isfactorial","lG","isfactorial","./auto.gp.so");
 GP;addhelp(isfactorial, "isfactorial(n): Is n a factorial? Sloane's A012245; characteristic function of Sloane's A000142.");
 GP;install("facmod","LL","facmod","./auto.gp.so");
@@ -248,6 +250,10 @@ void forbigprime(GEN ga, GEN gb, GEN code);
 void forbigprime_sieve(ulong a, ulong b, GEN code);
 void forthinprime(GEN ga, GEN gb, GEN code);
 void forthinprimeuu(ulong a, ulong b, GEN code);
+GEN primezeta(GEN s, long prec);
+static GEN primezeta_complex_helper(void * _cargs, GEN k);
+GEN primezeta_complex(GEN s);
+GEN primezeta_real(GEN s);
 INLINE GEN gtor(GEN x, const char* funcName, long prec);
 void init_auto(void);
 /*End of prototype*/
