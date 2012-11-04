@@ -24,10 +24,10 @@ primezeta(GEN s, long prec)
 		pari_err_TYPE("primezeta", s);
 	}
 	
-	if (cmprs(s, 1) > 1)
-		return primezeta_real(s);
-	else
-		return primezeta_complex(s);
+	pari_sp ltop = avma;
+	GEN ret = cmprs(s, 1) > 1 ? primezeta_real(s) : primezeta_complex(s);
+	ret = gerepileupto(ltop, ret);
+	return ret;
 }
 
 
@@ -63,15 +63,21 @@ GEN
 primezeta_real(GEN s)
 {
 	long prec = precision(s);
+	pari_sp ltop = avma, st_lim = stack_lim(ltop, 2);
+	
+	// Determine the number of iterations needed
+	// The precision here is probably overkill but the extra time is irrelevant.
 	GEN t = shiftr(mulrr(rtor(s, DEFAULTPREC), dbltor(M_LN2)), 1 - precision(s));
 	GEN iter = gdivent(W(shiftr(t, 1 - prec), FAKE_PREC), t);
 	ulong k, mx = itou(iter);
+	
 	GEN accum = real_0(prec);
 	for (k = 1; k <= mx; k++) {
 		long mu = moebiusu(k);
 		if (mu) {
 			accum = addrr(accum, divrs(mplog(absr(czeta(mulrs(s, k), prec))), k*mu));
-			// TODO: Add GC
+			if (low_stack(st_lim, stack_lim(ltop, 2)))
+				accum = gerepileupto(ltop, accum);
 		}
 	}
 	return accum;
