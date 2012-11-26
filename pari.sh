@@ -4,5 +4,5 @@ gcc -o auto.gp.o  -O2 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -f
 gcc -o auto.gp.so -O2 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC -shared -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari
 egrep '^GP;' auto.gp.c | sed 's/^GP;//' > auto.gp.run
 doxygen Doxyfile
-{for f in html/*.png ; do pngout $f ; done} &
+{ for f in html/*.png ; do pngout $f ; done } &
 gp
