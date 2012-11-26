@@ -768,6 +768,39 @@ primorial(GEN n)
 }
 
 
+ulong
+lpfu(ulong n)
+{
+	if (n < 2)
+		return n;	// Convention: lpf(1) = lpf(-1) = 1, lpf(0) = 0
+	if (!(n&1))
+		return 2;
+	
+	ulong p;
+	forprime_t S;
+	u_forprime_init(&S, 3, utridiv_bound(n));	// At least 2^14
+	while ((p = u_forprime_next_fast(&S)) <= 661) {
+		if (n%p == 0)
+			return p;
+	}
+	if (uisprime_661(n))
+		return n;
+	while (p) {
+		if (n%p == 0)
+			return p;
+		p = u_forprime_next_fast(&S);
+	}
+	
+	// No small prime factors, factor using general mechanisms.
+	// This is a performance disaster, since factoru repeats trial division.
+	// ifac_factoru would be better.
+	pari_sp ltop = avma;
+	ulong ret = vecsmall_min(gel(factoru(n), 1));
+	avma = ltop;
+	return ret;
+}
+
+
 GEN
 lpf(GEN n)
 {
@@ -775,32 +808,36 @@ lpf(GEN n)
 	GEN res;
 	if (typ(n) != t_INT)
 		pari_err_TYPE("lpf", n);
+	ulong nn = itou_or_0(n);
+	if (nn)
+		return utoipos(lpfu(nn));
+
 	if (!signe(n))
 		return gen_0;	// My choice of convention: lpf(0) = 0
 	if (!mod2(n))
 		return gen_2;
-	if (cmpis(n, 2) < 0) {
-		if (cmpis(n, -1) >= 0)
-			return gen_1;
-		n = negi(n);
-	}
 
+#ifdef LONG_IS_64BIT
+	static const ulong G = 16294579238595022365UL;
+#else
+	static const ulong G = 3234846615UL;
+#endif
+	ulong g = ugcd(umodiu(n, G), G);
+	if (g > 1)
+		return utoipos(lpfu(g));
+	
+	forprime_t S;
+#ifdef LONG_IS_64BIT
+	u_forprime_init(&S, 59, tridiv_bound(n));
+#else
+	u_forprime_init(&S, 31, tridiv_bound(n));
+#endif
 	long p = 0;
-	byteptr primepointer = diffptr;
-	NEXT_PRIME_VIADIFF(p, primepointer);
-	for (;p < 9999;)	// TODO: Find appropriate cutoff here
-	{
-		NEXT_PRIME_VIADIFF(p, primepointer);
+	while ((p = u_forprime_next_fast(&S))) {
 		if (dvdis(n, p))
 		{
 			avma = ltop;
-			return stoi(p);
-		}
-		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (dvdis(n, p))
-		{
-			avma = ltop;
-			return stoi(p);
+			return utoipos(p);
 		}
 	}
 	res = gcoeff(Z_factor(n), 1, 1);	// TODO: Partial factorization?  Tricky to do right...
