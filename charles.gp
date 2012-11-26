@@ -401,7 +401,8 @@ forpseudo(ff)={
 			return()
 		,
 			for(j=1,#pspChunk,
-				ff(pspChunk[j])
+				my(t=ff(pspChunk[j]));
+				if(t,return(t))
 			)
 		);
 		pspChunk=0
@@ -699,17 +700,6 @@ bestappr2(x, n)={
 };
 addhelp(bestappr2, "bestappr2(x, n): Work-in-progress.  Should determine the best rational approximation of x with denominator up to n.");
 */
-
-
-primezeta(s)={
-	if (type(s) == "t_COMPLEX" || s <= 1,
-		suminf(k=1,moebius(k)/k*log(abs(zeta(k*s))))
-	,
-		my(t=s*log(2),iter=W(t/eps())\t);
-		sum(k=1,iter,moebius(k)/k*log(abs(zeta(k*s))))
-	)
-};
-addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 
 
 \\ ***************************************************************************************************
