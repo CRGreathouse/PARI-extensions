@@ -1,4 +1,3 @@
-/*-*- compile-command: "/usr/bin/gcc -c -o auto.gp.o -O3 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC -I"/usr/local/include" auto.gp.c && /usr/bin/gcc -o auto.gp.so -shared -O3 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari"; -*-*/
 #include <pari/pari.h>
 #include <pari/paripriv.h>
 #include <float.h>
@@ -150,15 +149,7 @@ GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
 GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
 */
 
-// Removed: //GP;install("pBounds","vD0,G,DGp","pBounds","./auto.gp.so");
-// Removed: //GP;addhelp(pBounds, "pBounds(n, verbose=0): Estimates the nth prime. Set verbose=1 to get a list of sources for the results.");
-
-
-//////////////////////////////////////////////////////////// New
 GEN Bell(long n);
-//////////////////////////////////////////////////////////// New
-
-
 GEN listtovec_shallow(GEN v);
 long checkmult(GEN v, long verbose);
 long checkcmult(GEN v, long verbose);
@@ -256,7 +247,6 @@ GEN primezeta_complex(GEN s);
 GEN primezeta_real(GEN s);
 INLINE GEN gtor(GEN x, const char* funcName, long prec);
 void init_auto(void);
-/*End of prototype*/
 
 #define FAKE_PREC 0		// Used when a precision is required but will not be used
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
@@ -277,84 +267,3 @@ init_auto(void)
 {
 	rnormal_cached = 0;
 }
-
-
-
-/*
-default(debug,4)
-consistency()
-*/
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////// End newcomers
-
-////////////// Problems with gp2c //////////////
-// Uses				Should use
-// pariprintf		pari_printf
-////////////////////////////////////////////////
-
-// Warning types:
-// user		User-initiated warning
-// warnmem	Garbage collection
-// warner	Generic warning
-// warnprec	Precision increase
-// warnfile	File I/O
-
-// Error types:
-// 0			Generic error
-// talker2		?
-// bugparier	Bug, please report
-// alarmer		Generic error
-// openfiler	File I/O
-// talker		Generic error
-// flagerr		Invalid flag
-// impl			Not implemented
-// archer		Not available on this system
-// notfuncer	Not a function in function call
-// precer		Precision too low
-// typeer		Incorrect type
-// consister	Inconsistent data
-// user			User-initiated error
-// errpile		Stack overflow
-// overflower	Overflow
-// matinv1		Non-invertible matrix (in gauss)
-// mattype1		Not a square matrix
-// arither1		Not an integer argument in an arithmetic function
-// primer1		Not enough precomputed primes
-// invmoder		Impossible inverse
-// constpoler	Constant polynomial
-// notpoler		Not a polynomial
-// redpoler		Reducible polynomial
-// zeropoler	Zero polynomial
-// operi		"Impossible"
-// operf		"Forbidden"
-// gdiver		Division by zero
-// memer		Not enough memory
-// negexper		Negative exponent
-// sqrter5		Non quadratic residue (in gsqrt)
-// noer			Not an error...
-
-/*
-
-Possible additions to the OEIS:
-
-A138591
-a(n) = n + A000523(n + A000523(n))
-
-A063274
-For all n > N, a(n) <= 3. Possibly N = 119.
-Heath-Brown, D. R. "Ternary Quadratic Forms and Sums of Three Square-Full Numbers." In Séminaire de Theorie des Nombres, Paris 1986-87	(Ed. C. Goldstein). Boston, MA: Birkhäuser, pp. 137-163, 1988.
- 
-A045911
-Crossref A******
-
-A******
-Neither a cube nor the sum of a positive cube and a prime.
-Hardy & Littlewood's conjecture that this sequence is finite.
-H-L, ... (Conjecture L, p. 51)
-Crossref A045911
-
-*/
-
