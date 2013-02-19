@@ -320,7 +320,7 @@ pari_printf("Counting directly to %lu.\n", breakpoint);
 	res -= crossover * ucountSquarefree(breakpoint);
 	for (k = 1; k <= breakpoint; k++)
 		if (issquarefree_small(k))
-			res += usqrtsafe(n / k) / k;
+			res += usqrt(n / k) / k;
 	return res;
 }
 
@@ -434,12 +434,12 @@ countPowerful(GEN n)
 ulong
 ucountSquarefree(ulong lim)
 {
-	ulong b = usqrtsafe(lim >> 1);
+	ulong b = usqrt(lim >> 1);
 	ulong k;
 	ulong ret = 0;
 	for (k = 1; k <= b; k++)
 		ret += moebiusu(k) * (lim / (k * k));
-	ulong p3 = usqrtsafe(lim);
+	ulong p3 = usqrt(lim);
 	for (k = b + 1; k <= p3; k++)
 		ret += moebiusu(k);
 	return ret;

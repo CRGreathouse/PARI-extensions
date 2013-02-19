@@ -196,7 +196,7 @@ forbigprime(GEN ga, GEN gb, GEN code)
 	avma = av;
 #ifdef LONG_IS_64BIT
 	if (maxprime() < 4294967296UL && b > maxprime() * maxprime())
-		pari_err_MAXPRIME(usqrtsafe(b));
+		pari_err_MAXPRIME(usqrt(b));
 #else
 	// PARI currently guarantees that maxprime() >= 65557, so no check needed
 #endif
@@ -223,7 +223,7 @@ sieve_block(ulong a, ulong b, char* sieve)
 		return;
 	}
     if (DEBUGLEVEL>4) fprintferr("Sieving from %lu to %lu", a, b);
-	ulong lim = usqrtsafe(b);
+	ulong lim = usqrt(b);
 	ulong sz = (b - a + 2) >> 1;
 	if (DEBUGLEVEL>4) fprintferr("; size = %lu\n", sz);
 	long p = 0;
@@ -270,7 +270,7 @@ forbigprime_sieve(ulong a, ulong b, GEN code)
 	// TODO: Optimize size (surely < 512k to stay in L1 cache, but not so large
 	// as to force recalculating too often).
 	// Guesstimate: greater of sqrt(n) * lg(n) or 1M
-	ulong chunk = maxuu(0x100000, usqrtsafe(b) * __builtin_ffsl(b));
+	ulong chunk = maxuu(0x100000, usqrt(b) * __builtin_ffsl(b));
 	ulong tmp = (b - a) / chunk + 1;
 	pari_sp ltop = avma;
 

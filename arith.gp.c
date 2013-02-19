@@ -645,7 +645,7 @@ long
 sways3s(ulong n)
 {
 	pari_sp ltop = avma;
-	long p1 = (long)usqrtsafe(n);
+	long p1 = (long)usqrt(n);
 	long res = 0;
 	long k, t, m, p2, tmod4;
 	for (k = 0; k <= p1; k++)
@@ -657,7 +657,7 @@ sways3s(ulong n)
 		if (!istwo(stoi(t)))
 			continue;
 		avma = ltop;
-		p2 = (long)usqrtsafe(t>>1);
+		p2 = (long)usqrt(t>>1);
 		switch (tmod4) {
 			case 0:
 				for (m = ((k + 1)|1) - 1; m <= p2; m += 2)

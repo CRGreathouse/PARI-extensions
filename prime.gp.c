@@ -305,7 +305,7 @@ isPowerful_small(ulong n)
 	//if (n < 3)
 	//	return 1;
 	
-	long p = 0, lim = usqrtsafe(usqrtsafe(n));
+	long p = 0, lim = usqrt(usqrt(n));
 	byteptr primepointer = diffptr;
 	NEXT_PRIME_VIADIFF(p, primepointer);
 	for (;p <= lim;)
@@ -319,7 +319,7 @@ isPowerful_small(ulong n)
 			do {
 				n /= p;
 			} while (n % p == 0);
-			lim = usqrtsafe(usqrtsafe(n));
+			lim = usqrt(usqrt(n));
 		}
 	}
 	
