@@ -14,7 +14,7 @@ isfactorial(GEN n)
 		return isint1(n);
 	
 	// Remove small factorials with a combined binary-linear search
-	long nn = itou_or_0(n);
+	ulong nn = itou_or_0(n);
 	if (nn) {
 		return
 #ifdef LONG_IS_64BIT
@@ -45,6 +45,7 @@ isfactorial(GEN n)
 
 	long mn = v2 + 1, mx = mn + __builtin_clzl(v2), t, c;
 	
+	// Find the 
 	while (mx - mn > 1) {
 		t = mn + (mx - mn)/2;
 		c = factorial_lval(t, 2);
@@ -72,7 +73,8 @@ isfactorial(GEN n)
 		else
 			return 0;
 	}
-	c = equalii(mpfact(mn), n);
+	//c = equalii(mpfact(mn), n);
+	c = equalii(mulu_interval(2UL, (ulong)mn), n);
 	avma = ltop;
 	return c;
 }

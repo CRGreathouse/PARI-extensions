@@ -1,8 +1,17 @@
 #!/bin/bash
 cd ~/mth/pari
-gcc -o auto.gp.o  -O2 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC -c -I"/usr/local/include" auto.gp.c
-gcc -o auto.gp.so -O2 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC -shared -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari
+
+# Compile auto file
+GCCOPT='-O2 -Wall -Werror -fno-strict-aliasing -fomit-frame-pointer -fPIC'
+gcc -o auto.gp.o $GCCOPT -c -I"/usr/local/include" auto.gp.c
+gcc -o auto.gp.so $GCCOPT -shared -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari
+
+# Create run file to install auto and add associated help entries
 egrep '^GP;' auto.gp.c | sed 's/^GP;//' > auto.gp.run
-doxygen Doxyfile
-{ for f in html/*.png ; do pngout $f ; done } &
+
+## Create documentation -- takes a long time
+#doxygen Doxyfile
+#{ for f in html/*.png ; do pngout $f ; done } &
+
+# Run gp itself
 gp
