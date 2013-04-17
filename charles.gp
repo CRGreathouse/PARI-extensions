@@ -113,9 +113,9 @@ shortestPath(G, startAt)={
 
 
 gammainv(x:real)={
-	if(x<2,return(solve(y=1,3,gamma(y)-x)));
+	if(x<5040,return(solve(y=1,8,gamma(y)-x)));
 	my(L=log(x));
-	solve(y=L,max(4,L^2),lngamma(y)-L)
+	solve(y=L/log(L),L,lngamma(y)-L)
 };
 addhelp(gammainv, "gammainv(x): Inverse gamma function.");
 
