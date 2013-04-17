@@ -7,6 +7,13 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
+yafu(n)={
+	if(type(n) != "t_INT", error("Bad type in yafu."));
+	system(Str("~/mth/yafu-linux64 'factor(",n,")'"))
+};
+addhelp(yafu, "yafu(n): Factor a number with yafu.");
+
+
 src(funcName:genstr)={
 	my(cmd=Str("egrep --color=auto --after-context=10 -R '^", funcName, "'"),C,t);
 	C=[Str(cmd, " basemath"), Str(cmd, " kernel/gmp"), Str(cmd, " ."), Str("egrep --color=auto --after-context=3 -R '#define.*", funcName, "' .")];
