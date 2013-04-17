@@ -260,6 +260,56 @@ addhelp(pan9, "pan9(n): Is the number a 1-to-9 pandigital (exactly 9 distinct di
 \\ *                          Obscure (but otherwise reusable) functions                             *
 \\ ***************************************************************************************************
 
+\\ These functions relate to A218459.
+docheck(d,p)=for(y=1,sqrtint(p\d),if(issquare(p-d*y^2),return(1)));0;
+dochk(p)=my(d);while(!docheck(d++,p),);d;
+/*
+\\ v=apply(do,primes(1000));
+\\ bnfisintnorm(bnfinit('x^2+93),2903)
+verify(d,p)=for(y=1,sqrtint(p\d),if(issquare(p-d*y^2),return(1)));0;
+dv(d,p)={
+	if(#DV<9,DV=vector(1000));
+	my(B);
+	B=if(d<=#DV,
+		if(DV[d],DV[d],DV[d]=bnfinit('x^2+d))
+	,
+		bnfinit('x^2+d)
+	);
+	if(#bnfisintnorm(B,p),
+		if(verify(d,p),
+			1
+		,
+			\\print("Funny stuff at p = "p": bnfisintnorm sez "d" but it ain't so.");
+			0
+		)
+	,
+		0
+	)
+};
+dv_k(d,p)={
+	kronecker(-d,p)>0 && dv(d,p)
+};
+dv_k_s(d,p)={
+	kronecker(-d,p)>=0 && issquarefree(d) && dv(d,p)
+};
+\\ Values known to occur: 
+do(p)={
+	if(p%24<23,return(if(p%4<3,1,if(p%8==3,2,3))));
+	if(kronecker(p,7)>0,return(7));
+	if(dv_k(11,p), return(11));
+	if(dv_k(19,p), return(19));
+	if(kronecker(p,11)>0,return(22));
+	if(dv_k(23,p), return(23));
+	if(dv_k(26,p), return(26));	\\ probably never happens
+	if(dv_k(29,p), return(29)); \\ probably never happens
+	if(dv_k(31,p), return(31));
+	for(d=34,p,
+		if(dv_k_s(d,p), return(d))
+	)
+};
+*/
+
+
 testCI(n,alpha,b:small)={
 	my(t,s);
 	s=sum(i=1,n,
