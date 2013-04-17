@@ -3,6 +3,94 @@
 \\ ***************************************************************************************************
 
 
+A024916(z) = 
+{
+	my(s=z^2,p,n);
+	for(d=1, sqrtint(z),
+		n = z\d - z\(d+1); 
+		if(n<2, p=d; break, s -= (z%d2+(n-1)*d)*n/2);
+	);
+	for(d=2, z\if(p, p, sqrtint(z)+1),
+		s -= z%d
+	);
+	s
+};
+
+pack(v)={
+	sum(i=1,#v,1<<v[i])>>1
+};
+unpack(n)={
+	my(t=1,v=vector(hammingweight(n)),i);
+	while(n,
+		if(bitand(n,1), v[i++]=t);
+		t++;
+		n>>=1
+	);
+	v
+};
+step(V,n)= {
+	my(N=2^(n-1),u=List(V),v,t);
+	for(i=1,#V,
+		v=unpack(V[i]);
+		forprime(p=2,n,
+			if(#vecsort(v%p,,8)==p,next(2))
+		);
+		listput(u,V[i]+N)
+	);
+	Vec(u)
+};
+steps()={
+	my(V=[0],i);
+	for(n=1,99,
+		if(gcd(n,10)>1,next);
+		i++;
+		V=step(V,n);
+		my(MB=sizebyte(V)/2.^20);
+		print1(n" "#V" ("round(MB)" MB; est. ");
+		print(round(#V^(40/i-1)*MB)," MB to finish)")
+	)
+};
+
+
+
+\\ Find 2-element members of J_Z[i] such that
+\\ * Neither element is 0
+\\ * The elements are not the negatives of each other
+findGaussianPair(lim)={
+	lim\=1;
+	my(ok=v->isJ(v)&&v[1]!=-v[2]&&v[1]&&v[2]&&real(v[1])>1&&real(v[2])>1);
+	for(a=-lim,lim,
+		for(b=-lim,lim,
+			my(m=3*(b^2-a^2)+6*a+1,n=6*b*(1-a),x=m+n*I);
+			if(n,
+				fordiv(n/2,d,
+					my(e=n/(2*d));
+					if((d+e*I)^2==x,
+						my(v);
+						v=[a+b*I,(a+b*I+1+d+e*I)/2];
+						if(ok(v),print(v));
+						v=[a+b*I,(a+b*I+1-d-e*I)/2];
+						if(ok(v),print(v));
+					)
+				)
+			,
+				my(k);
+				if(issquare(m,&k),
+					my(v);
+					v=[a+b*I,(a+b*I+1+k)/2];
+					if(ok(v),print(v));
+					v=[a+b*I,(a+b*I+1-k)/2];
+					if(ok(v),print(v));
+				)
+			)
+		)
+	)
+};
+isJ(v)={
+	sum(i=1,#v,v[i]^3)==sum(i=1,#v,v[i])^2
+};
+
+
 \\ A015704
 \\ best(p, cur) gives an upper bound on the value of sigma(n)/n in [0..L]
 \\ for numbers divisible by cur but not divisible by p.
