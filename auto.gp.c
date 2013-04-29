@@ -134,14 +134,18 @@ GP;install("rhoest","Gp","rhoest","./auto.gp.so");
 GP;addhelp(rhoest, "rhoest(x): de Bruijn's asymptotic approximation for rho(x), rewritten as in van de Lune and Wattel 1969.  Curiously, their paper shows values for this estimate that differ from those calculated by this function, often as soon as the second decimal place -- but as the difference is in the direction of the true value, I have not looked further into this.");
 GP;install("DickmanRho","Gp","DickmanRho","./auto.gp.so");
 GP;addhelp(DickmanRho, "DickmanRho(x): Estimates the value of the Dickman rho function. For x <= 3 the exact values are used, up to rounding; up to 15 the value is interpolated using known values and rhoest; after 15 rhoest is used, along with a correction factor based on the last value in rhoTable.");
+GP;install("tau","G","tau","./auto.gp.so");
+GP;addhelp(tau, "tau(n): Ramanujan's tau function, Sloane's A000594.");
+GP;install("HurwitzClassNumber","G","H","./auto.gp.so");
+GP;addhelp(H, "H(n): The Hurwitz class number. Counts the number of equivalence classes of positive definite quadratic forms ax^2 + bxy + cy^2 with discriminant b^2-4ac = -n, counting forms equivalent to x^2+y^2 with weight 1/2 and forms equivalent to x^2+xy+y^2 with weight 1/3.");
 GP;alias(isPowerful, ispowerful);
 GP;alias(hamming, hammingweight);
 GP;alias(graeffe,polgraeffe);
 GP;alias(dsum, sumdigits);
-// New \/
+// Testing \/
 GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
 GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
-* // New /\
+* // Testing /\
 // No associated help
 GP;install("init_auto","v","init_auto","./auto.gp.so");
 GP;install("consistency","l","consistency","./auto.gp.so");
@@ -247,6 +251,12 @@ GEN primezeta_complex(GEN s);
 GEN primezeta_real(GEN s);
 INLINE GEN gtor(GEN x, const char* funcName, long prec);
 void init_auto(void);
+GEN taup_small(ulong p);
+GEN HurwitzClassNumber_small(ulong n);
+GEN HurwitzClassNumber(GEN n);
+GEN taup_big(GEN p);
+GEN taup(GEN p, long e);
+GEN tau(GEN n);
 
 #define FAKE_PREC 0		// Used when a precision is required but will not be used
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain

@@ -1102,3 +1102,189 @@ checkdiv(GEN v, long verbose/*=1*/)
 	return 1;
 }
 
+
+GEN
+HurwitzClassNumber_small(ulong n)
+{
+	pari_sp ltop = avma;
+	ulong c = coreu(n);
+	ulong sq = usqrt(n/c);	// n = c * sq^2 with c squarefree
+	GEN div = divisorsu(sq);
+	pari_sp btop = avma;
+	long i, last = lg(div), sum = 0;
+	if (c == 3)
+		last--;
+	else if (c == 1 && (n&3) == 0)
+		last -= 2;
+	
+	for (i = 1; i < last; ++i)
+	{
+		ulong D = n/(div[i]*div[i]);
+		if ((1<<(D&3)) & 0x9) {
+			sum += itos(classno(utoineg(D)));
+			avma = btop;
+		}
+	}
+	
+	GEN ret = stoi(sum);
+	
+	// This loop handles the special case where the result may be a fraction.
+	for (i = last; i < lg(div); ++i)
+	{
+		ulong D = n/(div[i]*div[i]);
+		if ((1<<(D&3)) & 0x9)
+			ret = gadd(ret, gdivgs(classno(utoineg(D)), D > 4 ? 1 : 6-D));
+	}
+	
+	return gerepileupto(ltop, ret);
+}
+
+
+// Class number of n. Not stack clean.
+INLINE GEN
+classno_fast(GEN n)
+{
+	if (lgefint(n) == 3)
+		return classno(n);
+	return member_no(quadclassunit0(n, 0, NULL, DEFAULTPREC));
+}
+
+
+// The Hurwitz class number of n. An integer unless n is of the form 3k^2 or 4k^2.
+GEN
+HurwitzClassNumber(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err_TYPE("HurwitzClassNumber",n);
+	if (signe(n) < 1) {
+		if (isintzero(n))
+			return gdiv(gen_m1, stoi(12));
+		pari_err(e_IMPL,"HurwitzClassNumber(n) for n < 0.");
+	}
+	ulong nn = itou_or_0(n);
+#ifdef LONG_IS_64BIT
+	if (nn && nn < 500000000000000000UL)
+#else
+	if (nn)
+#endif
+		return HurwitzClassNumber_small(nn);
+	
+	pari_sp ltop = avma;
+	GEN div = divisors(gel(core0(n, 1), 2)), ret = gen_0;
+	pari_sp btop = avma;
+	long i, mx = lg(div);
+	for (i = 1; i < mx; ++i) {
+		GEN D = diviiexact(negi(n), sqri(gel(div, i)));
+		if ((1<<mod4(D)) & 0x9)	{
+			// mod4(D) = |D| mod 4, so this selects |D| in {0, 3} mod 4 thus D in {0, 1} mod 4
+			ret = gadd(ret, gdiv(classno_fast(D), gmaxsg(1, addis(D, 6))));
+			ret = gerepileupto(btop, ret);	// perhaps do this only when the stack is low?
+		}
+	}
+	ret = gerepileupto(ltop, ret);
+	return ret;
+}
+
+
+// Computes tau(p) assuming p is prime.
+GEN
+taup_small(ulong p)
+{
+	ulong k;
+	pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
+	GEN ret = gen_0;
+	for (k = 1; k < p; ++k) {
+		ret = addii(ret, mulii(sumdivk(utoipos(k), 5), sumdivk(utoipos(p - k), 5)));
+		if (low_stack(st_lim, stack_lim(ltop, 1)))
+			ret = gerepileuptoint(ltop, ret);
+	}
+	ret = diviuexact(subii(addii(mulsi(65, sumdivk(utoipos(p), 11)), mulsi(691, sumdivk(utoipos(p), 5))), mulsi(174132, ret)), 756);
+	return gerepileuptoint(ltop, ret);
+}
+
+
+// Computes tau(p) assuming p > 3 is prime.
+// Algorithm based on the Selberg trace formula, as analyzed by
+// Denis Xavier Charles, Computing the Ramanujan tau function, The Ramanujan
+// Journal 11:2 (April 2006), pp. 221-224.
+GEN
+taup_big(GEN p)
+{
+	pari_sp ltop = avma;
+	GEN P = cgetg(7, t_VEC);
+	gel(P, 1) = negi(powiu(p, 5));
+	gel(P, 2) = mulsi(15, powiu(p, 4));
+	gel(P, 3) = mulsi(-35, powiu(p, 3));
+	gel(P, 4) = mulsi(28, sqri(p));
+	gel(P, 5) = mulsi(-9, p);
+	gel(P, 6) = gen_1;
+	//P = gtopolyrev(P, -1);
+	P = gerepileupto(ltop, P);
+	GEN p4 = mulsi(4, p), lim = sqrtint(p4);
+	
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	GEN t, ret = gen_0;
+	for (t = gen_1; cmpii(t, lim) <= 0; t = addis(t, 1)) {
+		GEN t2 = sqri(t);
+		GEN tmp = gmul(poleval(P, t2), HurwitzClassNumber(subii(p4, t2)));
+		ret = gadd(ret, tmp);
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+			gerepileall(btop, 2, &t, &ret);
+	}
+	ret = gsub(gsubgs(gdivgs(mulii(powiu(p, 5), HurwitzClassNumber(p4)), 2), 1), ret);
+	return gerepileupto(ltop, ret);
+}
+
+
+GEN
+taup(GEN p, long e)
+{
+	if (typ(p) != t_INT)
+		pari_err_TYPE("taup",p);
+	
+	ulong pp = itou_or_0(p);
+	pari_sp ltop = avma;
+	GEN t = pp && pp < 220000 ? taup_small(pp) : taup_big(p);
+	
+	// Special case for common low exponents.
+	if (e == 1)
+		return t;
+	if (e < 4) {
+		GEN ret;
+		if (e == 2)
+			ret = subii(sqri(t), powiu(p, 11));
+		else
+			ret = mulii(subii(sqri(t), shifti(powiu(p, 11), 1)), t);
+		return gerepileupto(ltop, ret);
+	}
+	
+	// Exponent calculation in full generality
+	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	GEN ret = gen_0;
+	long j, l2 = e/2;
+	for (j = 0; j <= l2; ++j) {
+		// (-1)^j*binomial(e-j, e-2*j)*p^(11*j)*t^(e-2*j)
+		GEN tmp = mulii(mulii(binomialuu(e - j, e - 2*j), powiu(t, e-2*j)), powiu(p, 11*j));
+		if (j&1)
+			ret = subii(ret, tmp);
+		else
+			ret = addii(ret, tmp);
+		if (low_stack(st_lim, stack_lim(btop, 1)))
+			ret = gerepileupto(btop, ret);
+	}
+	return gerepileupto(ltop, ret);
+}
+
+
+GEN
+tau(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err_TYPE("tau",n);
+	pari_sp ltop = avma;
+	GEN ret = gen_1, f = Z_factor(n);
+	long i, l1 = glength(gel(f, 1));
+	for (i = 1; i <= l1; ++i)
+		ret = mulii(ret, taup(gcoeff(f, i, 1), itos(gcoeff(f, i, 2))));
+	return gerepileupto(ltop, ret);
+}
