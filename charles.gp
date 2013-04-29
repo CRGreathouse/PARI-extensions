@@ -3,9 +3,14 @@ default(timer, 0);
 
 
 \\ ***************************************************************************************************
-\\ *					Working space						*
+\\ *					Working space
 \\ ***************************************************************************************************
 
+
+
+\\ ***************************************************************************************************
+\\ *					Uncategorized
+\\ ***************************************************************************************************
 
 yafu(n)={
 	if(type(n) != "t_INT", error("Bad type in yafu."));
@@ -15,8 +20,8 @@ addhelp(yafu, "yafu(n): Factor a number with yafu.");
 
 
 src(funcName:genstr)={
-	my(cmd=Str("egrep --color=auto --after-context=10 -R '^", funcName, "'"),C,t);
-	C=[Str(cmd, " basemath"), Str(cmd, " kernel/gmp"), Str(cmd, " ."), Str("egrep --color=auto --after-context=3 -R '#define.*", funcName, "' .")];
+	my(cmd=Str("egrep --color=auto --after-context=10 --before-context=1 -R '^", funcName, "'"),C,t);
+	C=[Str(cmd, " basemath"), Str(cmd, " kernel/gmp"), Str(cmd, " ."), Str("egrep --color=auto --after-context=5 -R '#define.*", funcName, "' .")];
 	for(i=1,#C,
 		t=Str("cd ~/mth/pari/src;", C[i]);
 		if (#externstr(t),
