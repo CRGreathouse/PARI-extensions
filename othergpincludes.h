@@ -1,16 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef S_SPLINT_S
 
-/* Where to stop trial dividing in factorization. Guaranteed >= 2^14 */
-static ulong
-tridiv_bound(GEN n)
-{
-  ulong l = (ulong)expi(n) + 1;
-  if (l <= 32)  return 1UL<<14;
-  if (l <= 512) return (l-16) << 10;
-  return 1UL<<19; /* Rho is generally faster above this */
-}
-
 /* return a value <= (48 << 10) = 49152 < primelinit */
 static ulong
 utridiv_bound(ulong n)
