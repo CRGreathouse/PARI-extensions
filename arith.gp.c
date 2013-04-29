@@ -102,34 +102,6 @@ long ispow3_tiny(ulong n)
 }
 
 
-long
-isTriangular(GEN n)
-{
-	if (typ(n) != t_INT)
-		pari_err_TYPE("isTriangular", n);
-	pari_sp ltop = avma;
-	long ret = Z_issquare(addis(shifti(n, 3), 1));
-	avma = ltop;
-	return ret;
-}
-
-
-long isHexagonal(GEN n)
-{
-	if (typ(n) != t_INT)
-		pari_err_TYPE("isHexagonal", n);
-	if (signe(n) < 1)
-		return signe(n) == 0;	// 0 is hexagonal
-	pari_sp ltop = avma;
-	GEN root;
-	long ret = Z_issquareall(addis(shifti(n, 3), 1), &root);
-	if (ret)
-		ret = mod4(root) == 3;
-	avma = ltop;
-	return ret;
-}
-
-
 // Approximate speed on a Phenom II at various input sizes:
 // size	 cycles		time
 // 1e00			110	 40 ns
@@ -421,32 +393,6 @@ Pisano(long p, long e)
 	else
 		p1 = p - 1;
 	return e == 1 ? p1 : p1 * (long)upowuu(p, e - 1);
-}
-
-
-GEN
-largestSquareFactor(GEN n)
-{
-	pari_sp ltop = avma;
-	GEN f, res;
-	long l1, e, i;
-	if (typ(n) != t_INT)
-		pari_err_TYPE("largestSquareFactor", n);
-	if (!signe(n))
-		return gen_0;
-
-	f = Z_factor(n);
-	l1 = glength(gel(f, 1));
-	res = gen_1;
-	for (i = 1; i <= l1; ++i)
-	{
-		e = itos(gcoeff(f, i, 2));
-		if (e > 1)
-			res = mulii(res, e >= 4 ? powis(gcoeff(f, i, 1), e >> 1) : gcoeff(f, i, 1));
-	}
-	res = gsqr(res);	// Remove this line to instead calculate A000188.
-	res = gerepileupto(ltop, res);
-	return res;
 }
 
 
