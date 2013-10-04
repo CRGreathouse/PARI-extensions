@@ -1,11 +1,19 @@
-  colors = "lightbg"
-  datadir = /home/charles/pari
-  help = "/usr/local/bin/gphelp -cu 6"
-  prettyprinter = /usr/local/bin/tex2mail -TeX -noindent -ragged -by_par
-  prompt = "(%H:%M)"
-  primelimit = 100M
-  parisize = 52428800
-  factor_add_primes = 1
-  strictargs = 1
-  read "auto.gp.run"
-  read "charles.gp"
+colors = "lightbg"
+compatible = 0
+datadir = /home/charles/mth/pari
+factor_add_primes = 1
+factor_proven = 0
+help = "/usr/local/bin/gphelp -cu 6 -detex"
+new_galois_format = 1
+parisize = 52428800
+path = "~/mth/pari:.:~"
+prettyprinter = /usr/local/bin/tex2mail -TeX -noindent -ragged -by_par
+primelimit = 100M
+prompt = "(%H:%M)"
+realprecision = 38
+secure = 0
+strictargs = 1
+
+read "auto.gp.run"
+read "charles.gp"
+timer = 1
