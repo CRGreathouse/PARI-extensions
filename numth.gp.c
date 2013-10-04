@@ -1222,11 +1222,11 @@ taup_big(GEN p)
 	P = gerepileupto(ltop, P);
 	GEN p4 = mulsi(4, p), lim = sqrtint(p4);
 	
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	pari_sp btop = avma, st_lim = stack_lim(btop, 2);
 	GEN t, ret = gen_0;
 	for (t = gen_1; cmpii(t, lim) <= 0; t = addis(t, 1)) {
 		GEN t2 = sqri(t);
-		GEN tmp = gmul(poleval(P, t2), HurwitzClassNumber(subii(p4, t2)));
+		GEN tmp = gmul(poleval_denseint(P, t2), HurwitzClassNumber(subii(p4, t2)));
 		ret = gadd(ret, tmp);
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 2, &t, &ret);

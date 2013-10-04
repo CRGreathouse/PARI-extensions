@@ -451,7 +451,6 @@ hamming(GEN n)
 	return sum + hamming_word(u);
 }
 
-
 static const ulong DS[] ={
 	0,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10,11,3,4,5,6,7,8,
 	9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,9,10,11,
@@ -814,4 +813,22 @@ fusc_large(GEN n)
 	b = gerepileupto(ltop, b);
 	return b;
 	#undef fusc8bits
+}
+
+
+// Evaluate the integer polynomial x at integer y.
+// Also accepts a t_VEC or t_COL as Polrev(x).
+// Optimized for dense polynomials using Horner's rule.
+GEN
+poleval_denseint(GEN x, GEN y)
+{
+	long i = lg(x)-1, imin = (typ(x) == t_POL) ? 2 : 1;
+	if (i<=imin)
+		return (i==imin) ? icopy(gel(x,imin)) : gen_0;
+
+	pari_sp ltop = avma;
+	GEN ret = gel(x,i);
+	for (i-- ; i>=imin; i--)
+		ret = addii(mulii(ret,y),gel(x,i));
+	return gerepileupto(ltop,ret);
 }
