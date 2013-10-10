@@ -553,7 +553,7 @@ Eng_tiny(long n)
 	}
 
 	if (n < 20) {
-		static char* lookup[] = {"","one","two","three","four","five","six",
+		static const char* lookup[] = {"","one","two","three","four","five","six",
 		"seven","eight","nine","ten","eleven","twelve","thirteen","fourteen",
 		"fifteen","sixteen","seventeen","eighteen","ninteen"};
 		GEN ret = Str(mkvec2(s, strtoGENstr(lookup[n])));
@@ -562,7 +562,7 @@ Eng_tiny(long n)
 	}
 	
 	long tmp = n / 10;
-	static char* lookup[] = {"","","twenty","thirty","forty","fifty","sixty",
+	static const char* lookup[] = {"","","twenty","thirty","forty","fifty","sixty",
 	"seventy","eighty","ninety"};
 	s = Str(mkvec2(s, strtoGENstr(lookup[tmp])));
 	n -= 10 * tmp;
@@ -576,7 +576,7 @@ Eng_tiny(long n)
 GEN
 Edigit(long n)
 {
-	static char* lookup[] = {"","one","two","three","four","five","six","seven",
+	static const char* lookup[] = {"","one","two","three","four","five","six","seven",
 	"eight","nine"};
 	return strtoGENstr(lookup[n]);
 }

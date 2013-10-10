@@ -301,15 +301,13 @@ GEN
 initial(GEN n, char *s)
 {
 	pari_sp ltop = avma;
-	char *l1;		/* str */
 	GEN p2 = gen_0, p3 = gen_0;
 	if (typ(n) != t_INT)
 		pari_err_TYPE("initial", n);
 	if (cmpis(n, 0) == 0)
 	{
-		l1 = "";
 		avma = ltop;
-		return strtoGENstr(l1);
+		return strtoGENstr("");
 	}
 	if (equalim1(n))
 	{
@@ -332,15 +330,13 @@ GEN
 medial(GEN n, char *s)
 {
 	pari_sp ltop = avma;
-	char *l1;		/* str */
 	GEN p2 = gen_0, p3 = gen_0, p4 = gen_0, p5 = gen_0;
 	if (typ(n) != t_INT)
 		pari_err_TYPE("medial", n);
 	if (cmpis(n, 0) == 0)
 	{
-		l1 = "";
 		avma = ltop;
-		return strtoGENstr(l1);
+		return strtoGENstr("");
 	}
 	if (equalim1(n))
 	{
