@@ -2,7 +2,6 @@
 /**												 Other number theory															**/
 /******************************************************************************/
 
-
 long
 isfactorial(GEN n)
 {
@@ -172,17 +171,17 @@ issquarefree_small(ulong n)
 	if (tmp == 2)
 		n >>= 1;
 	
-	long p = 0;
-	byteptr primepointer = diffptr;
-	NEXT_PRIME_VIADIFF(p, primepointer);	// Skip 2
+	ulong last = cuberoot(n);
+	ulong last1 = minuu(last, CUTOFF);
+
+	long p;
+    forprime_t primepointer;
+    u_forprime_init(&primepointer, 3, CUTOFF);
 
 	// First loop: remove tiny primes, don't calculate cube roots
 	// 99.7% of non-squarefree numbers are detected by this loop (or the above)
-	for (;;)
+    while ((p = u_forprime_next(&primepointer)) < 98)
 	{
-		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (p > 97)
-			break;
 		if (n%p == 0) {
 			n /= p;
 			if (n%p == 0)
@@ -191,10 +190,10 @@ issquarefree_small(ulong n)
 	}
 	
 	// Beyond this point, 99.89% of numbers are squarefree.
-	ulong last = cuberoot(n);
-	ulong last1 = minuu(last, CUTOFF);
-	for (;;)
+    while ((p = u_forprime_next(&primepointer)))
 	{
+		if (p > last1)
+			break;
 		if (n%p == 0) {
 			n /= p;
 			if (n%p == 0)
@@ -202,10 +201,6 @@ issquarefree_small(ulong n)
 			last = cuberoot(n);
 			last1 = minuu(last, CUTOFF);
 		}
-		
-		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (p > last1)
-			break;
 	}
 
 #ifdef LONG_IS_64BIT
