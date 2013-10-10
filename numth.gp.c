@@ -3,6 +3,56 @@
 /******************************************************************************/
 
 long
+Collatz(GEN n)
+{
+	if (typ(n) != t_INT)
+		pari_err_TYPE("Collatz",n);
+	if (signe(n) < 1)
+		pari_err_DOMAIN("Collatz", "n", "<", gen_1, n);
+	pari_sp ltop = avma;
+
+	long v = vali(n);
+	if (v) n = shifti(n, -v);	// Possible stack garbage
+	ulong nn = itou_or_0(n);
+#ifdef LONG_IS_64BIT
+	if (nn && nn < 23035537407UL)
+#else
+	if (nn && nn < 159487UL)
+#endif
+		return Collatz_tiny(nn);
+	
+	long iterations = 0;
+#ifdef LONG_IS_64BIT
+	while (cmpiu(n, 23035537407UL) >= 0) {
+#else
+	while (cmpiu(n, 159487UL) >= 0) {
+#endif
+		iterations++;
+		n = addii(n, addis(shifti(n, -1), 1));
+		v = vali(n);
+		if (v) n = shifti(n, -v);
+		// Not sure if it's worthwhile to collect garbage in this loop.
+	}
+	
+	avma = ltop;
+	return iterations + Collatz_tiny(itou_or_0(n));
+}
+
+long
+Collatz_tiny(ulong n)
+{
+	long iterations = 0;
+	//n >>= vals(n);	// It is the caller's responsibility to pass an odd number
+	while (n > 1) {
+		iterations++;
+		n += (n>>1)+1;
+		n >>= vals(n);
+	}
+	return iterations;
+}
+
+
+long
 isfactorial(GEN n)
 {
 	if (typ(n) != t_INT)
