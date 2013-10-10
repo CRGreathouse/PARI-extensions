@@ -234,6 +234,7 @@ GEN tau(GEN n);
 GEN poleval_denseint(GEN x, GEN y);
 long Collatz(GEN n);
 long Collatz_tiny(ulong n);
+long consistency(void);
 long issm3(long n) __attribute__ ((const));
 long ispow3_tiny(ulong n) __attribute__ ((const));
 long isSmallFib(long n) __attribute__ ((const));
