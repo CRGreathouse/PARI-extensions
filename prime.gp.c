@@ -22,14 +22,12 @@ issemiprime(GEN n)
 		return ret;
 	}
 	
-	long p = 0;
-	byteptr primepointer = diffptr;
-	NEXT_PRIME_VIADIFF(p, primepointer);	// Skip 2
-	for (;;)
-	{
-		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (p > 997)	// What is a good breakpoint here?
-			break;
+
+	long p;
+    forprime_t primepointer;
+    u_forprime_init(&primepointer, 3, 997);	// What is a good breakpoint here?
+    while ((p = u_forprime_next(&primepointer)))
+    {
 		if (dvdis(n, p))
 		{
 			long ret = isprime(diviuexact(n, p));
@@ -156,9 +154,9 @@ With prime test fronting, before even rho:
 long
 uissemiprime(ulong n)
 {
-#define CUTOFF 1000UL
+#define CUTOFF 1000
 #ifdef LONG_IS_64BIT
-	#if CUTOFF <= 2642245UL
+	#if CUTOFF <= 2642245
 		#define CUTOFF_CUBE CUTOFF * CUTOFF * CUTOFF
 	#else
 		#define CUTOFF_CUBE 18446744073709551615UL
@@ -179,11 +177,11 @@ uissemiprime(ulong n)
 		return uisprime(n >> 1);
 
 	// If n is small, simply test up to the cube root; no need for fancy stuff
-	ulong lim;
+	long lim;
 	if (n <= CUTOFF_CUBE) {
 		if (n < 9)
 			return 0;
-		lim = cuberoot(n);
+		lim = (long)cuberoot(n);
 
 		long p = 0;
 		byteptr primepointer = diffptr;
