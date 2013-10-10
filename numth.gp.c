@@ -222,7 +222,7 @@ issquarefree_small(ulong n)
 		n >>= 1;
 	
 	ulong last = cuberoot(n);
-	ulong last1 = minuu(last, CUTOFF);
+	long last1 = (long)minuu(last, CUTOFF);
 
 	long p;
     forprime_t primepointer;
@@ -249,7 +249,7 @@ issquarefree_small(ulong n)
 			if (n%p == 0)
 				return 0;
 			last = cuberoot(n);
-			last1 = minuu(last, CUTOFF);
+			last1 = (long)minuu(last, CUTOFF);
 		}
 	}
 
@@ -263,7 +263,7 @@ issquarefree_small(ulong n)
 
 	// n is at least CUTOFF^3 and is not divisible by any prime under CUTOFF
 	if (last < 65536) {	// maxprime() > 65536
-		for (;;)
+		while ((p = u_forprime_next(&primepointer)))
 		{
 			if (n%p == 0) {
 				n /= p;
@@ -271,12 +271,9 @@ issquarefree_small(ulong n)
 					return 0;
 				last = cuberoot(n);
 			}
-			
-			NEXT_PRIME_VIADIFF(p, primepointer);
 			if (p > last)
-				break;
+				return !uissquare(n);
 		}
-		return !uissquare(n);
 	}
 	
 	// n is at least 49 bits
