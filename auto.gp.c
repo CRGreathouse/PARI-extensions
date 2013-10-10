@@ -7,7 +7,6 @@ GP;install("primezeta","D0,G,p","primezeta","./auto.gp.so");
 GP;addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 GP;install("isfactorial","lG","isfactorial","./auto.gp.so");
 GP;addhelp(isfactorial, "isfactorial(n): Is n a factorial? Sloane's A012245; characteristic function of Sloane's A000142.");
-GP;install("facmod","LL","facmod","./auto.gp.so");
 GP;install("glnBell","L","lnBell", "./auto.gp.so");
 GP;install("issm3","lL","issm3","./auto.gp.so");
 GP;install("Bell","L","Bell","./auto.gp.so");
