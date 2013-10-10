@@ -221,9 +221,6 @@ issquarefree_small(ulong n)
 	if (tmp == 2)
 		n >>= 1;
 	
-	ulong last = cuberoot(n);
-	long last1 = (long)minuu(last, CUTOFF);
-
 	long p;
     forprime_t primepointer;
     u_forprime_init(&primepointer, 3, CUTOFF);
@@ -239,6 +236,9 @@ issquarefree_small(ulong n)
 		}
 	}
 	
+	long last = (long)cuberoot(n);
+	long last1 = (long)minuu(last, CUTOFF);
+
 	// Beyond this point, 99.89% of numbers are squarefree.
     while ((p = u_forprime_next(&primepointer)))
 	{
@@ -248,7 +248,7 @@ issquarefree_small(ulong n)
 			n /= p;
 			if (n%p == 0)
 				return 0;
-			last = cuberoot(n);
+			last = (long)cuberoot(n);
 			last1 = (long)minuu(last, CUTOFF);
 		}
 	}
@@ -261,6 +261,8 @@ issquarefree_small(ulong n)
 #endif
 	return n == 1 || !uissquare(n);
 
+    u_forprime_init(&primepointer, p+2, last);
+
 	// n is at least CUTOFF^3 and is not divisible by any prime under CUTOFF
 	if (last < 65536) {	// maxprime() > 65536
 		while ((p = u_forprime_next(&primepointer)))
@@ -269,7 +271,7 @@ issquarefree_small(ulong n)
 				n /= p;
 				if (n%p == 0)
 					return 0;
-				last = cuberoot(n);
+				last = (long)cuberoot(n);
 			}
 			if (p > last)
 				return !uissquare(n);
@@ -320,22 +322,21 @@ issquarefree_small(ulong n)
 	// 300000	72.06
 	// 250000	72.33
 	// 100000	72.51
-	if (last > 300000 || last > maxprime())	// TODO: Find good breakover point here
+	if (last > 300000 || (ulong)last > maxprime())	// TODO: Find good breakover point here
 	{
 		long ret = Z_issquarefree(stoi(n));
 		avma = ltop;
 		return ret;
 	}
-	for (;;)
+	while ((p = u_forprime_next(&primepointer)))
 	{
 		if (n%p == 0) {
 			n /= p;
 			if (n%p == 0)
 				return 0;
-			last = cuberoot(n);
+			last = (long)cuberoot(n);
 		}
 		
-		NEXT_PRIME_VIADIFF(p, primepointer);
 		if (p > last)
 			break;
 	}
