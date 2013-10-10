@@ -672,7 +672,7 @@ fusc(GEN n)
 	// Note: Different constants depending on word size!
 #ifdef LONG_IS_64BIT
 	long l = lgefint(n);
-	if (l < 4 || (l == 4 && *int_MSW(n) <= 13153337344UL))
+	if (l < 4 || (l == 4 && (ulong)(*int_MSW(n)) <= 13153337344UL))
 #else
 	if (cmpii(n, u2toi(9386, 2863311530UL)) <= 0)
 #endif
