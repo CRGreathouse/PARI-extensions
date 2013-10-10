@@ -746,7 +746,9 @@ isperiodic(v:vec)={
 	for(k=1,(#v+1)\2,
 		for(i=k+1,#v,if(v[i]!=v[i-k], next(2)));
 		return(k)
-	)
+	);
+	print("Not periodic with period <= ",(#v+1)\2);
+	0
 };
 
 
