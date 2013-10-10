@@ -351,7 +351,7 @@ ucountPowerfulu(ulong n)
 {
 	if (n < 4)	/* avoid log(0) */
 		return n > 0;
-	int i, crossover = (int)exp(log(n) * 0.14);
+	int i, crossover = (int)pow(n, .14);
 	ulong res = 0, k, breakpoint = cuberoot(n / (crossover * crossover));
 /*
 pari_printf("Counting squarefrees until %d, values ranging from %lu to %lu;\n",
@@ -881,7 +881,7 @@ tetrMod(GEN a, GEN b, GEN M)
 
 
 GEN
-tetrMod_tiny(ulong a, ulong b, ulong M)
+tetrMod_tiny(ulong a __attribute__((unused)), ulong b __attribute__((unused)), ulong M __attribute__((unused)))
 {
 	/*
 	if (typ(a) != t_INT || typ(b) != t_INT || typ(M) != t_INT)
