@@ -167,7 +167,6 @@ GEN prodtree(GEN A, long start, long stop);
 GEN gpf(GEN n);
 GEN lpf(GEN n);
 long isFibonacci(GEN n);
-long isSmallFib(long n);
 GEN fibmod(GEN n, GEN m);
 long Pisano(long p, long e);
 INLINE long hamming_word(ulong w);
@@ -213,8 +212,6 @@ GEN longestProgression(GEN v);
 GEN longestProgression1(GEN v);
 GEN fusc(GEN n);
 GEN fusc_large(GEN n);
-ulong fusc_small(GEN n);
-ulong cuberoot(ulong n);
 ulong ucountPowerfulu(ulong lim);
 long issquarefree_small(ulong n);
 void forodd(GEN a, GEN b, GEN code);
@@ -237,6 +234,11 @@ GEN tau(GEN n);
 GEN poleval_denseint(GEN x, GEN y);
 long Collatz(GEN n);
 long Collatz_tiny(ulong n);
+long issm3(long n) __attribute__ ((const));
+long ispow3_tiny(ulong n) __attribute__ ((const));
+long isSmallFib(long n) __attribute__ ((const));
+ulong cuberoot(ulong n) __attribute__ ((const));
+ulong fusc_small(GEN n) __attribute__ ((pure));
 
 #define FAKE_PREC 0		// Used when a precision is required but will not be used
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
