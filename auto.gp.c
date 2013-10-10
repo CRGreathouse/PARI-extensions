@@ -124,6 +124,8 @@ GP;install("tau","G","tau","./auto.gp.so");
 GP;addhelp(tau, "tau(n): Ramanujan's tau function, Sloane's A000594.");
 GP;install("HurwitzClassNumber","G","H","./auto.gp.so");
 GP;addhelp(H, "H(n): The Hurwitz class number. Counts the number of equivalence classes of positive definite quadratic forms ax^2 + bxy + cy^2 with discriminant b^2-4ac = -n, counting forms equivalent to x^2+y^2 with weight 1/2 and forms equivalent to x^2+xy+y^2 with weight 1/3.");
+GP;install("Collatz","lG","Collatz","./auto.gp.so");
+GP;addhelp(Collatz, "Collatz(n): Number of triplings to reach 1 via the Collatz relation; Sloane's A006667.");
 GP;alias(isPowerful, ispowerful);
 GP;alias(hamming, hammingweight);
 GP;alias(graeffe,polgraeffe);
@@ -238,6 +240,8 @@ GEN taup_big(GEN p);
 GEN taup(GEN p, long e);
 GEN tau(GEN n);
 GEN poleval_denseint(GEN x, GEN y);
+long Collatz(GEN n);
+long Collatz_tiny(ulong n);
 
 #define FAKE_PREC 0		// Used when a precision is required but will not be used
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
