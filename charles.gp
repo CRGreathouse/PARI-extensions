@@ -7,7 +7,6 @@ default(timer, 0);
 \\ ***************************************************************************************************
 
 
-
 \\ ***************************************************************************************************
 \\ *					Uncategorized
 \\ ***************************************************************************************************
@@ -1051,16 +1050,16 @@ R(x)={
 	local(l2,u);
 	l2 = li(2);
 	u = -log(x);
-	-suminf(n=1,
+	-real(suminf(n=1,
 		moebius(n)/n * (eint1(u/n) + l2)
-	)
+	))
 };
 addhelp(R, "Riemann's R function, an estimate for primepi.");
 
-li(x)=-eint1(-log(x));
+li(x)=-real(eint1(-log(x)));
 addhelp(li, "Logarithmic integral.");
 
-Li(x)=eint1(-log(2)) - eint1(-log(x));
+Li(x)=real(eint1(-log(2)) - eint1(-log(x)));
 addhelp(Li, "Offset logarithmic integral, an estimate for primepi. Crandall and Pomerance call this li_0.");
 
 piBounds(x,verbose:bool=0)={
@@ -1086,7 +1085,7 @@ piBounds(x,verbose:bool=0)={
 		t = x/lx * (1 + 1.0992/lx);			\\ Dusart, x >= 1.332e10
 		if (upper > t, upper = t)
 	);
-	
+	/*
 	if (roundFlag,
 		lower = ceil(lower);
 		upper = floor(upper);
@@ -1128,6 +1127,7 @@ piBounds(x,verbose:bool=0)={
 		);
 		print();
 	);
+	*/
 	[lower, upper]
 };
 addhelp(piBounds, "piBounds(x, verbose=0): Bounds on primepi(x). Set verbose=1 to get a list of sources for the results.");
