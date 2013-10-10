@@ -709,38 +709,44 @@ prodtree_small(GEN A, long start, long stop)
 GEN
 primorial(GEN n)
 {
-	static const long smallpr[] = {
-		1, 1, 2, 6, 6, 30, 30, 210, 210, 210, 210, 2310, 2310, 30030, 30030, 30030,
-		30030, 510510, 510510, 9699690, 9699690, 9699690, 9699690, 223092870,
-		223092870, 223092870, 223092870, 223092870, 223092870
+	static const ulong smallpr[] = {
+		1UL, 1UL, 2UL, 6UL, 6UL, 30UL, 30UL, 210UL, 210UL, 210UL, 210UL, 2310UL,
+		2310UL, 30030UL, 30030UL, 30030UL, 30030UL, 510510UL, 510510UL, 9699690UL,
+		9699690UL, 9699690UL, 9699690UL, 223092870UL, 223092870UL, 223092870UL,
+		223092870UL, 223092870UL, 223092870UL
 #ifdef LONG_IS_64BIT
-		, 6469693230, 6469693230, 200560490130, 200560490130, 200560490130,
-		200560490130, 200560490130, 200560490130
+		, 6469693230UL, 6469693230UL, 200560490130UL, 200560490130UL,
+		200560490130UL, 200560490130UL, 200560490130UL, 200560490130UL,
+		7420738134810UL, 7420738134810UL, 7420738134810UL, 7420738134810UL,
+		304250263527210UL, 304250263527210UL, 13082761331670030UL,
+		13082761331670030UL, 13082761331670030UL, 13082761331670030UL,
+		614889782588491410UL, 614889782588491410UL, 614889782588491410UL,
+		614889782588491410UL, 614889782588491410UL, 614889782588491410UL
 #endif
 	};
 	
 	pari_sp ltop = avma;
-	long nn = NEVER_USED;
+	ulong nn = NEVER_USED;
 	GEN ret;
 	if (typ(n) == t_REAL) {
-		nn = itos_or_0(floorr(n));
+		if (signe(n) < 1) return gen_1;
+		nn = itou_or_0(floorr(n));
 		avma = ltop;
 	} else if (typ(n) == t_INT) {
-		nn = itos_or_0(n);
+		if (signe(n) < 1) return gen_1;
+		nn = itou_or_0(n);
 	} else {
 		pari_err_TYPE("primorial", n);
 	}
 	
-	if (signe(n) <= 0)
-		return gen_1;
 	if (nn > maxprime() || nn == 0)	// nn == 0 if n didn't fit into a word
 		pari_err_MAXPRIME(nn);
 #ifdef LONG_IS_64BIT
-	if (nn < 37)
+	if (nn < 53)
 #else
 	if (nn < 29)
 #endif
-		return stoi(smallpr[nn]);
+		return utoipos(smallpr[nn]);
 
 	ulong primeCount = uprimepi(nn);
 	GEN pr = primes_zv(primeCount);
