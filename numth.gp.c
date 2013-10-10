@@ -604,9 +604,11 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 		lim = gfloor(lim);
 	else if (typ(lim) != t_INT)
 		pari_err_TYPE("bigfactor", lim);
-	long lm = itos(lim);
+	ulong lm = itou_or_0(lim);
 	if (lm > maxprime())
-		pari_err_MAXPRIME(lm);	// TODO: Should be ulong not long
+		pari_err_MAXPRIME(lm);
+	if (!lm)
+		pari_err(e_MISC, "bigfactor: Not enough primes on your architechture for that!");
 
 	if (signe(b) < 0)
 	{
@@ -626,20 +628,15 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 		/* a^b not in Z */
 		pari_err_OP("bigfactor", a, b);
 	}
-	long p3 = minss(itos(a), lm);
+	ulong p3 = minuu(itou(a), lm);
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-	long p = 0;
-	byteptr primepointer = diffptr;
 	GEN p5 = gen_0;		/* int */
-	if (p3 > maxprime())
-		pari_err_MAXPRIME(p3);
 
-	// First loop -- deal with small primes
-	for (;;)
+	long p;
+    forprime_t primepointer;
+    u_forprime_init(&primepointer, 3, lm);
+    while ((ulong)(p = u_forprime_next(&primepointer)) <= p3)
 	{
-		NEXT_PRIME_VIADIFF(p, primepointer);
-		if (p > p3)
-			break;
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &v);
 		if (cmpis(gcdii(a, stoi(p)), 1) > 0)
@@ -669,15 +666,10 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 	v = gerepileupto(btop, v);
 	btop = avma;
 	st_lim = stack_lim(btop, 1);
-	p = 0;
-	primepointer = diffptr;
 
 	// Second loop -- most of the work is done here
-	for (;;)
+    while ((p = u_forprime_next(&primepointer)))
 	{
-		NEXT_PRIME_VIADIFF(p, primepointer);
-		//if (p < p4)
-		//	continue;
 		if (cmpsi(p, lim) > 0)
 			break;
 		if (low_stack(st_lim, stack_lim(btop, 1)))
