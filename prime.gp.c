@@ -376,25 +376,16 @@ isPowerful(GEN n)
 		for (i = 1; i <= len; i++) {
 			GEN q = gel(pr, i);	// The found factor, probably prime
 			long e = itos(gel(expo, i));
-			GEN nn = n = diviiexact(n, powis(q, e));
-			GEN g = gcdii(nn, q);
+			n = diviiexact(n, powis(q, e));
+			GEN g = gcdii(n, q);
 			if (is_pm1(g)) {
-				if (e > 1 || isPowerful(q)) {
-					n = nn;
-				} else {
+				if (e <= 1 && !isPowerful(q)) {
 					avma = ltop;
 					return 0;
 				}
 			} else {
 				// This really shouldn't happen!
-				GEN nnn;
-				long ee = Z_pvalrem(n, q, &nnn);
-				if (ee > 1 || isPowerful(nnn)) {
-					n = nnn;
-				} else {
-					avma = top;
-					return 0;
-				}
+				pari_err_BUG(pari_sprintf("Unexpected factor %Ps found after %Ps was removed; the latter could be a BPSW pseudoprime but more likely this is a bug.", g, q));
 			}
 		}
 	}
