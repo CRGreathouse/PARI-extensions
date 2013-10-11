@@ -880,9 +880,10 @@ tetrMod(GEN a, GEN b, GEN M)
 }
 
 
-GEN
-tetrMod_tiny(ulong a __attribute__((unused)), ulong b __attribute__((unused)), ulong M __attribute__((unused)))
+ulong
+tetrMod_tiny(ulong a, ulong b, ulong M)
 {
+	(void)a;(void)b;(void)M;
 	/*
 	if (typ(a) != t_INT || typ(b) != t_INT || typ(M) != t_INT)
 		pari_err(typeer, "tetrMod");
