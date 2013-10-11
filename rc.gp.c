@@ -340,22 +340,18 @@ contfracback(GEN v, GEN terms)
 double
 W_small(double x)
 {
-	if (x <= 0)
-	{
-		if (!x)
-			return 0.0;
-		if (x == -exp(-1))
-			return -1.0;	// otherwise, sometimes sqrt becomes complex?
-		if (x < -exp(-1))
-			pari_err_DOMAIN("W_small", "x", "<", gneg(gexp(gen_m1, DEFAULTPREC)), dbltor(x));
-	}
 	double e, w, t = 1.0;
 	
 	// Initial approximation for iteration
 	if (x < 1)
 	{
-		double tmp = sqrt(2 * exp(1) * x + 2);
-		w = (1 - (11/72*tmp + 1/3)*tmp)*tmp - 1;
+		double tmp = sqrt(2*M_E*(x + 1/M_E));
+		w = (1 + (11/72*tmp - 1/3)*tmp)*tmp - 1;
+		if (x < (-1/M_E + DBL_EPSILON * 1000000)) {
+			if (x < -1/M_E)	// W(x) undefined for x < -1/e
+				pari_err_DOMAIN("W_small", "x", "<", gneg(gexp(gen_m1, DEFAULTPREC)), dbltor(x));
+			return w;
+		}
 	} else {
 		w = log(x);
 	}
