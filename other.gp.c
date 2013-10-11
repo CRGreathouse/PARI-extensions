@@ -1,5 +1,5 @@
 long
-consistency()
+consistency(void)
 {
 	pari_sp ltop = avma;
 	ulong n;
