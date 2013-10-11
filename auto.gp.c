@@ -172,7 +172,6 @@ long Pisano(long p, long e);
 INLINE long hamming_word(ulong w);
 long ispow2(GEN n);
 long ispow3(GEN n);
-long ispow3_tiny(ulong n);
 long istwo(GEN n);
 GEN ways2(GEN n);
 long isthree(GEN n);
