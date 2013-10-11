@@ -55,25 +55,25 @@ issemiprime(GEN n)
 			avma = ltop;
 			return 0;
 		}
-		GEN p = gel(pr, 1);
-		GEN q = gel(pr, 2);
-		long ret = equalii(mulii(p, q), n) && isprime(p) && isprime(q);
+		GEN P = gel(pr, 1);
+		GEN Q = gel(pr, 2);
+		long ret = isprime(P) && isprime(Q) && equalii(mulii(P, Q), n);
 		avma = ltop;
 		return ret;
 	}
 	if (len == 1) {
 		long e = itos(gel(expo, 1));
 		if (e == 2) {
-			GEN p = gel(pr, 1);
-			long ret = equalii(sqri(p), n) && isprime(p);
+			GEN P = gel(pr, 1);
+			long ret = isprime(P) && equalii(sqri(P), n);
 			avma = ltop;
 			return ret;
 		} else if (e > 2) {
 			avma = ltop;
 			return 0;
 		}
-		GEN p = gel(pr, 1);
-		long ret = isprime(p) && isprime(diviiexact(n, p));
+		GEN P = gel(pr, 1);
+		long ret = isprime(P) && isprime(diviiexact(n, P));
 		avma = ltop;
 		return ret;
 	}
