@@ -97,26 +97,22 @@ sumset(GEN a, GEN b)		/* vecsmall */
 		gel(p2, l5) = gen_0;
 	c = p2;
 	l3 = glength(a);
-{
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+	pari_sp btop = avma, b_lim = stack_lim(btop, 1);
 	long i, l6;
 	for (i = 1; i <= l3; ++i)
 	{
 		l6 = glength(b);
-{
-		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+		pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
 		long j;
 		for (j = 1; j <= l6; ++j)
 		{
 			gel(c, ((i - 1)*glength(b)) + j) = gadd(gel(a, i), gel(b, j));
-			if (low_stack(st_lim, stack_lim(btop, 1)))
-				c = gerepilecopy(btop, c);
+			if (low_stack(c_lim, stack_lim(ctop, 1)))
+				c = gerepilecopy(ctop, c);
 		}
-}
-		if (low_stack(st_lim, stack_lim(btop, 1)))
+		if (low_stack(b_lim, stack_lim(btop, 1)))
 			c = gerepilecopy(btop, c);
 	}
-}
 	p4 = vecsort0(c, NULL, 8);
 	p4 = gerepileuptoleaf(ltop, p4);
 	return p4;
@@ -147,16 +143,14 @@ diffset(GEN a, GEN b)		/* vecsmall */
 		for (i = 1; i <= l3; ++i)
 		{
 			l6 = glength(b);
-			{
-				pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+				pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
 				long j;
 				for (j = 1; j <= l6; ++j)
 				{
 					gel(c, ((i - 1)*glength(b)) + j) = gsub(gel(a, i), gel(b, j));
-					if (low_stack(st_lim, stack_lim(btop, 1)))
-						c = gerepilecopy(btop, c);
+					if (low_stack(c_lim, stack_lim(ctop, 1)))
+						c = gerepilecopy(ctop, c);
 				}
-			}
 			if (low_stack(st_lim, stack_lim(btop, 1)))
 				c = gerepilecopy(btop, c);
 		}
@@ -314,25 +308,21 @@ longestProgression(GEN v)
 		{
 			p3 = gaddgs(i, 1);
 			l4 = glength(v);
+			pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
+			GEN j = gen_0;
+			for (j = p3; gcmpgs(j, l4) <= 0; j = gaddgs(j, 1))
 			{
-				pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-				GEN j = gen_0;
-				for (j = p3; gcmpgs(j, l4) <= 0; j = gaddgs(j, 1))
-				{
-					t = gen_2;
-					d = gsub(gel(v, gtos(j)), gel(v, gtos(i)));
+				t = gen_2;
+				d = gsub(gel(v, gtos(j)), gel(v, gtos(i)));
+					pari_sp dtop = avma;
+					while (setsearch(s, gadd(gel(v, gtos(i)), gmul(d, t)), 0))
 					{
-						pari_sp btop = avma;
-						while (setsearch(s, gadd(gel(v, gtos(i)), gmul(d, t)), 0))
-						{
-							t = gaddgs(t, 1);
-							t = gerepileupto(btop, t);
-						}
+						t = gaddgs(t, 1);
+						t = gerepileupto(dtop, t);
 					}
-					r = gmax(r, t);
-					if (low_stack(st_lim, stack_lim(btop, 1)))
-						gerepileall(btop, 4, &j, &t, &d, &r);
-				}
+				r = gmax(r, t);
+				if (low_stack(c_lim, stack_lim(ctop, 1)))
+					gerepileall(ctop, 4, &j, &t, &d, &r);
 			}
 			if (low_stack(st_lim, stack_lim(btop, 1)))
 				gerepileall(btop, 5, &i, &p3, &t, &d, &r);
@@ -379,41 +369,37 @@ longestProgression1(GEN v)
 		{
 			i = gsubgs(j, 1);
 			k = gaddgs(j, 1);
+			pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
+			while ((gcmpgs(i, 0) > 0) && (gcmpgs(k, glength(v)) <= 0))
 			{
-				pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-				while ((gcmpgs(i, 0) > 0) && (gcmpgs(k, glength(v)) <= 0))
+				tmp = gsub(gadd(gel(v, gtos(i)), gel(v, gtos(k))), gmulsg(2, gel(v, gtos(j))));
+				if (gcmpgs(tmp, 0) < 0)
+					k = gaddgs(k, 1);
+				else
 				{
-					tmp = gsub(gadd(gel(v, gtos(i)), gel(v, gtos(k))), gmulsg(2, gel(v, gtos(j))));
-					if (gcmpgs(tmp, 0) < 0)
-						k = gaddgs(k, 1);
+					if (gcmpgs(tmp, 0) > 0)
+					{
+						gcoeff(L, gtos(i), gtos(j)) = gen_2;
+						i = gsubgs(i, 1);
+					}
 					else
 					{
-						if (gcmpgs(tmp, 0) > 0)
-						{
-							gcoeff(L, gtos(i), gtos(j)) = gen_2;
-							i = gsubgs(i, 1);
-						}
-						else
-						{
-							gcoeff(L, gtos(i), gtos(j)) = gaddgs(gcoeff(L, gtos(j), gtos(k)), 1);
-							Lstar = gmax(Lstar, gcoeff(L, gtos(i), gtos(j)));
-							i = gsubgs(i, 1);
-							k = gaddgs(k, 1);
-						}
+						gcoeff(L, gtos(i), gtos(j)) = gaddgs(gcoeff(L, gtos(j), gtos(k)), 1);
+						Lstar = gmax(Lstar, gcoeff(L, gtos(i), gtos(j)));
+						i = gsubgs(i, 1);
+						k = gaddgs(k, 1);
 					}
-					if (low_stack(st_lim, stack_lim(btop, 1)))
-						gerepileall(btop, 5, &tmp, &k, &L, &i, &Lstar);
 				}
+				if (low_stack(c_lim, stack_lim(ctop, 1)))
+					gerepileall(ctop, 5, &tmp, &k, &L, &i, &Lstar);
 			}
+			ctop = avma; c_lim = stack_lim(ctop, 1);
+			while (gcmpgs(i, 0) > 0)
 			{
-				pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-				while (gcmpgs(i, 0) > 0)
-				{
-					gcoeff(L, gtos(i), gtos(j)) = gen_2;
-					i = gsubgs(i, 1);
-					if (low_stack(st_lim, stack_lim(btop, 1)))
-						gerepileall(btop, 2, &L, &i);
-				}
+				gcoeff(L, gtos(i), gtos(j)) = gen_2;
+				i = gsubgs(i, 1);
+				if (low_stack(c_lim, stack_lim(ctop, 1)))
+					gerepileall(ctop, 2, &L, &i);
 			}
 			if (low_stack(st_lim, stack_lim(btop, 1)))
 				gerepileall(btop, 6, &j, &i, &k, &tmp, &L, &Lstar);

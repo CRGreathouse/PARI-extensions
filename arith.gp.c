@@ -620,18 +620,16 @@ ways3(GEN n)
 	{
 		t = subii(n, sqri(k));
 		p3 = sqrtint(shifti(t, -1));
-{
-		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+		pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
 		GEN m;
 		p4 = gen_0;
 		for (m = k; cmpii(m, p3) <= 0; m = addis(m, 1))
 		{
 			if (Z_issquare(subii(t, gsqr(m))))
 				p4 = addis(p4, 1);
-			if (low_stack(st_lim, stack_lim(btop, 1)))
-				gerepileall(btop, 2, &p4, &m);
+			if (low_stack(c_lim, stack_lim(ctop, 1)))
+				gerepileall(ctop, 2, &p4, &m);
 		}
-}
 		res = addii(res, p4);
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 4, &res, &k, &p3, &p4);

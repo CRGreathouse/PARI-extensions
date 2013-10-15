@@ -256,14 +256,14 @@ DickmanRho(GEN x, long prec)
   
 	// Asymptotic estimate (scaled for continuity)
 	if (xx > rhoTableLen) {
-		double scale = rhoScale;
-		scale = (scale - 1) * sqrt(sqrt(rhoTableLen / xx)) + 1;
+		double sc = rhoScale;
+		sc = (sc - 1) * sqrt(sqrt(rhoTableLen / xx)) + 1;
 		/* Let the scale factor dwindle away, since the estimate is (presumably) */
 		/* better in the long run than any scaled version of it.  The exponent */
 		/* of 0.25 has been chosen to give the best results for 10 < x < 100 */
 		/* with a table size of 10. */
 
-		ret = precision0(mulrr(rhoest(x, prec), dbltor(scale)), 9);
+		ret = precision0(mulrr(rhoest(x, prec), dbltor(sc)), 9);
 		ret = gerepileupto(ltop, ret);
 		return ret;
 	}

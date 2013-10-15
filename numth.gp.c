@@ -647,7 +647,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 			continue;
 		v = concat(v, stoi(p));
 		long i = 2;
-		pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+		pari_sp ctop = avma, c_lim = stack_lim(btop, 1);
 		GEN p6 = gen_0;
 		for(;;)
 		{
@@ -659,8 +659,8 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 				break;
 			v = concat(v, stoi(p));
 			i++;
-			if (low_stack(st_lim, stack_lim(btop, 1)))
-				v = gerepileupto(btop, v);
+			if (low_stack(c_lim, stack_lim(ctop, 1)))
+				v = gerepileupto(ctop, v);
 		}
 	}
 	v = gerepileupto(btop, v);
@@ -806,8 +806,7 @@ solvePell(GEN n)
 	pari_sp btop = avma;
 	while (1) {
 		C = contfrac0(gsqrt(n, myprec), NULL, 0);
-{
-		pari_sp btop = avma;
+		pari_sp ctop = avma;
 		GEN p1, p2;	  /* vec */
 		while (k++ <= glength(C)) {
 			long i;
@@ -824,9 +823,8 @@ solvePell(GEN n)
 				p2 = gerepileupto(ltop, p2);
 				return p2;
 			}
-			avma = btop;
+			avma = ctop;
 		}
-}
 		myprec <<= 1;
 		avma = btop;
 	}
