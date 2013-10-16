@@ -425,7 +425,7 @@ Continued fraction:
 // FIXME: Needs numerical analysis to determine stopping point.  Also needs to
 // handle rational numbers and intgers.
 GEN
-Engel(GEN x, long prec)
+Engel(GEN x)
 {
 	GEN v, t, ret;
 	switch (typ(x)) {
