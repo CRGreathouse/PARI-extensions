@@ -421,6 +421,7 @@ Continued fraction:
         b = addsi(signe(x), c);
         return gerepilecopy(av, Qsfcont(b,y, a, 0));*/
 
+
 // FIXME: Needs numerical analysis to determine stopping point.  Also needs to
 // handle rational numbers and intgers.
 GEN
@@ -453,7 +454,7 @@ Engel(GEN x, long prec)
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	while (1)
 	{
-		if (cmprr(x, real_0(prec)) == 0)
+		if (!signe(x))
 		{
 			ret = gtovec(v);
 			ret = gerepileupto(ltop, ret);
@@ -461,10 +462,10 @@ Engel(GEN x, long prec)
 		} else {
 			t = ceilr(invr(x));
 		}
-		listput(v, t, 0);
+		listput_shallow(v, t);
 		x = subrs(mulri(x, t), 1);
 		if (low_stack(st_lim, stack_lim(btop, 1)))
-			gerepileall(btop, 1, &x);
+			x = gerepileupto(btop, x);
 	}
 	return NEVER_USED;
 }
