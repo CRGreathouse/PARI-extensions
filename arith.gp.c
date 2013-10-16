@@ -68,7 +68,7 @@ ispow3(GEN n)
 	pari_sp ltop = avma;
 	double sz3 = dbllog2r(itor(n, DEFAULTPREC)) / log2(3);
 	int e = (int)(sz3 + 0.5);
-	long ret = equalii(n, powis(stoi(3), e));
+	long ret = equalii(n, powis(utoipos(3), e));
 	avma = ltop;
 	return ret;
 }

@@ -141,7 +141,7 @@ bfile(GEN name, GEN v, GEN offset)
 	} else if (typ(name) == t_STR) {
 		// TODO: Try to extract a reasonable A-number, or just set to blank?
 		Anum = strtoGENstr("000000");
-		//Anum = concat(extract0(gtovec(name), stoi(126), NULL), NULL);
+		//Anum = concat(extract0(gtovec(name), utoipos(126), NULL), NULL);
 	} else {
 		pari_err_TYPE("bfile", name);
 	}

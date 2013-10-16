@@ -5,7 +5,7 @@
 void
 listput_shallow(GEN L, GEN x)
 {
-  long l, index;
+  long l;
   GEN z = list_data(L);
   l = z ? lg(z): 1;
   ensure_nb(L, l);
@@ -149,7 +149,7 @@ countdigits(GEN x)
 {
 	pari_sp av = avma;
 	long s = sizedigit(x) - 1;
-	if (gcmp(x, powis(stoi(10), s)) >= 0)
+	if (gcmp(x, powis(utoipos(10), s)) >= 0)
 	s++;
 	avma = av;
 	return s;

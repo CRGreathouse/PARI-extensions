@@ -192,7 +192,7 @@ pBounds(GEN n, GEN verbose, long prec)
 	if (gcmpgs(n, 13196) > 0)
 		lower = gmul(n, gsub(gadd(gsubgs(gadd(l, ll), 1), gdiv(ll, l)), gdiv(strtor("2.25", prec), l)));
 	/* Dusart, n >= 2 */
-	appx = gmul(n, gadd(gadd(gsub(gsub(gadd(gsubgs(gadd(l, ll), 1), gdiv(ll, l)), gdivsg(2, l)), gdiv(gdivgs(gsqr(ll), 2), gsqr(l))), gdiv(gmulsg(3, ll), gsqr(l))), gdiv(gdivgs(stoi(11), 2), gsqr(l))));
+	appx = gmul(n, gadd(gadd(gsub(gsub(gadd(gsubgs(gadd(l, ll), 1), gdiv(ll, l)), gdivsg(2, l)), gdiv(gdivgs(gsqr(ll), 2), gsqr(l))), gdiv(gmulsg(3, ll), gsqr(l))), gdiv(gdivgs(utoipos(11), 2), gsqr(l))));
 	/* + O(ll^3/l^3) */
 	upper = gmul(n, gadd(l, ll));
 	/* ?, n >= 6 */

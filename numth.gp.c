@@ -391,9 +391,9 @@ timer_start(&T);
 		avma = ltop;
 	}
 	res -= crossover * ucountSquarefree(breakpoint);
-GEN est = divrr(czeta(gdiv(stoi(3), gen_2), MEDDEFAULTPREC),czeta(stoi(3), MEDDEFAULTPREC));
+GEN est = divrr(czeta(gdiv(utoipos(3), gen_2), MEDDEFAULTPREC),czeta(utoipos(3), MEDDEFAULTPREC));
 est = gmul(est, sqrtr(itor(n, MEDDEFAULTPREC)));
-GEN correction = divrr(czeta(gdiv(gen_2, stoi(3)), MEDDEFAULTPREC),czeta(gen_2, MEDDEFAULTPREC));
+GEN correction = divrr(czeta(gdiv(gen_2, utoipos(3)), MEDDEFAULTPREC),czeta(gen_2, MEDDEFAULTPREC));
 correction = gmul(correction, powrfrac(itor(n, MEDDEFAULTPREC), 1, 3));
 est = gadd(est, correction);
 est = gerepileupto(ltop, est);
@@ -1159,7 +1159,7 @@ HurwitzClassNumber(GEN n)
 		pari_err_TYPE("HurwitzClassNumber",n);
 	if (signe(n) < 1) {
 		if (isintzero(n))
-			return gdiv(gen_m1, stoi(12));
+			return gdiv(gen_m1, utoipos(12));
 		pari_err(e_IMPL,"HurwitzClassNumber(n) for n < 0.");
 	}
 	ulong nn = itou_or_0(n);
