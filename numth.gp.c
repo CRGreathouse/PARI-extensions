@@ -621,7 +621,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 		}
 		if (equalim1(a))
 		{
-			p2 = Z_factor(subii(stoi(1 - 2 * mpodd(b)), c));
+			p2 = Z_factor(subii(mod2(b) ? gen_m1 : gen_1, c));
 			p2 = gerepileupto(ltop, p2);
 			return p2;
 		}
