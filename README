@@ -52,7 +52,6 @@ DickmanRho(x): Estimates the value of the Dickman rho function. For x <= 3 the
     using known values and rhoest; after 15 rhoest is used, along with a
     correction factor based on the last value in rhoTable.
 diffset(A, B): Set of all numbers of the form a-b, a in A, b in B.
-dsum(n): Digit sum of n. Sloane's A007953.
 Engel(x): Engel expansion of x.
 Eng(n): English name of the number n.
 eps(): Returns machine epsilon for the current precision.
@@ -61,21 +60,13 @@ Faulhaber(e,{a='x}): Returns the polynomial for the sum 1^e + 2^e + ... + x^e,
 fibmod(n,m): Returns the nth Fibonacci number mod m. Same as finonacci(n)%m,
     but faster for large n.
 fnice(n): Returns a string with a 'nice' factorization of n.
-forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes
-    between a and b.
-forodd(X=a,b,seq): the sequence is evaluated, X running over the odds between
-    a and b.
 fusc(n): Stern's diatomic series, which has many interpretations. Sloane's
     A002487.
 gpf(n): The greatest prime factor of a number. Sloane's A006530.
-hamming(n): Hamming weight of n (considered as a binary number). Sloane's
-    A000120.
 isfactorial(n): Is n a factorial? Sloane's A012245; characteristic function of
     Sloane's A000142.
 isFibonacci(n): Is n a Fibonacci number? Sloane's A010056; characteristic
     function of Sloane's A000045.
-isHexagonal(n): Is n a hexagonal number? Characteristic function of Sloane's
-    A000384.
 ispow2(n): Is n a power of two? Characteristic function of Sloane's A000079.
 ispow3(n): Is n a power of three? Characteristic function of Sloane's A000244.
 isPowerful(n): Is n powerful (min exponent 2)? Sloane's A112526; characteristic
@@ -84,8 +75,6 @@ issemi(n): Is n a semiprime? Sloane's A064911; characteristic function of
     Sloane's A001358.
 isthree(n): Is the number the sum of three squares? Sloane's A071374;
     characteristic function of Sloane's A000378.
-isTriangular(n): Is n a triangular number? Sloane's A010054; characteristic
-    function of Sloane's A000217.
 istwo(n): Is the number a sum of two squares? Characteristic function of
     Sloane's A001481.
 largestSquareFactor(n): Largest square dividing n. Sloane's A008833.
@@ -116,7 +105,6 @@ rhoest(x): de Bruijn's asymptotic approximation for rho(x), rewritten as in
     the true value, I have not looked further into this.
 rnormal(): Returns a random normal variable with mean 0 and standard deviation
     1 at the current precision.
-rp(b): Returns a random b-bit prime.
 solvePell(n): Returns a solution to the equation x^2 - ny^2 = 1.
 sopf(n): Sum of distinct prime factors of n. Sloane's A008472.
 sopfr(n): Sum of prime factors of n (with multiplicity). Sloane's A001414.
@@ -129,8 +117,6 @@ ways2(n): Number of ways that n can be represented as a sum of two squares.
     Sloane's A000161.
 ways3(n): Number of ways that n can be represented as a sum of three squares.
     Sloane's A000164.
-W(x): Primary branch of Lambert's W function. Finds an L >= -1 such that
-    L * exp(L) = x, where x >= -1/e.
 
 
 Here are other functions that have implementations but which are not complete
