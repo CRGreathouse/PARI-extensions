@@ -256,6 +256,7 @@ GEN rev(GEN n, long B);
 ulong tetrMod_tiny(ulong a, ulong b, ulong M);
 ulong ucomposite(long n);
 ulong ucountPowerfuli(GEN n);
+void listput_shallow(GEN L, GEN x);
 long Collatz(GEN n);
 long Collatz_tiny(ulong n);
 long consistency(void);

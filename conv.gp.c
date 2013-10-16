@@ -2,6 +2,19 @@
 /**														 Convenience																	**/
 /******************************************************************************/
 
+void
+listput_shallow(GEN L, GEN x)
+{
+  long l, index;
+  GEN z = list_data(L);
+  l = z ? lg(z): 1;
+  ensure_nb(L, l);
+  z = list_data(L); /* it may change ! */
+  gel(z,l++) = x;
+  z[0] = evaltyp(t_VEC) | evallg(l); /*must be after gel(z,index) is set*/
+}
+
+
 INLINE GEN
 gtor(GEN x, const char* funcName, long prec)
 {
