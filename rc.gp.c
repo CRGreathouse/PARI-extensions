@@ -68,7 +68,7 @@ primezeta_real(GEN s)
 	// Determine the number of iterations needed
 	// The precision here is probably overkill but the extra time is irrelevant.
 	GEN t = shiftr(mulrr(rtor(s, DEFAULTPREC), dbltor(M_LN2)), 1 - precision(s));
-	GEN iter = gdivent(W(shiftr(t, 1 - prec), FAKE_PREC), t);
+	GEN iter = gdivent(mplambertW(shiftr(t, 1 - prec)), t);
 	ulong k, mx = itou(iter);
 	
 	GEN accum = real_0(prec);
@@ -370,78 +370,6 @@ W_small(double x)
 	return w;
 }
 
-
-GEN
-W(GEN x, long prec)
-{
-	pari_sp ltop = avma;
-	GEN e, t, w, ep, tmp;
-	
-	if (typ(x) == t_INT)
-		x = itor(x, prec);
-	else if (typ(x) != t_REAL)
-		pari_err_TYPE("W", x);
-	prec = precision(x);
-	
-	if (signe(x) <= 0)
-	{
-		if (!signe(x))
-		{
-			avma = ltop;
-			return real_0(prec);
-		}
-		pari_sp btop = avma;
-		GEN oneOverE = mpexp(stor(-1, prec));
-		long c = absr_cmp(x, oneOverE);
-		avma = btop;
-		if (!c)
-			return real_m1(prec);	// otherwise, sometimes sqrt becomes complex
-		if (c > 0)	// x < -1/e
-			pari_err_DOMAIN("W", "x", "<", gneg(gexp(gen_m1, DEFAULTPREC)), x);
-		// TODO: Parabolic iteration rather than Halley in this case?
-	}
-	t = real_1(prec);
-	
-	// Initial approximation for iteration
-	if (cmprs(x, 1) < 0)
-	{
-		// t = 1 already, might as well use it for this calculation
-		tmp = sqrtr(addrs(mulrr(shiftr(mpexp(t), 1), x), 2));
-		w = subrs(mulrr(tmp, subir(gen_1, mulrr(tmp, addrr(invr(stor(3, prec)), divrs(mulrs(tmp, 11), 72))))), 1);
-		// tmp = sqrt(2e * x + 2)
-		// w = tmp * (1 - tmp * (1/3 + 11/72 * tmp)) - 1
-		if (precision(w) < prec) {
-			w = rtor(w, prec);
-		}
-	} else {
-		w = mplog(x);
-	}
-	if (cmprs(x, 3) > 0)
-		w = subrr(w, mplog(w));
-
-	ep = mulrr(eps(prec), addsr(1, absr(w)));
-	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-
-	while (cmprr(absr(t), ep) > 0)
-	{
-		// Halley loop
-		e = mpexp(w);
-		t = subrr(mulrr(w, e), x);
-//pari_printf("	%Ps (off by %Ps)\n", w, t);
-		if (cmprr(absr(t), ep) <= 0)
-			break;	// Stops calculation when answer is already very close, to avoid division by 0
-		tmp = addrs(w, 1);
-		t = divrr(t, subrr(mulrr(e, tmp), divrr(mulrr(shiftr(addrs(w, 2), -1), t), tmp)));
-		w = subrr(w, t);
-		if (low_stack(st_lim, stack_lim(btop, 1)))
-			gerepileall(btop, 1, &w);
-	}
-
-	w = gerepileupto(ltop, w);
-	if (precision(w) < prec)
-		pari_warn(warner, "precision loss");
-	return w;
-}
 
 /******************************************************************************/
 /**															 Statistics																 **/
