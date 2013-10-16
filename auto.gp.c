@@ -166,7 +166,6 @@ GEN lpf(GEN n);
 long isFibonacci(GEN n);
 GEN fibmod(GEN n, GEN m);
 long Pisano(long p, long e);
-INLINE long hamming_word(ulong w);
 long ispow2(GEN n);
 long ispow3(GEN n);
 long istwo(GEN n);
@@ -234,8 +233,6 @@ GEN fibomod(long n, GEN m);
 ulong fibomod_tiny(long n, ulong m);
 void forpal(GEN a, GEN b, GEN code);
 GEN glnBell(long n);
-GEN graeffe(GEN f);
-long hamming(GEN n);
 long infinite(GEN x);
 long isExtendedReal(GEN x);
 long isfactorial(GEN n);
@@ -262,7 +259,6 @@ long isSmallFib(long n) __attribute__ ((const));
 ulong cuberoot(ulong n) __attribute__ ((const));
 ulong fusc_small(GEN n) __attribute__ ((pure));
 
-#define FAKE_PREC 0		// Used when a precision is required but will not be used
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
 GEN rnormal_cached;
 

@@ -757,39 +757,6 @@ bigdiv(GEN a, GEN b, GEN c, GEN d)
 }
 
 
-// Assumes that f is a nonzero t_POL with t_INT coefficients.  Returns a
-// polynomial with roots that are precisely the squares of the roots of f.
-GEN
-graeffe(GEN f)
-{
-	pari_sp ltop = avma;
-	GEN g, h, ret, x = mkpoln(2, gen_1, gen_0);
-	if (typ(f) != t_POL)
-		pari_err_TYPE("graeffe", f);
-		
-	long d = degpol(f);
-	long gsize = (d >> 1) + 1, hsize = (d + 1) >> 1;
-	long i;
-	
-	g = cgetg(gsize+2, t_POL);
-	g[1] = evalvarn(0);
-	for (i = 1; i <= gsize; ++i)
-		gel(g, i + 1) = polcoeff0(f, (2*i) - 2, -1);
-	g = normalizepol_lg(g, gsize + 2);
-	
-	h = cgetg(hsize+2, t_POL);
-	h[1] = evalvarn(0);
-	for (i = 1; i <= hsize; ++i)
-		gel(h, i + 1) = polcoeff0(f, (2*i) - 1, -1);
-	h = normalizepol_lg(h, hsize + 2);
-	
-	ret = gsub(gsqr(g), gmul(x, gsqr(h)));
-	ret = gerepileupto(ltop, ret);
-	setvarn(ret, varn(f));
-	return ret;
-}
-
-
 GEN
 solvePell(GEN n)
 {

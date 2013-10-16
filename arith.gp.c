@@ -400,62 +400,6 @@ Pisano(long p, long e)
 }
 
 
-INLINE long
-hamming_word(ulong w)
-{
-	return __builtin_popcountl(w);
-#if 0
-static const long byte_weight[] = {
-	0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,
-	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-	1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-	2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,
-	3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8
-};
-	long sum = 0;
-	while (w) {
-		//sum += w & 1;
-		//w >>= 1;
-
-		//sum++;
-		//w &= w - 1;
-
-		sum += byte_weight[w & 255];
-		w >>= 8;
-	}
-	return sum;
-#endif
-}
-
-
-long
-hamming(GEN n)
-{
-	pari_sp ltop = avma;
-	if (typ(n) != t_INT)
-		pari_err_TYPE("hamming", n);
-	if (!signe(n))
-		return 0;
-
-	GEN xp = int_MSW(n);
-	long lx = lgefint(n);
-	ulong u = *xp;
-	long sum = 0;
-	long i = 3;
-	for (; i < lx; ++i)
-	{
-		sum += hamming_word(u);
-		xp=int_precW(xp);
-		u = *xp;
-	}
-	avma = ltop;
-	return sum + hamming_word(u);
-}
-
-
 long
 istwo(GEN n)
 {
