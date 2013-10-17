@@ -6,21 +6,12 @@ default(timer, 0);
 \\ *                                Reusable base-dependant functions                                *
 \\ ***************************************************************************************************
 
-ispal(n:int,B:int=10)={
-	my(tmp:int, d:int);
-	if (B == 10,
-		d = digits(n) - 2
-	,
-		d = log(n) \ log(B) - 1
+ispal(n:int,B:small=10)={
+	my(v=digits(n,B));
+	for(i=1,#v\2,
+		if(v[i]!=v[#v+1-i],return(0))
 	);
-	while(d > 0,
-		tmp = n%B;
-		n = (n - tmp) / B;
-		if (n\B^d != tmp, return(0));
-		n = n % (B^d);
-		d = d - 2;
-	);
-	d < 0 || n%(B+1)==0
+	1
 };
 addhelp(ispal, "ispal(n): Is n a palindrome? Sloane's A136522; characteristic function of Sloane's A002113.");
 
