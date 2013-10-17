@@ -15,8 +15,6 @@ Priority classification (first column): [subjective and debatable]
 
 ***********************  From the PARI standard TODO ************************
 
-4  changing primelimit from within forprime loop yields unpredictable results
-
 4  implement Jebelean-Krandick diviiexact (5)
 
 3  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
@@ -47,15 +45,13 @@ Priority classification (first column): [subjective and debatable]
 
 4  Good code for finding recurrence relations.
 
+4  Fast sieve for various internal purposes.  Perhaps the GPL'd version of
+   Tomás Oliveira e Silva?
+
 3  Code a correct tetration-mod-m function.
 
 3  Extend fnice() to printing factored polynomials.  Perhaps also accepting
    factorizations as input?
-
-3  Detect cyclotomic polynomials and related objects (divisors of x^n - 1, etc.)
-
-4  Fast sieve for various internal purposes.  Perhaps the GPL'd version of
-   Tomás Oliveira e Silva?
 
 3  Script (function?) to deal 'nicely' with recurrence relations, finding Binet
    forms and searching for cycles (using cyclotomic junk above).
