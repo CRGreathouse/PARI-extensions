@@ -108,7 +108,7 @@ isfactorial(GEN n)
 		}
 	}
 	if (mn < mx) {
-		long p = itos(lpf(stoi(mx)));	// Doesn't really need to be the smallest, just some prime factor
+		ulong p = lpfu(mx);	// Doesn't really need to be the smallest, just some prime factor
 		avma = ltop;
 		t = Z_lval(n, p);
 		c = factorial_lval(mx, p);
@@ -122,7 +122,6 @@ isfactorial(GEN n)
 		else
 			return 0;
 	}
-	//c = equalii(mpfact(mn), n);
 	c = equalii(mulu_interval(2UL, (ulong)mn), n);
 	avma = ltop;
 	return c;
