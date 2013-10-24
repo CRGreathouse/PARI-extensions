@@ -14,7 +14,7 @@
  * 2011/07/09 (1.0.8.11)
  *  -  First Release
  * 2013/10/24 (1.?.?.?)
- *  -  Update keywords, types, and defaults
+ *  -  Update keywords, types, defaults, and errors
  *
  * TODO (updated 2011/07/09)
  * -------------------------
@@ -194,8 +194,12 @@ $language_data = array(
             ),
 
         4 => array(
-            'alarmer','archer','errpile','gdiver','impl','syntaxer','invmoder',
-            'overflower','talker','typeer','user'
+        	'e_SYNTAX', 'e_BUG', 'e_ALARM', 'e_FILE', 'e_MISC', 'e_FLAG',
+        	'e_IMPL', 'e_ARCH', 'e_PACKAGE', 'e_NOTFUNC', 'e_PREC', 'e_TYPE',
+        	'e_DIM', 'e_VAR', 'e_PRIORITY', 'e_USER', 'e_STACK', 'e_OVERFLOW',
+        	'e_DOMAIN', 'e_COMPONENT', 'e_MAXPRIME', 'e_CONSTPOL', 'e_IRREDPOL',
+        	'e_COPRIME', 'e_PRIME', 'e_MODULUS', 'e_ROOTS0', 'e_OP', 'e_TYPE2',
+        	'e_INV', 'e_MEM', 'e_SQRTN'
             )
         ),
     'SYMBOLS' => array(
@@ -282,7 +286,7 @@ $language_data = array(
             'default(' => ''
             ),
         4 => array(
-            'trap(' => ''
+            '"' => '"	'
             ),
         ),
     'HIGHLIGHT_STRICT_BLOCK' => array()
