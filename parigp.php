@@ -14,7 +14,7 @@
  * 2011/07/09 (1.0.8.11)
  *  -  First Release
  * 2013/10/24 (1.?.?.?)
- *  -  Update keywords
+ *  -  Update keywords, types, and defaults
  *
  * TODO (updated 2011/07/09)
  * -------------------------
@@ -179,7 +179,7 @@ $language_data = array(
 
         2 => array(
             'void','bool','negbool','small','int',/*'real',*/'mp','var','lg','pol',
-            'vecsmall','vec','list','str','genstr','gen','typ'
+            'vecsmall','vec','list','str','genstr','gen','typ','error','errtyp'
             ),
 
         3 => array(
@@ -189,7 +189,8 @@ $language_data = array(
             'lines','linewrap',/*'log',*/'logfile','new_galois_format','output',
             'parisize','path','prettyprinter','primelimit','prompt_cont',
             'prompt','psfile','readline','realprecision','recover','secure',
-            'seriesprecision',/*'simplify',*/'strictmatch','timer'
+            'seriesprecision',/*'simplify',*/'sopath','strictargs','strictmatch',
+            'timer'
             ),
 
         4 => array(
@@ -258,7 +259,7 @@ $language_data = array(
         ),
     'REGEXPS' => array(
         0 => array( # types marked on variables
-            GESHI_SEARCH => '(?<!\\\\ )"(t_(?:INT|REAL|INTMOD|FRAC|FFELT|COMPLEX|PADIC|QUAD|POLMOD|POL|SER|RFRAC|QFR|QFI|VEC|COL|MAT|LIST|STR|VECSMALL|CLOSURE))"',
+            GESHI_SEARCH => '(?<!\\\\ )"(t_(?:INT|REAL|INTMOD|FRAC|FFELT|COMPLEX|PADIC|QUAD|POLMOD|POL|SER|RFRAC|QFR|QFI|VEC|COL|MAT|LIST|STR|VECSMALL|CLOSURE|ERROR))"',
             GESHI_REPLACE => '\\1',
             GESHI_MODIFIERS => '',
             GESHI_BEFORE => '"',
