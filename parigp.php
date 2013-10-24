@@ -3,8 +3,8 @@
  * parigp.php
  * --------
  * Author: Charles R Greathouse IV (charles@crg4.com)
- * Copyright: 2011 Charles R Greathouse IV (http://math.crg4.com/)
- * Release Version: 1.0.8.11
+ * Copyright: 2013 Charles R Greathouse IV (http://math.crg4.com/)
+ * Release Version: 1.?.?.?
  * Date Started: 2011/05/11
  *
  * PARI/GP language file for GeSHi.
@@ -186,11 +186,11 @@ $language_data = array(
             'TeXstyle','breakloop','colors','compatible','datadir','debug',
             'debugfiles','debugmem','echo','factor_add_primes','factor_proven',
             'format','graphcolormap','graphcolors','help','histfile','histsize',
-            'lines','linewrap',/*'log',*/'logfile','new_galois_format','output',
-            'parisize','path','prettyprinter','primelimit','prompt_cont',
-            'prompt','psfile','readline','realprecision','recover','secure',
-            'seriesprecision',/*'simplify',*/'sopath','strictargs','strictmatch',
-            'timer'
+            'lines','linewrap',/*'log',*/'logfile','nbthreads',
+            'new_galois_format','output','parisize','path','prettyprinter',
+            'primelimit','prompt_cont','prompt','psfile','readline',
+            'realprecision','recover','secure','seriesprecision',/*'simplify',*/
+            'sopath','strictargs','strictmatch','timer'
             ),
 
         4 => array(
