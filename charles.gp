@@ -267,7 +267,7 @@ print("Delta = "D);
 	f=factor(g)[,1];
 	if(a+b%2, 1, 2)/sqrt(a) * prod(i=1,#f,f[i]/(f[i]-1)) * ConjectureF_C(D,lim)
 };
-addhelp(ConjectureF, "ConjectureF(a,b,c): Returns a number C such that there are ~ C*sqrt(x)/log(x) primes of the form an^2 + bn + c up to x, or 0 if there are o(sqrt(x)/log(x)) or Omega(sqrt(x)) such primes. Relies on the Hardy-Littlewood Conjecture F and possible the ERH.");
+addhelp(ConjectureF, "ConjectureF(a,b,c): Returns a number C such that there are ~ C*sqrt(x)/log(x) primes of the form an^2 + bn + c up to x, or 0 if there are o(sqrt(x)/log(x)) or Omega(sqrt(x)) such primes. Relies on the Hardy-Littlewood Conjecture F and possibly the ERH.");
 
 
 \\ prodinf(i=1,p=prime(i);1-kronecker(D,p)/(p-1))
@@ -296,7 +296,7 @@ print("Correction: ", cf);
 		return(c * Pi^4 * sqrt(D) / 180 / quadregulator(D) / qfbclassno(D) / Lquad(D, 2) * prod(i=1,#f,1-1/f[i]^4) * pr)
 	);
 	if(1,
-		print("KConrad");
+		print("Keith Conrad"); \\ http://mathoverflow.net/questions/31150/calculating-the-infinite-product-from-the-hardy-littlewood-conjecture-f
 		my(t);
 		\\ Corrects for the 1 - 2/p^3
 		forprime(p=3,lim,t=kronecker(D,p);pr*=(1-t/(p-1))/(1-t/p));
