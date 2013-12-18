@@ -215,11 +215,15 @@ GEN
 rhoest(GEN x, long prec)
 {
 	pari_sp ltop = avma;
-	GEN xi, ret;
+	GEN xi, ret, e;
 	x = gtor(x, "rhoest", prec);
 	xi = deBruijnXi(x);
-	ret = gexp(gsub(gneg(veceint1(negr(xi), NULL, prec)), gmul(x, xi)), prec);
-	ret = gdiv(gdiv(ret, sqrtr(mulrr(mulsr(2, mppi(prec)), x))), xi);
+	e = eint1(negr(xi), prec);
+	if (typ(e) == t_COMPLEX)
+		e = gel(e, 1);
+	setsigne(e, -signe(e));
+	ret = mpexp(subrr(e, mulrr(x, xi)));
+	ret = divrr(divrr(ret, sqrtr(mulrr(mulsr(2, mppi(prec)), x))), xi);
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
