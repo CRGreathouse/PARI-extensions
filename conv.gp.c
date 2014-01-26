@@ -31,26 +31,6 @@ gtor(GEN x, const char* funcName, long prec)
 }
 
 
-GEN
-vecsum(GEN v)
-{
-	pari_sp ltop = avma;
-	GEN p2 = gen_0;
-	if (!is_matvec_t(typ(v)))
-		pari_err_TYPE("vecsum", v);
-	long l1 = lg(v);
-	pari_sp btop = avma;
-	long i;
-	for (i = 1; i < l1; ++i)
-	{
-		p2 = gadd(p2, gel(v, i));
-		p2 = gerepileupto(btop, p2);
-	}
-	p2 = gerepileupto(ltop, p2);
-	return p2;
-}
-
-
 // TODO: Binary splitting for smaller subproducts.
 GEN
 vecprod(GEN v)
