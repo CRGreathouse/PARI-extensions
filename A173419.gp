@@ -81,8 +81,8 @@ step(v)={
 		for(j=i+1,#v,
 			\\s=concat(s,v[i]+v[j])	\\ Addition chains
 			\\s=concat(s,[v[i]*v[j],v[i]+v[j]])	\\ Addition and multiplication
-			\\s=concat(s,[v[i]*v[j],v[i]+v[j],v[i]-v[j],v[j]-v[i]])	\\ Addition, multiplication, and subtraction
-			s=concat(s,[v[i]*v[j],v[i]+v[j],abs(v[i]-v[j])])	\\ Addition, multiplication, and subtraction (nonnegatives only)
+			s=concat(s,[v[i]*v[j],v[i]+v[j],v[i]-v[j],v[j]-v[i]])	\\ Addition, multiplication, and subtraction
+			\\s=concat(s,[v[i]*v[j],v[i]+v[j],abs(v[i]-v[j])])	\\ Addition, multiplication, and subtraction (nonnegatives only)
 		);
 		s=vecsort(s,,8)
 	);
