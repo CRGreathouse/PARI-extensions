@@ -883,6 +883,16 @@ tetrMod_tiny(ulong a, ulong b, ulong M)
 }
 
 
+void
+show_pe(int p, int e)
+{
+	if (e == 1)
+		pari_printf("a(%ld)", p);
+	else
+		pari_printf("a(%ld^%ld)", p, e);
+}
+
+
 long
 checkmult(GEN v, long verbose)
 {
@@ -897,32 +907,40 @@ checkmult(GEN v, long verbose)
 	if (l1 == 1)
 		return 1;
 	
-	// At the moment v[1] must be equal to 1; definitions vary but this seems
-	// sensible.
-	if (!gequalgs(gel(v, 1), 1))
+	if (!isint1(gel(v, 1))) {
+		if (verbose) pari_printf("Only sequences starting with 1 are considered multiplicative.\n");
 		return 0;
+	}
 		
-	GEN f, target, pr, ex;
+	GEN f, target, pr, ex, pe;
 	ulong dummy;
 
 	for (n = 6; n < l1; ++n) {
 		if (uisprimepower(n, &dummy))
 			continue;
-		f = factoru(n);
+		f = factoru_pow(n);
 		pr = gel(f, 1);
 		ex = gel(f, 2);
+		pe = gel(f, 3);
 		l2 = lg(pr);
 		long i;
 		
 		// Set target = prod v[p^e] for each p^e || n
 		target = gen_1;
 		for (i = 1; i < l2; ++i)
-			target = mulii(target, gel(v, itos(powuu(pr[i], ex[i]))));
+			target = mulii(target, gel(v, pe[i]));
 		
 		// If v[n] is not equal to the target, the sequence is not multiplicative.
-		if (!gequal(gel(v, n), target)) {
-			if (verbose)
-				pari_printf("Not multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+		if (!equalii(gel(v, n), target)) {
+			if (verbose) {
+				pari_printf("Not multiplicative: a(%ld) = %Ps != %Ps = ", n, gel(v, n), target);
+				show_pe(pr[1], ex[1]);
+				for (i = 2; i < l2; ++i) {
+					pari_printf(" * ");
+					show_pe(pr[i], ex[i]);
+				}
+				pari_printf(".\n");
+			}
 			avma = ltop;
 			return 0;
 		}
@@ -946,32 +964,40 @@ checkcmult(GEN v, long verbose)
 	if (l1 == 1)
 		return 1;
 	
-	// At the moment v[1] must be equal to 1; definitions vary but this seems
-	// sensible.
-	if (!gequalgs(gel(v, 1), 1))
+	if (!isint1(gel(v, 1))) {
+		if (verbose) pari_printf("Only sequences starting with 1 are considered multiplicative.\n");
 		return 0;
+	}
 		
-	GEN f, target, pr, ex;
+	GEN f, target, pr, ex, pe;
 
 	for (n = 4; n < l1; ++n) {
 		if (uisprime(n))
 			continue;
-		f = factoru(n);
+		f = factoru_pow(n);
 		pr = gel(f, 1);
 		ex = gel(f, 2);
+		pe = gel(f, 3);
 		l2 = lg(pr);
 		long i;
 		
 		// Set target = prod v[p]^e for each p^e || n
 		target = gen_1;
 		for (i = 1; i < l2; ++i)
-			target = mulii(target, powiu(gel(v, pr[i]), ex[i]));
+			target = mulii(target, gel(v, pe[i]));
 		
 		// If v[n] is not equal to the target, the sequence is not
 		// completely multiplicative.
-		if (!gequal(gel(v, n), target)) {
-			if (verbose)
-				pari_printf("Not completely multiplicative at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+		if (!equalii(gel(v, n), target)) {
+			if (verbose) {
+				pari_printf("Not completely multiplicative: a(%ld) = %Ps != %Ps = ", n, gel(v, n), target);
+				show_pe(pr[1], ex[1]);
+				for (i = 2; i < l2; ++i) {
+					pari_printf(" * ");
+					show_pe(pr[i], ex[i]);
+				}
+				pari_printf(".\n");
+			}
 			avma = ltop;
 			return 0;
 		}

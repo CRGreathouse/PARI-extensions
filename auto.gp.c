@@ -252,6 +252,7 @@ long ispow3_tiny(ulong n) __attribute__ ((const));
 long isSmallFib(long n) __attribute__ ((const));
 ulong cuberoot(ulong n) __attribute__ ((const));
 ulong fusc_small(GEN n) __attribute__ ((pure));
+void show_pe(int p, int e);
 
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
 GEN rnormal_cached;
