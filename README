@@ -12,11 +12,8 @@ better solution is the script pari.sh which compiles them into a custom session.
 
 The purpose of this collection is to provide new functions for gp.  Some are
 designed to solve a problem which is not easily done in GP, while others merely
-make a common task easier.  (It's easier to write
-vecgcd(v)
-than
-u=v[1];for(i=2,#v,u=gcd(u,v[i]));u
-even though the former is not appreciably faster than the latter.)
+make a common task easier. (It's easier to write vecprod(v) than
+prod(i=1,#v,v[i]), and the former allows functional style.)
 
 == The Functions ==
 
@@ -69,8 +66,6 @@ isFibonacci(n): Is n a Fibonacci number? Sloane's A010056; characteristic
     function of Sloane's A000045.
 ispow2(n): Is n a power of two? Characteristic function of Sloane's A000079.
 ispow3(n): Is n a power of three? Characteristic function of Sloane's A000244.
-isPowerful(n): Is n powerful (min exponent 2)? Sloane's A112526; characteristic
-    function of Sloane's A001694.
 issemi(n): Is n a semiprime? Sloane's A064911; characteristic function of
     Sloane's A001358.
 isthree(n): Is the number the sum of three squares? Sloane's A071374;
@@ -122,7 +117,6 @@ ways3(n): Number of ways that n can be represented as a sum of three squares.
 Here are other functions that have implementations but which are not complete
 or which have not been tested:
 Mfactor(p,lim,{start=2}): Returns factors of the Mersenne number 2^p-1 up to lim, starting at start, provided p is a prime = 3 mod 4. Same as bigfactor(2,p,1,lim,start) but faster because it checks only factors of the form 2kp+1 that are +/- 1 mod 8.
-forthinprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b, even if b > primelimit. EXPERIMENTAL!
 tetrMod(a,b,M): Returns a^^b mod M.
 
 
@@ -133,5 +127,4 @@ issm3
 consistency
 cP
 cS
-graeffe
 
