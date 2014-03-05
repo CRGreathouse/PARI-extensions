@@ -883,16 +883,6 @@ tetrMod_tiny(ulong a, ulong b, ulong M)
 }
 
 
-void
-show_pe(int p, int e)
-{
-	if (e == 1)
-		pari_printf("a(%ld)", p);
-	else
-		pari_printf("a(%ld^%ld)", p, e);
-}
-
-
 long
 checkmult(GEN v, long verbose)
 {
@@ -934,10 +924,13 @@ checkmult(GEN v, long verbose)
 		if (!equalii(gel(v, n), target)) {
 			if (verbose) {
 				pari_printf("Not multiplicative: a(%ld) = %Ps != %Ps = ", n, gel(v, n), target);
-				show_pe(pr[1], ex[1]);
-				for (i = 2; i < l2; ++i) {
-					pari_printf(" * ");
-					show_pe(pr[i], ex[i]);
+				for (i = 1; i < l2; ++i) {
+					if (i > 1)
+						pari_printf(" * ");
+					if (ex[i] == 1)
+						pari_printf("a(%ld)", pr[i]);
+					else
+						pari_printf("a(%ld^%ld)", pr[i], ex[i]);
 				}
 				pari_printf(".\n");
 			}
@@ -969,32 +962,34 @@ checkcmult(GEN v, long verbose)
 		return 0;
 	}
 		
-	GEN f, target, pr, ex, pe;
+	GEN f, target, pr, ex;
 
 	for (n = 4; n < l1; ++n) {
 		if (uisprime(n))
 			continue;
-		f = factoru_pow(n);
+		f = factoru(n);
 		pr = gel(f, 1);
 		ex = gel(f, 2);
-		pe = gel(f, 3);
 		l2 = lg(pr);
 		long i;
 		
 		// Set target = prod v[p]^e for each p^e || n
 		target = gen_1;
 		for (i = 1; i < l2; ++i)
-			target = mulii(target, gel(v, pe[i]));
+			target = mulii(target, powis(gel(v, pr[i]), ex[i]));
 		
 		// If v[n] is not equal to the target, the sequence is not
 		// completely multiplicative.
 		if (!equalii(gel(v, n), target)) {
 			if (verbose) {
 				pari_printf("Not completely multiplicative: a(%ld) = %Ps != %Ps = ", n, gel(v, n), target);
-				show_pe(pr[1], ex[1]);
-				for (i = 2; i < l2; ++i) {
-					pari_printf(" * ");
-					show_pe(pr[i], ex[i]);
+				for (i = 1; i < l2; ++i) {
+					if (i > 1)
+						pari_printf(" * ");
+					if (ex[i] == 1)
+						pari_printf("a(%ld)", pr[i]);
+					else
+						pari_printf("a(%ld)^%ld", pr[i], ex[i]);
 				}
 				pari_printf(".\n");
 			}
@@ -1021,32 +1016,43 @@ checkadd(GEN v, long verbose)
 	if (l1 == 1)
 		return 1;
 	
-	// At the moment v[1] must be equal to 0; definitions vary but this seems
-	// sensible.
-	if (!gequalgs(gel(v, 1), 0))
+	if (!isintzero(gel(v, 1))) {
+		if (verbose) pari_printf("Only sequences starting with 0 are considered additive.\n");
 		return 0;
+	}
 		
-	GEN f, target, pr, ex;
+	GEN f, target, pr, ex, pe;
 	ulong dummy;
 
 	for (n = 6; n < l1; ++n) {
 		if (uisprimepower(n, &dummy))
 			continue;
-		f = factoru(n);
+		f = factoru_pow(n);
 		pr = gel(f, 1);
 		ex = gel(f, 2);
+		pe = gel(f, 3);
 		l2 = lg(pr);
 		long i;
 		
 		// Set target = sum v[p^e] for each p^e || n
 		target = gen_0;
 		for (i = 1; i < l2; ++i)
-			target = addii(target, gel(v, itos(powuu(pr[i], ex[i]))));
+			target = addii(target, gel(v, pe[i]));
 		
-		// If v[n] is not equal to the target, the sequence is not multiplicative.
+		// If v[n] is not equal to the target, the sequence is not additive.
 		if (!gequal(gel(v, n), target)) {
-			if (verbose)
-				pari_printf("Not additive at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+			if (verbose) {
+				pari_printf("Not additive: a(%ld) = %Ps != %Ps = ", n, gel(v, n), target);
+				for (i = 1; i < l2; ++i) {
+					if (i > 1)
+						pari_printf(" + ");
+					if (ex[i] == 1)
+						pari_printf("a(%ld)", pr[i]);
+					else
+						pari_printf("a(%ld^%ld)", pr[i], ex[i]);
+				}
+				pari_printf(".\n");
+			}
 			avma = ltop;
 			return 0;
 		}
@@ -1089,13 +1095,23 @@ checkcadd(GEN v, long verbose)
 		// Set target = sum v[p]*e for each p^e || n
 		target = gen_0;
 		for (i = 1; i < l2; ++i)
-			target = addii(target, muliu(gel(v, pr[i]), ex[i]));
+			target = addii(target, mulis(gel(v, pr[i]), ex[i]));
 		
 		// If v[n] is not equal to the target, the sequence is not
-		// completely multiplicative.
-		if (!gequal(gel(v, n), target)) {
-			if (verbose)
-				pari_printf("Not completely additive at n = %Ps = %ld.\n", fnice(stoi(n)), n);
+		// completely additive.
+		if (!equalii(gel(v, n), target)) {
+			if (verbose) {
+				pari_printf("Not completely additive: a(%ld) = %Ps != %Ps = ", n, gel(v, n), target);
+				for (i = 1; i < l2; ++i) {
+					if (i > 1)
+						pari_printf(" + ");
+					if (ex[i] == 1)
+						pari_printf("a(%ld)", pr[i]);
+					else
+						pari_printf("%ld*a(%ld)", ex[i], pr[i]);
+				}
+				pari_printf(".\n");
+			}
 			avma = ltop;
 			return 0;
 		}
