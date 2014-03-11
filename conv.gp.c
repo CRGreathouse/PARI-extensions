@@ -76,7 +76,7 @@ toC(GEN n)
 		return;
 	}
 	if (ispow2(n)) {
-		pari_printf("int2n(%ld)\n", expi(n));
+		pari_printf("int2u(%ld)\n", expi(n));
 		return;
 	}
 	
