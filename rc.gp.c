@@ -454,15 +454,23 @@ GEN
 rnormal(long prec)
 {
 	if (rnormal_cached) {
-		if (precision(rnormal_cached) != prec) {
-			gunclone(rnormal_cached);
-		} else {
+		long cached = precision(rnormal_cached);
+		if (prec == cached) {
 			GEN ret = gcopy(rnormal_cached);
 			gunclone(rnormal_cached);
 			rnormal_cached = 0;
 			return ret;
+		} else if (cached > prec) {
+			GEN ret = gcopy(rnormal_cached);
+			fixlg(ret, prec);
+			gunclone(rnormal_cached);
+			rnormal_cached = 0;
+			return ret;
+		} else {
+			gunclone(rnormal_cached);
 		}
 	}
+	
 	pari_sp ltop = avma;
 	GEN u1, u2, ret, left, rightS, rightC;
 	u1 = randomr(prec);
