@@ -183,7 +183,7 @@ cuberootint(GEN x)
 {
 	pari_sp ltop = avma;
 	long t = typ(x);
-	GEN ret = NEVER_USED;
+	GEN ret;
 	if (t == t_INT) {
 		ulong n = itou_or_0(x);
 		if (n)
@@ -194,6 +194,7 @@ cuberootint(GEN x)
 		x = gfloor(x);
 	} else {
 		pari_err_TYPE("cuberootint", x);
+		__builtin_unreachable();
 	}
 
 	if (cmpii(powis(ret, 3), x) == 1) {
@@ -847,7 +848,9 @@ tetrMod(GEN a, GEN b, GEN M)
 ulong
 tetrMod_tiny(ulong a, ulong b, ulong M)
 {
+	pari_err_IMPL("tetrMod");
 	(void)a;(void)b;(void)M;
+	__builtin_unreachable();
 	/*
 	if (typ(a) != t_INT || typ(b) != t_INT || typ(M) != t_INT)
 		pari_err(typeer, "tetrMod");

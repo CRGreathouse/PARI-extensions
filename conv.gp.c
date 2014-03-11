@@ -27,6 +27,7 @@ gtor(GEN x, const char* funcName, long prec)
 		default:
 			pari_err_TYPE(funcName, x);
 	}
+	__builtin_unreachable();
 	return NEVER_USED;
 }
 

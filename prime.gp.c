@@ -79,6 +79,7 @@ issemiprime(GEN n)
 	}
 	
 	pari_err_BUG(pari_sprintf("Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...", fac, n));
+	__builtin_unreachable();
 	avma = ltop;
 	return NEVER_USED;
 }
@@ -432,7 +433,7 @@ prodtree(GEN A, long start, long stop)
 		return ret;
 	}
 	
-	GEN ret = NEVER_USED, a, b, c, d;
+	GEN ret, a, b, c, d;
 	switch (diff) {
 		case 7:
 			a = mulss(A[start], A[start+7]);
@@ -464,6 +465,7 @@ prodtree(GEN A, long start, long stop)
 			break;
 		default:
 			pari_err_BUG("prodtree passed small argument");
+			__builtin_unreachable();
 	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -489,7 +491,7 @@ prodtree_small(GEN A, long start, long stop)
 		return ret;
 	}
 	
-	GEN ret = NEVER_USED;
+	GEN ret;
 	long a, b, c, d;
 	switch (diff) {
 		case 7:
@@ -522,6 +524,7 @@ prodtree_small(GEN A, long start, long stop)
 			break;
 		default:
 			pari_err_BUG("prodtree_small passed small argument");
+			__builtin_unreachable();
 	}
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -548,7 +551,7 @@ primorial(GEN n)
 	};
 	
 	pari_sp ltop = avma;
-	ulong nn = NEVER_USED;
+	ulong nn;
 	GEN ret;
 	if (typ(n) == t_REAL) {
 		if (signe(n) < 1) return gen_1;
@@ -559,6 +562,7 @@ primorial(GEN n)
 		nn = itou_or_0(n);
 	} else {
 		pari_err_TYPE("primorial", n);
+		__builtin_unreachable();
 	}
 	
 	if (nn > maxprime() || nn == 0)	// nn == 0 if n didn't fit into a word

@@ -103,8 +103,8 @@ GEN
 bfile(GEN name, GEN v, GEN offset)
 {
 	pari_sp ltop = avma;
-	GEN Anum = NEVER_USED;
-	long cur = NEVER_USED;
+	GEN Anum;
+	long cur;
 
 	if (v) {
 		switch(typ(v)) {
@@ -116,6 +116,7 @@ bfile(GEN name, GEN v, GEN offset)
 				break;
 			default:
 				pari_err_TYPE("bfile", v);
+				__builtin_unreachable();
 		}
 	}
 	
@@ -123,8 +124,10 @@ bfile(GEN name, GEN v, GEN offset)
 		cur = 0;
 	else if (typ(offset) == t_INT)
 		cur = itos(offset) - 1;
-	else
+	else {
 		pari_err_TYPE("bfile", offset);
+		__builtin_unreachable();
+	}
 	
 	if (typ(name) == t_INT)
 	{
@@ -144,6 +147,7 @@ bfile(GEN name, GEN v, GEN offset)
 		//Anum = concat(extract0(gtovec(name), utoipos(126), NULL), NULL);
 	} else {
 		pari_err_TYPE("bfile", name);
+		__builtin_unreachable();
 	}
 	
 	char* filename = GSTR(name);

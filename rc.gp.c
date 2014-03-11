@@ -292,7 +292,7 @@ GEN
 log_2(GEN x, long prec)
 {
 	pari_sp ltop = avma;
-	GEN ret = NEVER_USED;	// to silence compiler, which doesn't know that pari_err never returns
+	GEN ret;
 	switch(typ(x)) {
 		case t_INT:
 			ret = mplog(itor(x, prec));
@@ -306,6 +306,7 @@ log_2(GEN x, long prec)
 			break;
 		default:
 			pari_err_TYPE("lg", x);
+			__builtin_unreachable();
 	}
 	ret = divrr(ret, mplog2(prec));
 	ret = gerepileupto(ltop, ret);
@@ -318,13 +319,15 @@ contfracback(GEN v, GEN terms)
 {
 	pari_sp ltop = avma;
 	GEN x = gen_0;
-	long tterms = NEVER_USED;
+	long tterms;
 	if (!terms)
 		tterms = glength(v) - 1;
 	else if (typ(terms) == t_INT)
 		tterms = itos(terms);
-	else
+	else {
 		pari_err_TYPE("contfracback", terms);
+		__builtin_unreachable();
+	}
 	x = gel(v, tterms + 1);
 	if (tterms == 1)
 		x = gcopy(x);
@@ -411,7 +414,7 @@ normd(GEN a, GEN b, long prec)
 		pari_err(e_MISC, "incorrect endpoint in normd");
 	pari_sp ltop = avma;
 	long tmp;
-	GEN ret = NEVER_USED;
+	GEN ret;
 	
 	/* Infinities */
 	if ((tmp = infinite(a)))	// Assignment and test-if-0
@@ -432,6 +435,7 @@ pari_warn(warner, "Doesn't work properly with infinities");
 			else
 				pari_err(e_MISC, "incorrect endpoint in normd");
 				// Error type follows that of intnum in language/intnum.c
+				__builtin_unreachable();
 		}
 	} else if ((tmp = infinite(b))) {	// Assignment and test-if-0
 pari_warn(warner, "Doesn't work properly with infinities");

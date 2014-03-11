@@ -467,6 +467,7 @@ Engel(GEN x)
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			x = gerepileupto(btop, x);
 	}
+	__builtin_unreachable();
 	return NEVER_USED;
 }
 
