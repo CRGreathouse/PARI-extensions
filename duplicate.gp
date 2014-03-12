@@ -315,20 +315,8 @@ sopf(n:int)={
 addhelp(sopf, "sopf(n): Sum of distinct prime factors of n. Sloane's A008472.");
 
 
-primorial(n)={
-	my(t1=1,t2=1,t3=1,t4=1);
-	forprime(p=2,n>>3,t1=t1*p);
-	forprime(p=(n>>3)+1,n>>2,t2=t2*p);
-	t1=t1*t2;t2=1;
-	forprime(p=(n>>2)+1,(3*n)>>3,t2=t2*p);
-	forprime(p=((3*n)>>3)+1,n>>1,t3=t3*p);
-	t1=t1*(t2*t3);t2=1;t3=1;
-	forprime(p=(n>>1)+1,(5*n)>>3,t2=t2*p);
-	forprime(p=((5*n)>>3)+1,(3*n)>>2,t3=t3*p);
-	t2=t2*t3;t3=1;
-	forprime(p=((3*n)>>2)+1,(7*n)>>3,t3=t3*p);
-	forprime(p=((7*n)>>3)+1,n,t4=t4*p);
-	t1*(t2*(t3*t4))
+primorial(n:mp)={
+	vecprod(primes(primepi(n)))
 };
 addhelp(primorial, "Returns the product of each prime less than or equal to n. Sloane's A034386.");
 
@@ -719,27 +707,27 @@ addhelp(vecsum, "vecsum(v): Sum of the elements of v.");
 
 
 vecprod(v)={
-	prod(i=1,#v,v[i])
+	my(len=#v,mid);
+	if(len<9, return(prod(i=1,len,v[i])));
+	mid=len\2;
+	vecprod(v[mid+1..len])*vecprod(v[1..mid])
 };
 addhelp(vecprod, "vecprod(v): Product of the elements of v.");
 
 
 vecgcd(v)={
-	local(g);
-	g = 0;
-	for (i=1,#v, g=gcd(g, v[i]));
-	g
+	gcd(v)
 };
-addhelp(vecgcd, "Vector gcd: returns the gcd of all elements in the vector.");
+addhelp(vecgcd, "vecgcd(v): Returns the gcd of all elements in the vector.");
 
 
 veclcm(v)={
-	local(l);
-	l = 1;
-	for (i=1,#v, l=lcm(l, v[i]));
-	l
+	my(len=#v,mid);
+	if(len<99, return(lcm(v)));
+	mid=len\2;
+	lcm(veclcm(v[mid+1..len]),veclcm(v[1..mid]))
 };
-addhelp(veclcm, "Vector lcm: returns the lcm of all elements in the vector.");
+addhelp(veclcm, "veclcm(v): Returns the lcm of all elements in the vector.");
 
 
 oddres(n)={
