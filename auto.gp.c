@@ -129,8 +129,6 @@ GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
 GP;install("consistency","l","consistency","./auto.gp.so");
 GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
 GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
-GP;install("tau_Cohen","G","tauC","./auto.gp.so");
-GP;install("Hspec","G","Hs","./auto.gp.so");
 */
 
 GEN Bell(long n);
@@ -252,6 +250,7 @@ long ispow3_tiny(ulong n) __attribute__ ((const));
 long isSmallFib(long n) __attribute__ ((const));
 ulong cuberoot(ulong n) __attribute__ ((const));
 ulong fusc_small(GEN n) __attribute__ ((pure));
+void assume (int expr) __attribute__ ((const));
 
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
 GEN rnormal_cached;
@@ -270,106 +269,4 @@ void
 init_auto(void)
 {
 	rnormal_cached = 0;
-}
-
-
-
-
-GEN Hspec(GEN N);
-GEN tauprime(GEN p);
-GEN tau_Cohen(GEN n);
-
-/* Hurwitz class number in level 2, equal to H(N)+2H(N/4),
-with H=qfbhclassno */
-GEN
-Hspec(GEN N)
-{
-	GEN D0, F, s, fa, lipr, liex, q, p1;
-	p1 = coredisc2(negi(N));
-	D0 = gel(p1, 1);
-	F = gel(p1, 2);
-	fa = factor(F);
-	lipr = gel(fa, 1);
-	liex = gel(fa, 2);
-	long lfa = glength(lipr);
-	s = addsi(3, mulis(subis(shifti(gen_2, itos(gel(liex, 1))), 3), 2 - krouu(-mod8(D0), 2)));
-	long j;
-	for (j = 2; j <= lfa; ++j)
-	{
-		q = gel(lipr, j);
-		s = gmul(s, gaddsg(1, gmul(gdiv(subis(powiu(q, itou(gel(liex, j))), 1), subis(q, 1)), subis(q, kronecker(D0, q)))));
-	}
-	if (gequalgs(D0, -3))
-		return gdivgs(s, 3);
-	if (gequalgs(D0, -4))
-		return gdivgs(s, 2);
-	return gmul(s, classno_fast(D0));
-}
-
-/* Ramanujan tau function for p prime */
-GEN
-tauprime(GEN p)
-{
-	static const long tauCached[] = {
-		-24, 252, 4830, -16744, 0, 534612, -577738, 0, -6905934, 10661420, 0,
-		18643272, 0, 0, 128406630, -52843168, 0, 0, -182213314, 0, 308120442,
-		-17125708
-	};
-	if (cmpis(p, 43) <= 0)
-		return stoi(tauCached[(itos(p) - 1)>>1]);
-	GEN s = gen_0, lim, p2_7, p_9;
-	lim = sqrtint(p);
-	p2_7 = mulsi(7, sqri(p));
-	p_9 = mulsi(9, p);
-	long tin = mod2(shifti(p, -1));
-	GEN t;
-	for (t = gen_1; cmpii(t, lim) <= 0; t = addis(t, 1))
-	{
-		GEN tmp, t2 = sqri(t);
-		if (mod2(t) == tin)
-			tmp = hclassno(shifti(subii(p, t2), 2));
-		else
-			tmp = Hspec(shifti(subii(p, t2), 2));
-		GEN tmp2 = gmul(mulii(powis(t2, 3), addii(p2_7, mulii(t2, subii(shifti(t2, 2), p_9)))), tmp);
-		if(typ(tmp2) != t_INT)
-			pari_warn(warner, "Not an integer in tauprime(%Ps) at t = %Ps", p, t);
-		s = addii(s, tmp2); // Can I use addii, or do I need gadd?
-	}
-	return gsub(gsubgs(gsub(gsub(gsub(gmulsg(28, powis(p, 6)), mulsi(28, powiu(p, 5))), mulsi(90, powiu(p, 4))), mulsi(35, powiu(p, 3))), 1), gmulsg(128, s));
-}
-
-/* Ramanujan tau function */
-GEN
-tau_Cohen(GEN n)
-{
-	if (typ(n) != t_INT)
-		pari_err_TYPE("tau",n);
-	GEN fa, lipr, liex, P, p;
-	fa = Z_factor(n);
-	lipr = gel(fa, 1);
-	liex = gel(fa, 2);
-	long lfa = glength(lipr);
-	P = gen_1;
-	long j;
-	for (j = 1; j <= lfa; ++j)
-	{
-		p = gel(lipr, j);
-		GEN p11 = powis(p, 11), tp = tauprime(p), t0 = gen_1, t1 = tp, t2;
-		//GEN p11 = powis(p, 11), tp = taup(p, 1), t0 = gen_1, t1 = tp, t2;
-/*
-GEN true_tau = taup(p, 1);
-pari_printf("tau(%Ps) = %Ps", p, true_tau);
-if(!gequal(true_tau, tp)) pari_printf(" but I get %Ps instead.", tp);
-pari_printf("\n");
-*/
-		long p1 = itos(gel(liex, j)), k;
-		for (k = 1; k < p1; ++k)
-		{
-			t2 = subii(mulii(tp, t1), mulii(p11, t0));
-			t0 = t1;
-			t1 = t2;
-		}
-		P = mulii(P, t1);
-	}
-	return P;
 }

@@ -1,3 +1,12 @@
+/* Error checking */
+
+void
+assume (int expr)
+{
+	if (!expr) __builtin_unreachable();
+}
+
+
 long
 consistency(void)
 {
