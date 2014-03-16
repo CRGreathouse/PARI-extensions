@@ -4,6 +4,7 @@ datadir = /home/charles/mth/pari
 factor_add_primes = 1
 factor_proven = 0
 help = "/usr/local/bin/gphelp -cu 6 -detex"
+log = 1
 new_galois_format = 1
 parisize = 52428800
 path = "~/mth/pari:.:~"
