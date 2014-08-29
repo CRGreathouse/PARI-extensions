@@ -359,11 +359,9 @@ sopf(GEN n)
 {
 	pari_sp ltop = avma;
 	GEN f, ret = gen_0;
-	long l1;
-	if (typ(n) != t_INT)
-		pari_err_TYPE("sopf", n);
-	f = Z_factor(n);
-	l1 = glength(gel(f, 1));
+	f = check_arith_all(n, "sopf");
+	if (!f) f = Z_factor(n);
+	long l1 = glength(gel(f, 1));
 	long i;
 	for (i = 1; i <= l1; ++i)
 	{
@@ -379,11 +377,9 @@ sopfr(GEN n)
 {
 	pari_sp ltop = avma;
 	GEN f, ret = gen_0;
-	long l1;
-	if (typ(n) != t_INT)
-		pari_err_TYPE("sopfr", n);
-	f = Z_factor(n);
-	l1 = glength(gel(f, 1));
+	f = check_arith_all(n, "sopfr");
+	if (!f) f = Z_factor(n);
+	long l1 = glength(gel(f, 1));
 	long i;
 	for (i = 1; i <= l1; ++i)
 	{
