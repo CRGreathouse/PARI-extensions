@@ -397,18 +397,22 @@ sopfr(GEN n)
 GEN
 gpf(GEN n)
 {
-	if (typ(n) != t_INT)
-		pari_err_TYPE("gpf", n);
-	if (is_pm1(n))
+	GEN f, ret;
+	pari_sp ltop = avma;
+	f = check_arith_all(n, "gpf");
+	if (!f) f = Z_factor(n);
+	
+	f = gel(f, 1);
+	long len = glength(f);	// Number of distinct prime factors
+	
+	if (len == 0)
 		return gen_1;
-	if (!signe(n))
+	if (equalii(gel(f, 1), gen_0))
 		return gen_0;
 		// My choice of convention: gpf(0) = 0
 	
-	pari_sp ltop = avma;
-	GEN f, ret;
-	f = gel(Z_factor(n), 1);
-	ret = gel(f, glength(f));
+	ret = gel(f, len);
+	if (equalii(ret, gen_m1)) ret = gen_1;
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
@@ -635,9 +639,31 @@ GEN
 lpf(GEN n)
 {
 	pari_sp ltop = avma;
-	GEN res;
-	if (typ(n) != t_INT)
-		pari_err_TYPE("lpf", n);
+	GEN res, f;
+	if ((f = check_arith_all(n, "lpf"))) {
+		f = gel(f, 1);
+		long len = glength(f);	// Number of distinct prime factors
+		
+		// Convention: lpf(1) = lpf(-1) = 1, lpf(0) = 0
+		if (len == 0 || (len == 1 && equalii(gel(f, 1), gen_m1))) {
+			avma = ltop;
+			return gen_1;
+		}
+		if (len == 1 && equalii(gel(f, 1), gen_0)) {
+			avma = ltop;
+			return gen_0;
+		}
+		
+		// Skip the -1 if present
+		if (equalii(gel(f, 1), gen_m1)) {
+			res = gel(f, 2);
+		} else {
+			res = gel(f, 1);
+		}
+		res = gerepileupto(ltop, res);
+		return res;
+	}
+	
 	ulong nn = itou_or_0(n);
 	if (nn)
 		return utoipos(lpfu(nn));
