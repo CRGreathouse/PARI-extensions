@@ -264,12 +264,11 @@ GEN
 rad(GEN n)
 {
 	pari_sp ltop = avma;
-	GEN ret;
-	if (typ(n) != t_INT)
-		pari_err_TYPE("rad", n);
-	if (signe(n) < 0)
-		n = negi(n);
-	ret = vecprod(gel(Z_factor(n), 1));
+	GEN f, ret;
+	f = check_arith_all(n, "rad");
+	if (!f) f = Z_factor(n);
+	ret = vecprod(gel(f, 1));
+	if (signe(ret) < 0) setabssign(ret);
 	ret = gerepileupto(ltop, ret);
 	return ret;
 }
