@@ -599,6 +599,47 @@ addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and 
 \\ *	                                    Polynomials                                              *
 \\ ***************************************************************************************************
 
+finiteOrbit(f:pol, x:mp)={
+	my(a=pollead(f), y=variable(f), v, d, b);
+	if(a < 0, error("Not implemented: negative leading coefficient"));
+	if(type(f) != "t_POL", error("Type error in finiteOrbit: should be polynomial"));
+	d=poldegree(f);
+	b=vecsum(abs(Vec(f)[2..d+1]))/a;
+	if(b < 1, b = 1);
+	v=List([x]);
+	while(1,
+		x=subst(f,y,x);
+		if(x > b, return(0));
+		for(i=1,#v,	\\ Slow loop -- need a better data structure.
+			if(x==v[i], return(1));
+		);
+		listput(v, x)
+	)
+};
+addhelp(finiteOrbit, "finiteOrbit(f, x): Is the forward orbit of x (under the polynomial f) finite?");
+
+
+isCriticallyFinite(f:pol)={
+	my(cp=nfroots(,f'), d=poldegree(f), y=variable(f));
+	if(#cp < d-2 && sum(i=1,#roots,valuation(f,y-cp[i])) < d-1,
+		error("Not implemented: polynomials with irrational critical points")
+	);
+	for(i=1,#cp,
+		if(!finiteOrbit(f, cp[i]), return(0))
+	);
+	1
+};
+addhelp(isCriticallyFinite, "isCriticallyFinite(f): ");
+
+
+RgX_check_ZX(P:pol, s:genstr)={
+	for(i=0,poldegree(P),
+		if(type(polcoeff(P,i)) != "t_INT", error("Type error: must be an integer polynomial in ",s))
+	)
+};
+addhelp(RgX_check_ZX, "RgX_check_ZX(P, s): Given a polynomial P, checks if its coefficients are integers and returns an error if not. s is a string with the name of the calling function (for the error message). Mimics the library function of the same name.");
+
+
 hasIntegerRoot(P:pol)={
 	#select(x->type(x)=="t_INT", nfroots(,P)) > 0
 };
