@@ -604,10 +604,6 @@ vdiff(v1,v2)={
 	);
 };
 */
-AA(n)={
-	my(k=sqrtint(n));
-	k*(n-(2*k+5)/6*(k-1))
-};
 
 
 dotproduct(a:vec, b:vec)={
