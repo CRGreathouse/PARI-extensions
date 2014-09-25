@@ -604,6 +604,12 @@ addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and 
 \\ *	                                  Number theory                                              *
 \\ ***************************************************************************************************
 
+hasIntegerRoot(P:pol)={
+	#select(x->type(x)=="t_INT", nfroots(,P)) > 0
+};
+addhelp(hasIntegerRoot, "hasIntegerRoot(P): Returns 1 if the polynomial P has at least one integer root and 0 otherwise.");
+
+
 \\ Varies as n*log(log(n))/log(n)
 countsemi(n:int)={
 	my(B=sqrtint(n),s=-binomial(primepi(B),2));
