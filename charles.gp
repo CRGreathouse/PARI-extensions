@@ -724,6 +724,18 @@ addhelp(bestappr2, "bestappr2(x, n): Work-in-progress.  Should determine the bes
 \\ *                               Operations on generic lists                                       *
 \\ ***************************************************************************************************
 
+ternarySearch(f, left, right)={
+	my(e=2*eps());\\left+right));
+	left *= 1.;	\\ convert to t_REAL
+	while(right-left>e,
+		my(L=(2*left+right)/3,R=(left+2*right)/3);
+		if(f(L) < f(R), left=L, right=R)
+	);
+	(left+right)/2
+};
+addhelp(ternarySearch, "ternarySearch(f, left, right): Assuming f is unimodal, find left <= x <= right such that f(x) is maximal.");
+
+
 chop(v:vec,n:int)={
 	if(#v<n,v,vector(n,i,v[i]))
 	\\ vecextract?
