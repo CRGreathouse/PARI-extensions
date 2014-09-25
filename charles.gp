@@ -604,6 +604,13 @@ addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and 
 \\ *	                                  Number theory                                              *
 \\ ***************************************************************************************************
 
+sqrtformal(n:int)={
+	my([d,f]=core(n,1));
+	if(d>1,quadgen(4*d),1)*f
+};
+addhelp(sqrtformal, "sqrtformal(n): Returns a number (t_QUAD or t_INT) representing the square root of n.");
+
+
 factordb(n)={
 	my(N=n,res,pr);
 	if(type(n)=="t_STR",N=eval(n));
