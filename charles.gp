@@ -86,26 +86,6 @@ isWardC(v:vec)={
 addhelp(isWardC, "isWardC(v): Does the vector v have Ward's (1939) property C? If not, return 0; if so, return the auxiliary sequence.");
 
 
-Eisenstein(P:pol)={
-	my(d=poldegree(P),x=variable(P),g,t,times);
-	P/=content(P);
-	while(1,
-		g=0;
-		for(i=0,d-1,
-			g=gcd(g,polcoeff(P,i));
-			if(g==1,break)
-		);
-		while((t=gcd(g,polcoeff(P,d)))>1,
-			g/=t
-		);
-		g=factor(g)[,1];
-		for(i=1,#g,if(polcoeff(P,0)%g[i]^2,return([g[i],times,P])));
-		times++;
-		P=subst(P,x,x+1)
-	)
-};
-
-
 plt(mn,mx,ff,flags:small=0,n:small=0)={
 	my(o=mn\1-1,k);
 	if(mx-mn < 2*n || (!n && mx-mn < 500),
@@ -616,6 +596,36 @@ addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and 
 
 
 \\ ***************************************************************************************************
+\\ *	                                    Polynomials                                              *
+\\ ***************************************************************************************************
+
+hasIntegerRoot(P:pol)={
+	#select(x->type(x)=="t_INT", nfroots(,P)) > 0
+};
+addhelp(hasIntegerRoot, "hasIntegerRoot(P): Returns 1 if the polynomial P has at least one integer root and 0 otherwise.");
+
+
+Eisenstein(P:pol)={
+	my(d=poldegree(P),x=variable(P),g,t,times);
+	P/=content(P);
+	while(1,
+		g=0;
+		for(i=0,d-1,
+			g=gcd(g,polcoeff(P,i));
+			if(g==1,break)
+		);
+		while((t=gcd(g,polcoeff(P,d)))>1,
+			g/=t
+		);
+		g=factor(g)[,1];
+		for(i=1,#g,if(polcoeff(P,0)%g[i]^2,return([g[i],times,P])));
+		times++;
+		P=subst(P,x,x+1)
+	)
+};
+addhelp(Eisenstein, "Eisenstein(P): Given an irreducible polynomial P, searches for some k such that P(x+k) can be proven irreducible by Eisenstein's criterion using a prime q. Output is [q, k, P(x+k)].");
+
+\\ ***************************************************************************************************
 \\ *	                                  Number theory                                              *
 \\ ***************************************************************************************************
 
@@ -663,12 +673,6 @@ factordb(n)={
 	res
 };
 addhelp(factordb, "factordb(n): Look up the factorization of n on factordb.com.");
-
-
-hasIntegerRoot(P:pol)={
-	#select(x->type(x)=="t_INT", nfroots(,P)) > 0
-};
-addhelp(hasIntegerRoot, "hasIntegerRoot(P): Returns 1 if the polynomial P has at least one integer root and 0 otherwise.");
 
 
 \\ Varies as n*log(log(n))/log(n)
