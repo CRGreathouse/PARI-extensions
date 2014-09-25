@@ -251,6 +251,74 @@ addhelp(pan9, "pan9(n): Is the number a 1-to-9 pandigital (exactly 9 distinct di
 \\ *                          Obscure (but otherwise reusable) functions                             *
 \\ ***************************************************************************************************
 
+smooth(P:vec,lim)={
+	my(v=List([1]),nxt=vector(#P,i,1),indx,t);
+	while(1,
+		t=vecmin(vector(#P,i,v[nxt[i]]*P[i]),&indx);
+		if(t>lim,break);
+		if(t>v[#v],listput(v,t));
+		nxt[indx]++
+	);
+	Vec(v)
+};
+addhelp(smooth, "smooth(P, lim): Returns a list of the P-smooth numbers up to lim, where P is a vector of positive integers.");
+
+
+tMod(a:int,b:int,M:int)={
+	if(b<=2,
+		if(b==2, return(Mod(a,M)^a));
+		if(b==1, return(Mod(a,M)));
+		if(b==0, return(Mod(1,M)));
+		if(b==-1, return(Mod(0,M)));
+		error("Undefined: tower height "b)
+	);
+	a=a%M;
+	if(a<=1,
+		if(a==0, return(Mod(0,M)));
+		if(a==1, return(Mod(1,M)));
+	);
+	my(g=gcd(a,M),coprimePart=a,partial);
+	while(g>1,
+		coprimePart/=g;
+		g=gcd(coprimePart,M);
+	);
+	partial=Mod(coprimePart,M)^lift(tMod(a,b,znorder(a,M)));
+	if(coprimePart==a,return(partial));
+	my(f=factor(a/coprimePart));
+	
+};
+addhelp(tMod, "tetrMod(a,b,M): Returns a^^b mod M. Not sure if this is working yet...");
+
+
+square(V:vec)={
+	my(U=List(),u,v,t);
+	listput(U, [1,sum(i=1,#V,
+		v=V[i];
+		v[1]*v[2]^2
+	)]);
+	for(i=1,#V-1,
+		v=V[i];
+		for(j=i+1,#V,
+			u=V[j];
+			t=core(v[1]*u[1],1);
+			t[2]*=2*u[2]*v[2];
+			listput(U, t)
+		)
+	);
+	for(i=1,#U-1,
+		v=U[i];
+		for(j=i+1,#U,
+			u=U[j];
+			if(v[1]==u[1],
+				U[i]=U[j]=[v[1], v[2]+u[2]]
+			)
+		)
+	);
+	U=Set(U);	\\ Like terms are added above so now duplicates can be removed
+	select(v->v[2]!=0, U)
+};
+addhelp(square, "square(V): Given a vector V containing pairs [a_i, b_i] representing the sum sqrt(a_1)*b_1 + ... + sqrt(a_k)*b_k, return a similar vector representing its square.");
+
 \\ These functions relate to A218459.
 docheck(d,p)=for(y=1,sqrtint(p\d),if(issquare(p-d*y^2),return(1)));0;
 dochk(p)=my(d);while(!docheck(d++,p),);d;
