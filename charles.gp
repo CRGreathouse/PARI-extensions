@@ -604,6 +604,45 @@ addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and 
 \\ *	                                  Number theory                                              *
 \\ ***************************************************************************************************
 
+factordb(n)={
+	my(N=n,res,pr);
+	if(type(n)=="t_STR",N=eval(n));
+	if(type(N)!="t_INT", error("Bad input"));
+	my(t=factor(N,2^24));	\\ Check if number is already factored (or tiny)
+	if(#select(k->k>2^24 || ispseudoprime(k), t[,1]) == #t[,1],
+		return(t)
+	);
+	\\t=alarm(1,factor(N));	\\ Pretest to remove easy composites
+	\\if(type(t)!="t_ERROR",return(t));
+	if(N<1e1000 && ispseudoprime(N),
+		if(default(factor_proven) && !isprime(N),
+			warning("Input appears to be a BPSW pseudoprime, PLEASE REPORT")
+		,
+			return(Mat([N,1]))
+		)
+	);
+	res = extern(concat("~/mth/fdb_factor.pl ",n));
+	if(!res, error("Could not find factors -- did you hit your hourly limit?"));
+	if(type(res)=="t_VEC",res=Mat(res));
+	if(type(res)!="t_MAT", error("fdb_factor.pl returned a non-matrix: ", res));
+	pr=prod(i=1,#res~, res[i,1]^res[i,2]);
+	if(N!=pr,
+		if(N%pr, error("factordb error on input "n));
+		res=concat(res,[N/pr,1])
+	);
+	for(i=1,#res~,
+		my(p=res[i,1]);
+		if(if(default(factor_proven),isprime(p),ispseudoprime(p)),
+			if(p>2^24 && default(factor_add_primes), addprimes(p))
+		,
+			warning("composite factor C",#Str(p)," = ",precision(p*1.,9))
+		)
+	);
+	res
+};
+addhelp(factordb, "factordb(n): Look up the factorization of n on factordb.com.");
+
+
 hasIntegerRoot(P:pol)={
 	#select(x->type(x)=="t_INT", nfroots(,P)) > 0
 };
