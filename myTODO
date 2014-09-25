@@ -4,10 +4,8 @@ Note that the priorities are my own.  For the tasks taken from the PARI TODO
 file, the priority there has been recorded in a parenthetical.
 
 Priority classification (first column): [subjective and debatable]
-5    as soon as possible
-4    should be done
-3    nice to have
-2    maybe not
+3    as soon as possible
+2    nice to have
 1    probably not
 0    no
 -    unclassified
@@ -15,44 +13,43 @@ Priority classification (first column): [subjective and debatable]
 
 ***********************  From the PARI standard TODO ************************
 
-4  implement Jebelean-Krandick diviiexact (5)
+2  implement Jebelean-Krandick diviiexact
 
-3  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
-   (5)
+2  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
 
 3  add a 'variable' as an optional last argument in content, denominator,
-   numerator, as is done in divrem (cf. 2.6.2) (5)
+   numerator, as is done in divrem (cf. 2.6.2)
 
-3  a type t_FILE [current: stream re-opened/flushed/closed after every single
+2  a type t_FILE [current: stream re-opened/flushed/closed after every single
    write(): disaster when one wants to write often to the same file]
-
-3  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
-   (4)
 
 
 **************************   Personal priorities  ***************************
 
-5  New loop that yields factored integers: perhaps forfactored(n=1,10,...)
+3  New loop that yields factored integers: perhaps forfactored(n=1,10,...)
    where sieve is used to make this fast.  Would work nicely with a new
    factored integer type (t_FACTORED?).
 
-4  Conjecture F related materials, including L-function computation.  But don't
+2  Conjecture F related materials, including L-function computation.  But don't
    spend too long on optimizing the L-fuctions, since Molin is working on
    an efficient PARI solution:
    http://pari.math.u-bordeaux.fr/archives/pari-users-1007/msg00004.html
 
-4  Let sqrt work on INTMOD objects with a composite modulus.
+2  Let sqrt work on INTMOD objects with a composite modulus.
 
-4  Good code for finding recurrence relations.
+2  Good code for finding recurrence relations.
 
-4  Fast sieve for various internal purposes.  Perhaps the GPL'd version of
+2  Fast sieve for various internal purposes.  Perhaps the GPL'd version of
    Tomás Oliveira e Silva?
 
-3  Code a correct tetration-mod-m function.
+2  checkmult/checkadd should not factor but loop through multiples of prime
+   powers (coprime to the power, of course).
 
-3  Extend fnice() to printing factored polynomials.  Perhaps also accepting
+2  Code a correct tetration-mod-m function.
+
+2  Extend fnice() to printing factored polynomials.  Perhaps also accepting
    factorizations as input?
 
-3  Script (function?) to deal 'nicely' with recurrence relations, finding Binet
+2  Script (function?) to deal 'nicely' with recurrence relations, finding Binet
    forms and searching for cycles (using cyclotomic junk above).
 
