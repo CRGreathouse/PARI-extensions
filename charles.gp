@@ -6,7 +6,26 @@ default(timer, 0);
 \\ *					Working space
 \\ ***************************************************************************************************
 
-
+isRicePoly(P:pol, verbose:bool=1)={
+	if(type(P)!="t_POL", error("Must be a polynomial"));
+	if(poldegree(P)<2, error("Degree must be >= 2"));
+	for(i=0,poldegree(P),
+		if(type(polcoeff(P,i))!="t_INT",error("Must be an integer polynomial"))
+	);
+	if(pollead(P)!=1, return(0));	\\ Must be monic
+	if(polcoeff(P,1), return(0));	\\ Linear coefficient must be 0
+	my(c=polcoeff(P,0));
+	if(abs(c)>=2, return(1));
+	if(c==0, return(0));		\\ P(0) cannot be 0
+	if(subst(P,variable(P),c)==0, return(0));	\\ P(P(0)) cannot be 0
+	if(verbose,
+		print("The sequence starting with "c" and iterating");
+		print(variable(P)," |--> ",nice(P));
+		print("is a superrigid divisibility sequence.")
+	);
+	1
+};
+addhelp(isRicePoly, "isRicePoly(P): Checks if a polynomial P fits the conditions for Proposition 3.2 in Brian Rice, 'Primitive Prime Divisors in Polynomial Arithmetic Dynamics', Integers 7:1 (2007).");
 
 \\ ***************************************************************************************************
 \\ *					Uncategorized
