@@ -1135,12 +1135,24 @@ checkdiv(GEN v, long verbose/*=1*/)
 	for (n = 1; n < l1; ++n) {
 		GEN vn = gel(v, n);
 		long i;
-		for (i = n + n; i < l1; i += n) {
-			if (!dvdii(gel(v, i), vn)) {
-				if (verbose)
-					pariprintf("Not a divisibility sequence: a(%ld) = %Ps does not divide a(%ld) = %Ps.\n", n, gel(v, n), i, gel(v, i));
-				avma = ltop;
-				return 0;
+		
+		if (signe(vn)) {
+			for (i = n + n; i < l1; i += n) {
+				if (!dvdii(gel(v, i), vn)) {
+					if (verbose)
+						pariprintf("Not a divisibility sequence: a(%ld) = %Ps does not divide a(%ld) = %Ps.\n", n, vn, i, gel(v, i));
+					avma = ltop;
+					return 0;
+				}
+			}
+		} else {
+			for (i = n + n; i < l1; i += n) {
+				if (signe(gel(v, i))) {
+					if (verbose)
+						pariprintf("Not a divisibility sequence: a(%ld) = 0 does not divide a(%ld) = %Ps.\n", n, i, gel(v, i));
+					avma = ltop;
+					return 0;
+				}
 			}
 		}
 		avma = ltop;
