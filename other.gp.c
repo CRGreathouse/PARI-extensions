@@ -96,28 +96,18 @@ GEN
 sumset(GEN a, GEN b)		/* vecsmall */
 {
 	pari_sp ltop = avma;
-	GEN c, p2, p4;
-	long l1;
-	long l3;
-	l1 = glength(a)*glength(b);
-	long l5;
-	p2 = cgetg(l1+1, t_VEC);
-	for (l5 = 1; l5 <= l1; ++l5)
-		gel(p2, l5) = gen_0;
-	c = p2;
-	l3 = glength(a);
+	GEN c, p4;
+	long alen = glength(a), blen = glength(b);
+	long l1 = alen*blen;
+	c = cgetg(l1+1, t_VEC);
 	pari_sp btop = avma, b_lim = stack_lim(btop, 1);
-	long i, l6;
-	for (i = 1; i <= l3; ++i)
+	long i;
+	for (i = 1; i <= alen; ++i)
 	{
-		l6 = glength(b);
-		pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
 		long j;
-		for (j = 1; j <= l6; ++j)
+		for (j = 1; j <= blen; ++j)
 		{
-			gel(c, ((i - 1)*glength(b)) + j) = gadd(gel(a, i), gel(b, j));
-			if (low_stack(c_lim, stack_lim(ctop, 1)))
-				c = gerepilecopy(ctop, c);
+			gel(c, (i - 1)*blen + j) = gadd(gel(a, i), gel(b, j));
 		}
 		if (low_stack(b_lim, stack_lim(btop, 1)))
 			c = gerepilecopy(btop, c);
