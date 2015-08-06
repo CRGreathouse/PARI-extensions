@@ -22,8 +22,9 @@ ensure_nb(GEN L, long l)
     v[0] = evaltyp(t_VEC) | _evallg(1);
   }
   list_data(L) = v;
-  list_nmax(L) = nmax;
+  L[1] = evaltyp(list_typ(L))|evallg(nmax);
 }
+
 
 /* return a value <= (48 << 10) = 49152 < primelinit */
 static ulong
