@@ -1190,54 +1190,129 @@ addhelp(li, "Logarithmic integral.");
 Li(x)=real(eint1(-log(2)) - eint1(-log(x)));
 addhelp(Li, "Offset logarithmic integral, an estimate for primepi. Crandall and Pomerance call this li_0.");
 
-piBounds(x,verbose:bool=0)={
-	local(lower,upper,lx,t,lowerRH,upperRH,roundFlag=default(realprecision)>sizedigit(x));
+piBounds(x,verbose=0)={
+	my(lower,upper,t,srcLower,srcUpper,lowerRH,upperRH,lowerC,upperC,roundFlag);
+	roundFlag=default(realprecision)>sizedigit(x);
 	
 	if(roundFlag, x = floor(x));
-	if (x < default(primelimit),
+	if (x < default(primelimit) || x < 65557,
 		lower=primepi(x);
 		print("primepi("x") = "lower);
 		return([lower,lower]);
 	);
+	my(lx=log(x),lix=li(x),Rx=R(x));	\\ Precompute these, we'll use them several times.
 
-	lx = log(x);
-	lower = x/lx * (1 + 1/lx + 1.8/lx^2);	\\ Dusart, x >= 32299
-	upper = x/(lx - 1.1);					\\ Dusart, x >= 60184
+	\\ "PARI currently guarantees that the first 6547 primes, up to and
+	\\ including 65557, are precomputed, even if primelimit is 1."
+	\\ --User's Guide
+	lower = x/lx * (1 + 1/lx + 1.8/lx^2);	\\ Dusart 1998, x >= 32299
+	upper = x/(lx - 1.1);					\\ Dusart 1998, x >= 60184
+	srcLower = srcUpper = "Dusart1998";
+	
+	if (x >= 88783,
+		lower = x/lx * (1 + 1/lx + 2/lx^2);		\\ Dusart 2010, x >= 88783
+		srcLower = "Dusart2010"
+	);
+	
+	if (x >= 1332450001,
+		lower = x/lx * (1 + 1/lx + 2/lx^2 + 5.65/lx^3 + 23.65/lx^4 + 118.25/lx^5 + 709.5/lx^6 + 4966.5/lx^7);		\\ Axler 2014, x >= 1332450001
+		srcLower = "Axler2014"
+	);
 	
 	if (x >= 355991,
-		t = x/lx * (1 + 1/lx + 2.51/lx^2);	\\ Dusart, x >= 355991
-		if (upper > t, upper = t)
-	);
-
-	if (x >= 1.332e10,
-		t = x/lx * (1 + 1.0992/lx);			\\ Dusart, x >= 1.332e10
-		if (upper > t, upper = t)
-	);
-	/*
-	if (roundFlag,
-		lower = ceil(lower);
-		upper = floor(upper);
+		t = x/lx * (1 + 1/lx + 2.51/lx^2);	\\ Dusart 1998, x >= 355991
+		if (upper > t,
+			upper = t;
+			srcUpper = "Dusart1998"
+		)
 	);
 	
+	if (x >= 2953652302,
+		t = x/lx * (1 + 1/lx + 2.334/lx^2);	\\ Dusart 2010, x >= 2 953 652 302
+		if (upper > t,
+			upper = t;
+			srcUpper = "Dusart2010"
+		)
+	);
+	
+	if (x >= 13041027276,
+		\\ This is the best in [13041027276, 16526414332]
+		t = x/lx * (1 + 1.0992/lx);			\\ Dusart 1998, x >= 1.332e10
+		if (upper > t,
+			upper = t;
+			if(x < 1.332e10,
+				srcUpper = "Dusart1998+finite"
+			,
+				srcUpper = "Dusart1998"
+			)
+		)
+	);
+	
+	if (x >= 2,
+		t = x/lx * (1 + 1/lx + 2/lx^2 + 6.35/lx^3 + 24.35/lx^4 + 121.75/lx^5 + 730.5/lx^6 + 6801.4/lx^7);	\\ Axler 2014, x >= 2
+		if (upper > t,
+			upper = t;
+			srcUpper = "Axler2014"
+		)
+	);
+	
+	if(x >= 2 && x <= 1e18,
+		if(upper > lix,
+			upper = lix;
+			srcUpper = "StollDemichael2011"
+		)
+	);
+
 	t = sqrt(x)/8/Pi*log(x);
-	lowerRH = li(x)-t;					\\ Schoenfield, x >= 2657
-	upperRH = li(x)+t;					\\ Schoenfield, x >= 2657
+	lowerRH = lix-t;					\\ Schoenfield, x >= 2657
+	upperRH = lix+t;					\\ Schoenfield, x >= 2657
+	lowerC = lix-sqrt(x);				\\ Kotnik, x >= 2
+	upperC = Rx+sqrt(x);				\\ Kotnik, x >= 2
+	
+	\\ Note: Stoll & Demichael have even tighter, even more conjectural bounds:
+	\\ lix +- (lix-Rx)*(1+(log(log(lx))+1)/exp(1)). But this is so close --
+	\\ +- 1/e vs. Omega_{+-}(1) -- to Littlewood's bound that it scares me a bit.
+	
+	\\ primepi(10770325941) = 488450930
+	\\ 10770325941 being the Dusart-Axler crossover
+	
 	if (roundFlag,
 		lowerRH = ceil(lowerRH);
 		upperRH = floor(upperRH);
+		lower = ceil(lower);
+		upper = floor(upper);
+		lowerC = ceil(lowerC);
+		upperC = floor(upperC);
 	);
 
-	print("For primepi("x"):");
+	if (x <= 14316504791907170806555192,	\\ Büthe gives x <= 1.4e25, but this is the exact number based on Gourdon's verification up to height 2445999556030.
+		if (lowerRH > lower,
+			lower = lowerRH;
+			srcLower = "Buthe2014"
+		);
+		if (upperRH < upper,
+			upper = upperRH;
+			srcUpper = "Buthe2014"
+		);
+	);
+
+	\\print("For primepi("x"):");
 	print(lower" (lower bound)");
 	if (lowerRH > lower,
 		print(lowerRH" (lower bound under the RH)");
 	);
+	if (lowerC > max(lowerRH, lower),
+		print(lowerC" (conjectural lower bound)");
+	);
 	if(roundFlag,
-		print(round(R(x))" (Riemann R, approximate)");
-		print(round(Li(x))" (logarithmic integral, apx)");
+		print(round(Rx)" (Riemann R, approximate)");
+		print(round(lix)" (logarithmic integral, apx)");
 	,
-		print(R(x)" (Riemann R, approximate)");
-		print(Li(x)" (logarithmic integral, apx)");
+		print(Rx" (Riemann R, approximate)");
+		print(lix" (logarithmic integral, apx)");
+	);
+	if (upperC < min(upperRH, upper),
+		print(upperC" (conjectural upper bound)");
 	);
 	if (upperRH < upper,
 		print(upperRH" (upper bound under the RH)");
@@ -1245,17 +1320,83 @@ piBounds(x,verbose:bool=0)={
 	print(upper" (upper bound)");
 	
 	if (verbose,
-		print("\nPierre Dusart, 'Autour de la fonction qui compte le nombre de nombres");
-		print("premiers', doctoral thesis for l'Université de Limoges (1998).");
+		if (srcLower == "Dusart1998" || srcUpper == "Dusart1998" || srcUpper == "Dusart1998+finite",
+			if(srcLower == "Dusart1998" && (srcUpper == "Dusart1998" || srcUpper == "Dusart1998+finite"),
+				print("\nUpper and lower bounds:");
+			,
+				print(if(srcLower == "Dusart1998", "\nLower bound:", "\nUpper bound:"))
+			);
+			print("Pierre Dusart, 'Autour de la fonction qui compte le nombre de nombres");
+			print("premiers', doctoral thesis for l'Universite de Limoges (1998).");
+			if(srcUpper == "Dusart1998+finite",
+				print("  plus finite checking (crg4)")
+			)
+		);
 		
-		if (lowerRH > lower || upperRH < upper,
-			print("Lowell Schoenfeld, 'Sharper Bounds for the Chebyshev Functions theta(x)");
-			print("and psi(x). II'. Mathematics of Computation, Vol 30, No 134 (Apr 1976),");
+		if (srcLower == "Dusart2010" || srcUpper == "Dusart2010",
+			if(srcLower == "Dusart2010" && srcUpper == "Dusart2010",
+				print("\nUpper and lower bounds:")
+			,
+				print(if(srcLower="Dusart2010","\nLower bound:","\nUpper bound:"))
+			);
+			print("Pierre Dusart, 'Estimates of some functions over primes without R.H.',");
+			print("preprint (2010), arXiv:1002.0442.");
+		);
+		
+		if (srcLower == "Axler2014" || srcUpper == "Axler2014",
+			if(srcLower == "Axler2014" && srcUpper == "Axler2014",
+				print("\nUpper and lower bounds:")
+			,
+				print(if(srcLower="Axler2014","\nLower bound:","\nUpper bound:"))
+			);
+			print("Christian Axler, New bounds for the prime counting function pi(x), preprint");
+			print("(2014), arXiv:1409.1780.");
+		);
+		
+		if(srcUpper == "StollDemichael2011",
+			print("\nUpper bound:");
+			print("Douglas A. Stoll and Patrick Demichel, The impact of zeta(s) complex zeros on");
+			print("pi(x) for x < 10^10^13, Math. Comp. 80:276 (2011), pp. 2381-2394.")
+		);
+		
+		t=(srcUpper == "Buthe2014")+(srcLower == "Buthe2014");
+		if(t,
+			if(t==2,
+				print("\nUpper and lower bounds:")
+			, srcUpper == "Buthe2014",
+				print("\nUpper bound:")
+			,
+				print("\nLower bound:")
+			);
+			print("Jan Buthe, Estimating pi(x) and related functions under partial RH assumptions,");
+			print("preprint (2014), arXiv:1410.7015.");
+		);
+		
+		t=(lowerRH > lower) + (upperRH < upper);
+		if (t,
+			if(t==1,
+				print("\nBound on the RH:");
+			,
+				print("\nBounds on the RH:");
+			);
+			print("Lowell Schoenfeld, 'Sharper Bounds for the Chebyshev Functions theta(x) and");
+			print("psi(x). II'. Mathematics of Computation, Vol 30, No 134 (Apr 1976),");
 			print("pp. 337-360.");
 		);
+
+		t=(lowerC > max(lowerRH, lower)) + (upperC < min(upperRH, upper));
+		if(t,
+			if(t==1,
+				print("\nConjectural bound:")
+			,
+				print("\nConjectural bounds:")
+			);
+			print("Tadej Kotnik, The prime-counting function and its analytic approximations,");
+			print("Adv. Comput. Math. 29 (2008), pp. 55-70.");
+		);
+
 		print();
 	);
-	*/
 	[lower, upper]
 };
 addhelp(piBounds, "piBounds(x, verbose=0): Bounds on primepi(x). Set verbose=1 to get a list of sources for the results.");
