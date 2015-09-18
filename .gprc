@@ -7,6 +7,7 @@ help = "/usr/local/bin/gphelp -cu 6 -detex"
 log = 1
 new_galois_format = 1
 parisize = 52428800
+parisizemax = 3G
 path = "~/mth/pari:.:~"
 prettyprinter = /usr/local/bin/tex2mail -TeX -noindent -ragged -by_par
 primelimit = 100M
