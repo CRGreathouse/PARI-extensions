@@ -87,6 +87,7 @@ graeffe(f:pol)={
 addhelp(graeffe, "graeffe(f): Assumes that f is a nonzero t_POL with t_INT coefficients.  Returns a polynomial with roots that are precisely the squares of the roots of f.");
 
 
+/*
 poliscyclo(f:pol)={
 	my(f1=graeffe(f),f2,fn);
 	if(f==f1,return(1));
@@ -95,11 +96,12 @@ poliscyclo(f:pol)={
 	issquare(f1,&f2)&iscyclo(f2)
 };
 addhelp(poliscyclo, "poliscyclo(f): Is f a cyclotomic polynomial?  Uses the Bradford-Davenport algorithm.");
-
+*/
 
 \\addhelp(poliscycloproduct, "poliscycloproduct(f, {flag=0}): Is f a product of distinct cyclotomic polynomials?  If flag is 1, return the least n such that f | x^n-1.");
 
 
+/*
 istotient(n:int)={
 	my(k:int,p:int,d:int);
 	if(n<2,return(n==1));
@@ -142,7 +144,7 @@ totientHelper(n:int,m:int=1)={
 	0
 };
 addhelp(totientHelper, "totientHelper(n,m): Helper function for totient.");
-
+*/
 
 Eng(n:int)={
 	my(tmp, s="");
@@ -264,7 +266,7 @@ rad(n:int)={
 };
 addhelp(rad, "rad(n): Radical of n, the largest squarefree number dividing n. Sloane's A007947.");
 
-
+/*
 isprimepower(n:int)={
 	ispower(n,,&n);
 	isprime(n)
@@ -279,7 +281,7 @@ isPowerful(n:int)={
 	vecmin(factor(n)[,2])>1
 };
 addhelp(isPowerful, "isPowerful(n): Is n powerful (min exponent 2)? Sloane's A112526; characteristic function of Sloane's A001694.");
-
+*/
 
 prp(n:int,b:int=2)={
 	Mod(b,n)^(n-1)==1
@@ -774,13 +776,13 @@ toC(n)={
 };
 addhelp(toC, "toC(n): Format n for use with the Pari library (e.g., with gp2c programs).");
 
-
+/*
 digits(x)={
 	my(s=sizedigit(x)-1);
 	if(x<10^s,s,s+1)
 };
 addhelp(digits, "digits(n): Number of decimal digits in n. Sloane's A055642.");
-
+*/
 
 \\ 2 ^ -(decimal_precision * log(10)/log (2) / 32) * 32 - 1)
 \\ precision(2. >> (32 * ceil(precision(1.) * 0.103810252965230073370947482171543443)), 9)
@@ -806,7 +808,7 @@ bfile(name, v:vec, offset=1)={
 		Anum = concat(vecextract(Vec(name), 126))
 	);
 	for(i=1,#v,
-		if (digits(v[i]) > 1000,
+		if (#digits(v[i]) > 1000,
 			print("Next term has "digits(v[i])" digits; exiting.");
 			break
 		);
