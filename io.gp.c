@@ -137,14 +137,14 @@ bfile(GEN name, GEN v, GEN offset)
 		{
 			p2 = cgetg(2, t_VEC);
 			gel(p2, 1) = strtoGENstr("0");
-			name = concat(p2, name);
+			name = gconcat(p2, name);
 		}
-		Anum = concat(name, NULL);	// "0","0","0","0","4","0" -> "000040"
-		name = concat(concat(strtoGENstr("b"), Anum), strtoGENstr(".txt"));
+		Anum = gconcat(name, NULL);	// "0","0","0","0","4","0" -> "000040"
+		name = gconcat(gconcat(strtoGENstr("b"), Anum), strtoGENstr(".txt"));
 	} else if (typ(name) == t_STR) {
 		// TODO: Try to extract a reasonable A-number, or just set to blank?
 		Anum = strtoGENstr("000000");
-		//Anum = concat(extract0(gtovec(name), utoipos(126), NULL), NULL);
+		//Anum = gconcat(extract0(gtovec(name), utoipos(126), NULL), NULL);
 	} else {
 		pari_err_TYPE("bfile", name);
 		__builtin_unreachable();
@@ -208,7 +208,7 @@ fnice(GEN n)
 	}
 	if (cmpis(n, 4) < 0)
 	{
-		p1 = concat(s, n);
+		p1 = gconcat(s, n);
 		p1 = gerepileupto(ltop, p1);
 		return p1;
 	}

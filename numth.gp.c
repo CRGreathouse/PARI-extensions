@@ -569,11 +569,11 @@ Mfactor(GEN p, GEN lim, GEN start)
 			gerepileall(btop, 2, &q, &v);
 		if (!gequal1(powgi(gmodulsg(2, q), modii(p, subis(q, 1)))))
 			continue;
-		v = concat(v, q);
+		v = gconcat(v, q);
 		long i = 2;
 		while (gequal1(powgi(gmodulsg(2, powis(q, i)), modii(p, mulii(subis(q, 1), powis(q, i - 1))))))
 		{
-			v = concat(v, q);
+			v = gconcat(v, q);
 			i++;
 		}
 	}
@@ -645,7 +645,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 			p5 = stoi(smodis(b, p - 1));
 		if (!gequal(powgi(gmodulo(a, stoi(p)), p5), c))
 			continue;
-		v = concat(v, stoi(p));
+		v = gconcat(v, stoi(p));
 		long i = 2;
 		pari_sp ctop = avma, c_lim = stack_lim(btop, 1);
 		GEN p6 = gen_0;
@@ -657,7 +657,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 				p6 = modii(b, mulis(powuu(p, i - 1), p - 1));
 			if (!gequal(powgi(gmodulo(a, powuu(p, i)), p6), c))
 				break;
-			v = concat(v, stoi(p));
+			v = gconcat(v, stoi(p));
 			i++;
 			if (low_stack(c_lim, stack_lim(ctop, 1)))
 				v = gerepileupto(ctop, v);
@@ -676,11 +676,11 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 			gerepileall(btop, 1, &v);
 		if (!gequal(gpowgs(gmodulo(a, stoi(p)), smodis(b, p - 1)), c))
 			continue;
-		v = concat(v, stoi(p));
+		v = gconcat(v, stoi(p));
 		long i = 2;
 		while (gequal(powgi(gmodulo(a, powis(stoi(p), i)), modii(b, mulis(powis(stoi(p), i - 1), p - 1))), c))
 		{
-			v = concat(v, stoi(p));
+			v = gconcat(v, stoi(p));
 			i++;
 		}
 	}
