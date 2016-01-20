@@ -2,8 +2,9 @@ timervalue = default(timer);
 default(timer, 0);
 
 \\ This file is a collection of functions that are already implemented in
-\\ auto.gp.c.  Occasionally it is useful to see a script for these functions,
-\\ for example giving code to others who cannot load the .run files.
+\\ auto.gp.c, or in newer version of GP. Occasionally it is useful to see a
+\\ script for these functions, for example giving code to others who cannot
+\\ load the .run files.
 
 
 primezeta(s)={
