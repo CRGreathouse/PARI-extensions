@@ -131,6 +131,8 @@ bfile(GEN name, GEN v, GEN offset)
 	
 	if (typ(name) == t_INT)
 	{
+		if (cmpis(name, 999999) > 0)
+			pari_warn(warner, "Argument is larger than 999,999, possible typo");
 		name = gtovec(GENtoGENstr(name));
 		GEN p2;
 		while (glength(name) < 6)
