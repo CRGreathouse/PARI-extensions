@@ -62,7 +62,7 @@ toC(GEN n)
 {
 	if (typ(n) != t_INT)
 		pari_err_TYPE("toC", n);
-	if (cmpis(n, 3) < 0)
+	if (cmpis(n, 3) < 0 && cmpis(n, -2) > 0)
 	{
 		if (cmpis(n, 2) == 0)
 			pari_printf("gen_2\n");
@@ -72,8 +72,6 @@ toC(GEN n)
 			pari_printf("gen_0\n");
 		else if (equalim1(n))
 			pari_printf("gen_m1\n");
-		else
-			pari_err_IMPL("negatives in toC"); // white lie
 		return;
 	}
 	if (ispow2(n)) {
@@ -94,18 +92,29 @@ toC(GEN n)
 
 	if (words == 1)
 	{
-		pari_printf("utoipos(%Ps)\n", n);
+		if (signe(n) > 0)
+			pari_printf("utoipos(%Ps)\n", n);
+		else
+			pari_printf("utoineg(%Ps)\n", absi(n));
 		avma = ltop;
 		return;
 	}
 	if (words == 2)
 	{
-		pari_printf("uu32toi(%Ps, %Ps)\n", shifti(n, -32), remi2n(n, 32));
+		if (signe(n) > 0) {
+			pari_printf("uu32toi(%Ps, %Ps)\n", shifti(n, -32), remi2n(n, 32));
+		} else {
+			n = absi(n);
+			pari_printf("uutoineg(%Ps, %Ps)\n", shifti(n, -32), remi2n(n, 32));
+		}
 		avma = ltop;
 		return;
 	}
 
 	// Large numbers
+	int sign = signe(n);
+	n = absi(n);
+	
 	// If efficiency mattered, walking through the binary representation
 	// would be far more efficient.
 	pari_printf("mkintn(%Ps", stoi(words));
@@ -120,6 +129,7 @@ toC(GEN n)
 			gerepileall(btop, 1, &n);
 	}
 	pari_printf(")\n");
+	if (sign < 0) pari_printf("setsigne(variable_name, -1)\n");
 	avma = ltop;
 	return;
 }
