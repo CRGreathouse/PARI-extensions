@@ -112,8 +112,14 @@ toC(GEN n)
 	}
 
 	// Large numbers
-	int sign = signe(n);
-	n = absi(n);
+
+	// Handle negatives
+	if (signe(n) < 0) {
+		toC(absi(n));
+		pari_printf("setsigne(variable_name, -1)\n");
+		avma = ltop;
+		return;
+	}
 	
 	// If efficiency mattered, walking through the binary representation
 	// would be far more efficient.
@@ -129,7 +135,6 @@ toC(GEN n)
 			gerepileall(btop, 1, &n);
 	}
 	pari_printf(")\n");
-	if (sign < 0) pari_printf("setsigne(variable_name, -1)\n");
 	avma = ltop;
 	return;
 }
