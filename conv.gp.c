@@ -54,15 +54,13 @@ vecprod(GEN v)
 }
 
 
-// TODO (possibly): give 32- and 64-bit specific code if it would differ, since
-// sometimes code needs to be split anyway (or only one is relevant, etc.).
-// TODO: Handle negatives, and possibly non-integer types?
 void
 toC(GEN n)
 {
 	if (typ(n) != t_INT)
 		pari_err_TYPE("toC", n);
-	if (cmpis(n, 3) < 0 && cmpis(n, -2) > 0)
+
+	if (abscmpiu(n, 3) < 0)
 	{
 		if (cmpis(n, 2) == 0)
 			pari_printf("gen_2\n");
@@ -72,6 +70,8 @@ toC(GEN n)
 			pari_printf("gen_0\n");
 		else if (equalim1(n))
 			pari_printf("gen_m1\n");
+		else if (equalis(n, -2))
+			pari_printf("gen_m2\n");
 		return;
 	}
 	if (ispow2(n)) {
