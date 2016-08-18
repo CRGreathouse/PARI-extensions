@@ -9,6 +9,7 @@
 GEN
 primezeta(GEN s, long prec)
 {
+	pari_sp ltop = avma;
 	switch (typ(s)) {
 	case t_COMPLEX:
 		return primezeta_complex(s);
@@ -24,7 +25,6 @@ primezeta(GEN s, long prec)
 		pari_err_TYPE("primezeta", s);
 	}
 	
-	pari_sp ltop = avma;
 	GEN ret = cmprs(s, 1) > 1 ? primezeta_real(s) : primezeta_complex(s);
 	ret = gerepileupto(ltop, ret);
 	return ret;
@@ -75,7 +75,7 @@ primezeta_real(GEN s)
 	for (k = 1; k <= mx; k++) {
 		long mu = moebiusu(k);
 		if (mu) {
-			accum = addrr(accum, divrs(mplog(absr(gzeta(mulrs(s, k), prec))), k*mu));
+			accum = addrr(accum, divrs(logr_abs(gzeta(mulrs(s, k), prec)), k*mu));
 			if (low_stack(st_lim, stack_lim(ltop, 2)))
 				accum = gerepileupto(ltop, accum);
 		}
