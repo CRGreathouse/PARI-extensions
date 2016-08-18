@@ -75,7 +75,7 @@ primezeta_real(GEN s)
 	for (k = 1; k <= mx; k++) {
 		long mu = moebiusu(k);
 		if (mu) {
-			accum = addrr(accum, divrs(mplog(absr(czeta(mulrs(s, k), prec))), k*mu));
+			accum = addrr(accum, divrs(mplog(absr(gzeta(mulrs(s, k), prec))), k*mu));
 			if (low_stack(st_lim, stack_lim(ltop, 2)))
 				accum = gerepileupto(ltop, accum);
 		}

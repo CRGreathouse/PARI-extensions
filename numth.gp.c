@@ -391,9 +391,9 @@ timer_start(&T);
 		avma = ltop;
 	}
 	res -= crossover * ucountSquarefree(breakpoint);
-GEN est = divrr(czeta(gdiv(utoipos(3), gen_2), MEDDEFAULTPREC),czeta(utoipos(3), MEDDEFAULTPREC));
+GEN est = divrr(gzeta(gdiv(utoipos(3), gen_2), MEDDEFAULTPREC), szeta(3, MEDDEFAULTPREC));
 est = gmul(est, sqrtr(itor(n, MEDDEFAULTPREC)));
-GEN correction = divrr(czeta(gdiv(gen_2, utoipos(3)), MEDDEFAULTPREC),czeta(gen_2, MEDDEFAULTPREC));
+GEN correction = divrr(gzeta(gdiv(gen_2, utoipos(3)), MEDDEFAULTPREC), szeta(2, MEDDEFAULTPREC));
 correction = gmul(correction, powrfrac(itor(n, MEDDEFAULTPREC), 1, 3));
 est = gadd(est, correction);
 est = gerepileupto(ltop, est);
