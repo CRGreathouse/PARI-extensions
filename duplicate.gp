@@ -747,39 +747,6 @@ addhelp(lg, "Base-2 logarithm.");
 \\ *					Convenience						*
 \\ ***************************************************************************************************
 
-vecsum(v)=
-{
-	sum(i=1,#v,v[i]);
-}
-addhelp(vecsum, "vecsum(v): Sum of the elements of v.");
-
-
-vecprod(v)=
-{
-	my(len=#v,mid);
-	if(len<9, return(prod(i=1,len,v[i])));
-	mid=len\2;
-	vecprod(v[mid+1..len])*vecprod(v[1..mid]);
-}
-addhelp(vecprod, "vecprod(v): Product of the elements of v.");
-
-
-vecgcd(v)=
-{
-	gcd(v);
-}
-addhelp(vecgcd, "vecgcd(v): Returns the gcd of all elements in the vector.");
-
-
-veclcm(v)=
-{
-	my(len=#v,mid);
-	if(len<99, return(lcm(v)));
-	mid=len\2;
-	lcm(veclcm(v[mid+1..len]),veclcm(v[1..mid]));
-}
-addhelp(veclcm, "veclcm(v): Returns the lcm of all elements in the vector.");
-
 
 oddres(n)=
 {
