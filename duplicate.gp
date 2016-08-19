@@ -840,7 +840,8 @@ addhelp(digits, "digits(n): Number of decimal digits in n. Sloane's A055642.");
 \\ precision(2. >> (32 * ceil(precision(1.) * 0.103810252965230073370947482171543443)), 9)
 eps()=
 {
-	precision(2. >> (32 * ceil(default(realprecision) * 38539962 / 371253907)), 9);
+	\\precision(2. >> (32 * ceil(default(realprecision) * 38539962 / 371253907)), 9);
+	2.>>bitprecision(1.);
 }
 addhelp(eps,"Returns machine epsilon for the current precision.");
 
