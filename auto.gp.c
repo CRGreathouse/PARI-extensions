@@ -2,6 +2,7 @@
 #include <pari/paripriv.h>
 #include <float.h>
 #include <limits.h>
+//#include <inttypes.h>
 /*
 GP;install("primezeta","D0,G,p","primezeta","./auto.gp.so");
 GP;addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
@@ -65,7 +66,7 @@ GP;install("vecprod","G","vecprod","./auto.gp.so");
 GP;addhelp(vecprod, "vecprod(v): Product of the elements of v.");
 GP;install("oddres","G","oddres","./auto.gp.so");
 GP;addhelp(oddres, "oddres(n): Returns the greatest odd number dividing n.");
-GP;install("toC","vG","toC","./auto.gp.so");
+GP;install("gToC","vG","toC","./auto.gp.so");
 GP;addhelp(toC, "toC(n): Format n for use with the PARI library (e.g., with gp2c programs).");
 GP;install("eps","p","eps","./auto.gp.so");
 GP;addhelp(eps, "eps(): Returns machine epsilon for the current precision.");
@@ -183,7 +184,8 @@ GEN vecprod(GEN v);
 GEN vecgcd(GEN v);
 GEN veclcm(GEN v);
 GEN oddres(GEN n);
-void toC(GEN n);
+void gToC(GEN n);
+const char* toC(GEN n);
 GEN eps(long prec);
 GEN fnice(GEN n);
 GEN tonice(GEN o, long prec);

@@ -55,32 +55,37 @@ vecprod(GEN v)
 
 
 void
+gToC(GEN n)
+{
+	pari_printf("%s\n", toC(n));
+}
+
+
+const char*
 toC(GEN n)
 {
 	if (typ(n) != t_INT)
+	{
 		pari_err_TYPE("toC", n);
+		__builtin_unreachable();
+	}
 
 	if (abscmpiu(n, 3) < 0)
 	{
 		if (cmpis(n, 2) == 0)
-			pari_printf("gen_2\n");
+			return "gen_2";
 		else if (equali1(n))
-			pari_printf("gen_1\n");
+			return "gen_1";
 		else if (signe(n) == 0)
-			pari_printf("gen_0\n");
+			return "gen_0";
 		else if (equalim1(n))
-			pari_printf("gen_m1\n");
+			return "gen_m1";
 		else if (equalis(n, -2))
-			pari_printf("gen_m2\n");
-		return;
+			return "gen_m2";
+		__builtin_unreachable();
 	}
-	if (ispow2(n)) {
-		pari_printf("int2u(%ld)\n", expi(n));
-		return;
-	}
+	if (ispow2(n)) return pari_sprintf("int2u(%ld)", expi(n));
 	
-	pari_sp ltop = avma;
-	GEN t;
 	// words: number of 32-bit words in n.
 #ifdef LONG_IS_64BIT
 	long words = (lgefint(n) - 2) << 1;
@@ -93,50 +98,50 @@ toC(GEN n)
 	if (words == 1)
 	{
 		if (signe(n) > 0)
-			pari_printf("utoipos(%Ps)\n", n);
+			return pari_sprintf("utoipos(%Ps)", n);
 		else
-			pari_printf("utoineg(%Ps)\n", absi(n));
-		avma = ltop;
-		return;
+			return pari_sprintf("utoineg(%Ps)", absi(n));
 	}
 	if (words == 2)
 	{
 		if (signe(n) > 0) {
-			pari_printf("uu32toi(%Ps, %Ps)\n", shifti(n, -32), remi2n(n, 32));
+			return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
 		} else {
 			n = absi(n);
-			pari_printf("uutoineg(%Ps, %Ps)\n", shifti(n, -32), remi2n(n, 32));
+			return pari_sprintf("uutoineg(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
 		}
-		avma = ltop;
-		return;
 	}
-
-	// Large numbers
 
 	// Handle negatives
 	if (signe(n) < 0) {
-		toC(absi(n));
-		pari_printf("setsigne(variable_name, -1)\n");
-		avma = ltop;
-		return;
+		// This format is ugly, is there a good way to improve this?
+		return pari_sprintf("variable_name=%s;\nsetsigne(variable_name, -1);", toC(absi(n)));
 	}
 	
-	// If efficiency mattered, walking through the binary representation
-	// would be far more efficient.
-	pari_printf("mkintn(%Ps", stoi(words));
+	// Large numbers
+	// N.B., this requires sprintf rather than pari_sprintf.
+	size_t maxSize = 9 + countdigits(stoi(words)) + 12*words;
+	char* buffer;
+	buffer = (char*)pari_malloc(maxSize*sizeof(char));
+	int index = sprintf(buffer, "mkintn(%ld", words);	// 7+len(words) characters
 	long i = words - 1;
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
 	for (; i >= 0; i--)
 	{
-		t = shifti(n, -(i * 32));
-		pari_printf(", %Ps", t);
-		n = subii(n, shifti(t, i * 32));
+#ifdef LONG_IS_64BIT
+		ulong chunk = mod2BIL(n) & 0xffffffff;
+#else
+		ulong chunk = mod2BIL(n);
+#endif
+		index += sprintf(buffer+index, ", %lu", chunk);	// 12 characters max
+		n = shifti(n, -32); // a faster approach would use int_nextW
 		if (low_stack(st_lim, stack_lim(btop, 1)))
 			gerepileall(btop, 1, &n);
+
 	}
-	pari_printf(")\n");
-	avma = ltop;
-	return;
+	index += sprintf(buffer+index, ")");	// 2 characters with \0
+	
+	return buffer;
 }
 
 
