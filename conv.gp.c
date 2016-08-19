@@ -117,8 +117,7 @@ toC(GEN n)
 			gerepileall(btop, 1, &n);
 
 	}
-	index += sprintf(buffer+index, ")");	// 2 characters with \0
-	
+	sprintf(buffer+index, ")");	// 2 characters with \0
 	return buffer;
 }
 
