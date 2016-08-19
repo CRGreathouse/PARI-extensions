@@ -32,28 +32,6 @@ gtor(GEN x, const char* funcName, long prec)
 }
 
 
-// TODO: Binary splitting for smaller subproducts.
-GEN
-vecprod(GEN v)
-{
-	pari_sp ltop = avma;
-	GEN p2 = gen_1;
-	if (!is_matvec_t(typ(v)))
-		pari_err_TYPE("vecprod", v);
-	long l1 = lg(v);
-
-	pari_sp btop = avma;
-	long i;
-	for (i = 1; i < l1; ++i)
-	{
-		p2 = gmul(p2, gel(v, i));
-		p2 = gerepileupto(btop, p2);
-	}
-	p2 = gerepileupto(ltop, p2);
-	return p2;
-}
-
-
 void
 gToC(GEN n)
 {

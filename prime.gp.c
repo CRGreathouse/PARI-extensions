@@ -260,6 +260,10 @@ uissemiprime(ulong n)
 }
 
 
+static GEN
+mulNii(void *a, GEN x, GEN y) { (void)a; return mulii(x,y);}	// for rad
+
+
 GEN
 rad(GEN n)
 {
@@ -267,7 +271,7 @@ rad(GEN n)
 	GEN f, ret;
 	f = check_arith_all(n, "rad");
 	if (!f) f = Z_factor(n);
-	ret = vecprod(gel(f, 1));
+	ret = gen_product(gel(f, 1), NULL, &mulNii);
 	if (signe(ret) < 0) setabssign(ret);
 	ret = gerepileupto(ltop, ret);
 	return ret;
