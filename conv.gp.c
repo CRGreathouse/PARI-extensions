@@ -39,10 +39,27 @@ gToC(GEN n)
 }
 
 
+/* Given a PARI object, return a string containing a C representation.
+ * Works on t_INT and t_FRAC.
+ * Tries to give a simple form when possible. This includes the
+ * universal objects gen_0, gen_1, gen_m1, gen_2, gen_m2, and ghalf.
+ * Note: The functions mkoo(), mkmoo(), and gen_I(), though related,
+ * are not produced by this function.
+*/
 const char*
 toC(GEN n)
 {
-	if (typ(n) != t_INT)
+	long t = typ(n);
+	if (t == t_FRAC)
+	{
+		GEN num = gel(n, 1), den = gel(n, 2);
+		if (equali1(num)) {
+			if (cmpis(den, 2) == 0) return "ghalf";
+			return pari_sprintf("ginv(%Ps)", den);
+		}
+		return pari_sprintf("gdiv(%Ps, %Ps)", num, den);
+	}
+	if (t != t_INT)
 	{
 		pari_err_TYPE("toC", n);
 		__builtin_unreachable();
@@ -99,8 +116,7 @@ toC(GEN n)
 	// Large numbers
 	// N.B., this requires sprintf rather than pari_sprintf.
 	size_t maxSize = 9 + countdigits(stoi(words)) + 12*words;
-	char* buffer;
-	buffer = (char*)pari_malloc(maxSize*sizeof(char));
+	char* buffer = (char*)pari_malloc(maxSize*sizeof(char));
 	int index = sprintf(buffer, "mkintn(%ld", words);	// 7+len(words) characters
 	long i = words - 1;
 	pari_sp btop = avma, st_lim = stack_lim(btop, 1);
