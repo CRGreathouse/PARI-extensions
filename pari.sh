@@ -1,6 +1,10 @@
 #!/bin/bash
 cd ~/mth/pari
 
+#CC='gcc'
+#CC='/usr/local/bin/gcc5.1'
+CC='/usr/bin/gcc-6'
+
 # 'Basic' warnings.
 W='-Wall -Wextra -Wcast-align -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wunused-macros -Wswitch-enum -Wold-style-definition -Wpointer-arith -Wnested-externs -Wlogical-op -Winline -Winit-self -Wformat-security -Wformat-nonliteral -Wformat-y2k'
 
@@ -24,14 +28,16 @@ O="$O -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -fgra
 GCCOPT="-march=native -m64 $W $O"
 
 # What warnings are missed?
-#gcc $GCCOPT -Q --help=warnings | fgrep '[disabled]' | egrep -v `echo "'$ignore'" | tr ' ' '|' | sed s/-/[-]/ | sed s/+/[+]/g`
+#$CC $GCCOPT -Q --help=warnings | fgrep '[disabled]' | egrep -v `echo "'$ignore'" | tr ' ' '|' | sed s/-/[-]/ | sed s/+/[+]/g`
 
 # What optimizations are turned off?
-#gcc $GCCOPT -Q --help=optimizers | fgrep '[disabled]'
+#$CC $GCCOPT -Q --help=optimizers | fgrep '[disabled]'
 
-# Compile auto file
-gcc -o auto.gp.o $GCCOPT -c -I"/usr/local/include" auto.gp.c
-gcc -o auto.gp.so $GCCOPT -shared -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari
+# Compile and link auto file
+echo Compiling
+$CC -o auto.gp.o $GCCOPT -c -I"/usr/local/include" auto.gp.c || exit # exit with status of last command
+echo Linking
+$CC -time -o auto.gp.so $GCCOPT -shared -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari || exit # exit with status of last command
 
 # Create run file to install auto and add associated help entries
 egrep '^GP;' auto.gp.c | sed 's/^GP;//' > auto.gp.run
