@@ -1,5 +1,6 @@
 #!/bin/bash
 cd ~/mth/pari
+export GPDOCDIR="/home/charles/mth/pari/doc"
 
 #CC='gcc'
 #CC='/usr/local/bin/gcc5.1'
@@ -31,10 +32,10 @@ ignore="$ignore -Waliasing -Wampersand -Warray-temporaries -Wzerotrip -Wintrinsi
 O='-O2 -fno-strict-aliasing -fomit-frame-pointer -fPIC'
 
 # Powerful Graphite optimizations.
-O="$O -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -fgraphite-identity -floop-nest-optimize -floop-parallelize-all"
+O="$O -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -fgraphite-identity -floop-nest-optimize -floop-unroll-and-jam"
 
 # All options together here
-GCCOPT="-march=native -m64 $W $O"
+GCCOPT="-march=native -m64 $W $O -fdiagnostics-color=always"
 
 # What warnings are missed?
 #$CC $GCCOPT -Q --help=warnings | fgrep '[disabled]' | egrep -v `echo "'$ignore'" | tr ' ' '|' | sed s/-/[-]/ | sed s/+/[+]/g`
@@ -44,6 +45,7 @@ GCCOPT="-march=native -m64 $W $O"
 
 # Compile and link auto file
 echo Compiling
+#$CC -ftime-report -o auto.gp.o $GCCOPT -c -I"/usr/local/include" auto.gp.c
 $CC -o auto.gp.o $GCCOPT -c -I"/usr/local/include" auto.gp.c || exit # exit with status of last command
 echo Linking
 $CC -time -o auto.gp.so $GCCOPT -shared -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari || exit # exit with status of last command
