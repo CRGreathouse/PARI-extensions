@@ -10,13 +10,22 @@ W='-Wall -Wextra -Wcast-align -Wcast-qual -Wstrict-prototypes -Wmissing-prototyp
 
 # Extra warnings; these may give lots of output but are probably worthwhile. Disable if needed.
 W="$W -Wfloat-equal -Wdisabled-optimization -Wwrite-strings -Wtrampolines -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wshadow"
-W="$W -Wvector-operation-performance -Wabi -Wpadded -Wpacked -Waggregate-return -Woverlength-strings -Wc++-compat -Wstack-protector"
+W="$W -Wvector-operation-performance -Wabi -Wpadded -Wpacked -Waggregate-return -Woverlength-strings -Wc++-compat -Wstack-protector -Wundef"
+
+# New warnings for gcc 6, disable if using something else maybe
+W="$W -Wformat-signedness"
+
+# Warnings which should be errors
+W="$W -Werror=int-conversion -Werror=incompatible-pointer-types"
 
 # Not used: some warnings I have found to be unhelpful.
-ignore="-Wbad-function-cast -Wconversion -Wswitch-default -Wunsuffixed-float-constants -Wjump-misses-init -Wunsafe-loop-optimizations -Wdouble-promotion -Wsystem-headers -Wnoexcept -Wbad-function-cast -Wdeclaration-after-statement -Wpedantic -Wtraditional-conversion -Wtraditional"
+ignore="-Wbad-function-cast -Wconversion -Wswitch-default -Wunsuffixed-float-constants -Wjump-misses-init -Wunsafe-loop-optimizations -Wdouble-promotion -Wsystem-headers -Wnoexcept -Wdeclaration-after-statement -Wpedantic -Wtraditional-conversion -Wtraditional"
 
 # Warnings which do not apply to C (but to C++, Objective C++, D, etc.).
-ignore="$ignore -Wuseless-cast -Weffc++ -Wc++0x-compat -Wzero-as-null-pointer-constant -Wreorder -Wcast-result -Wabi-tag -Wsign-promo -Wnon-virtual-dtor -Wctor-dtor-privacy -Wctor-dtor-privacy -Wdelete-non-virtual-dtor -Wassign-intercept -Wdelete-non-virtual-dtor -Wc++0x-compat -Wundeclared-selector -Wold-style-cast -Wselector -Woverloaded-virtual -Wstrict-null-sentinel -Wstrict-selector-match -Wsynth "
+ignore="$ignore -Wuseless-cast -Weffc++ -Wc++0x-compat -Wzero-as-null-pointer-constant -Wreorder -Wcast-result -Wabi-tag -Wsign-promo -Wnon-virtual-dtor -Wctor-dtor-privacy -Wctor-dtor-privacy -Wdelete-non-virtual-dtor -Wassign-intercept -Wdelete-non-virtual-dtor -Wc++0x-compat -Wundeclared-selector -Wold-style-cast -Wselector -Woverloaded-virtual -Wstrict-null-sentinel -Wstrict-selector-match -Wsynth -Wc++14-compat"
+
+# These seem to apply to Fortran only.
+ignore="$ignore -Waliasing -Wampersand -Warray-temporaries -Wzerotrip -Wintrinsic-shadow"
 
 # Basic optimizations.
 O='-O2 -fno-strict-aliasing -fomit-frame-pointer -fPIC'
