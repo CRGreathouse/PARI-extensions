@@ -3,11 +3,11 @@
 
  This file is designed to work with GtkSourceView
 
- Author: Charles R Greathouse IV
+ Author: Charles R Greathouse IV, charles(at)crg4.com
  Copyright (C) 2016, Charles R Greathoue IV
 
 -->
-<language id="parigp" _name="Pari/GP" version="2.0" _section="Scientific">
+<language id="pari" _name="Pari/GP" version="2.0" _section="Scientific">
 	<metadata>
 		<property name="mimetypes">text/x-pari-gp</property>
 		<property name="globs">*.gp;*.GP;*.gpi</property>
