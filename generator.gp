@@ -1,6 +1,4 @@
 \\ Makes programs for sequences like A179643.
-\\ o link:http://willnicholes.com/math/primesiglist.htm -program:pari
-\\ o link:http://oeis.org/wiki/Prime_signature#Numbers_with_same_prime_signature -program:pari
 generate(v)={
 	my(s);
 	if(type(v) != "t_VEC", error("Input should be a vector"));
@@ -10,7 +8,7 @@ generate(v)={
 	);
 	v=vecsort(v,,4);
 	if(#v>3,
-		my(pVar=if(#v>4,vector(#v,i,Str("p",i)),["p","q","r","s"]),tVar=vector(#v-1,i,Str("t",i)),t,m);
+		my(pVar=if(#v>6,vector(#v,i,Str("p",i)),["p","q","r","s","t","u"][1..#v]),tVar=vector(#v-1,i,Str("t",i)),t,m);
 		t=gRoot(Str("lim\\",tVar[#v-1]), v[#v]);
 		s=Str("forprime(",pVar[#v],"=2,",t,", if(",gOr(pVar[1..#v-1], pVar[#v]),", next); listput(v, ",tVar[#v-1],"*",gPow(pVar[#v],v[#v]),"))");
 		forstep(i=#v-1,2,-1,
