@@ -8,8 +8,21 @@ generate(v)={
 		s=Str("a(n)=",gPow("prime(n)", v[1]));
 		return(gH(s))
 	);
-	if(#v>3,error("Not implemented."));
 	v=vecsort(v,,4);
+	if(#v>3,
+		my(pVar=if(#v>4,vector(#v,i,Str("p",i)),["p","q","r","s"]),tVar=vector(#v-1,i,Str("t",i)),t,m);
+		t=gRoot(Str("lim\\",tVar[#v-1]), v[#v]);
+		s=Str("forprime(",pVar[#v],"=2,",t,", if(",gOr(pVar[1..#v-1], pVar[#v]),", next); listput(v, ",tVar[#v-1],"*",gPow(pVar[#v],v[#v]),"))");
+		forstep(i=#v-1,2,-1,
+			m=factorback(primes(#v-i),v[i+1..#v]);
+			t=gRoot(Str("lim\\(",m,"*",tVar[i-1],")"), v[i]);
+			s=Str("forprime(",pVar[i],"=2,",t,", if(",gOr(pVar[1..i-1], pVar[i]),", next); ",tVar[i],"=",gPow(pVar[i],v[i]),"*",tVar[i-1],"; ",s,")");
+		);
+		m=factorback(primes(#v-1),v[2..#v]);
+		t=gRoot(Str("lim\\",m), v[1]);
+		s=Str("forprime(",pVar[1],"=2,",t,", ",tVar[1],"=",gPow(pVar[1],v[1]),"; ",s,")");
+		s=Str("list(lim)=my(v=List()",concat(apply(x->Str(",",x), tVar)),"); ",s);
+	);
 	if (#v == 2,
 		s="list(lim)=my(v=List(),t);forprime(p=2, ";
 		s=if(v[1]==v[2],
@@ -57,7 +70,7 @@ generate(v)={
 		));
 		s = Str(s, "listput(v,t2*", gPow("r", v[3]), "))))");
 	);
-	s = Str(s, "; vecsort(Vec(v))");
+	s = Str(s, "; Set(v)");
 	return(gH(s))
 };
 gH(s)={	\\ Helper function for printing or returning values.
@@ -65,7 +78,7 @@ gH(s)={	\\ Helper function for printing or returning values.
 	print("(PARI) "s" \\\\ ~~~~");
 	eval(s);
 	while(#(v=list(lm))<30, lm*=2);
-	if(v!=vecsort(v,,8),
+	if(v!=Set(v),
 		if(v==vecsort(v),
 			warning("repeats")
 		,
@@ -74,7 +87,8 @@ gH(s)={	\\ Helper function for printing or returning values.
 	);
 	v
 };
-gPow(s, n)={ \\ n-th power of s. Assumes s can be powered directly: is a function call, a variable, or in parens.
+
+gPow(s, n)={ \\ n-th power of s.
 	if(n == 1, return(s));
 	if(type(n)=="t_INT" || type(n)=="t_REAL",
 		return(Str(if(needsParens(s),Str("("s")"),s), "^", n))
@@ -89,6 +103,21 @@ gPow(s, n)={ \\ n-th power of s. Assumes s can be powered directly: is a functio
 		Str(s"^("n")")
 	)
 };
+
+\\ n-th root of s.
+gRoot(s, n)=
+{
+	if(n == 1, return(s));
+	if(n == 2, return(Str("sqrtint(", s, ")")));
+	Str("sqrtnint(", s, ", ", n, ")");
+}
+
+gOr(v:vec, x)=
+{
+	if (#v==1, return(Str(x,"==",v[1])));
+	Str(x,"==",v[1],concat(apply(s->Str(" || ",x,"==",s), v[2..#v])));
+}
+
 needsParens(s)={
 	my(v=Vec(s),start);
 	if(alpha(v[1]),
