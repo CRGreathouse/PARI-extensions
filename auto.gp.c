@@ -268,5 +268,5 @@ GEN rnormal_cached;
 void
 init_auto(void)
 {
-	rnormal_cached = 0;
+    rnormal_cached = 0;
 }
