@@ -7,6 +7,23 @@ default(timer, 0);
 \\ load the .run files.
 
 
+matperm(M:mat)=
+{
+	my(n:small=matsize(M)[1],innerSums=vectorv(n));
+	if(n==0, return(1));
+	sum(x=1,2^n-1,
+		my(k=valuation(x,2),s=M[,k+1],gray=bitxor(x, x>>1));
+		if(bittest(gray,k),
+			innerSums += s;
+		,
+			innerSums -= s;
+		);
+		(-1)^hammingweight(gray)*factorback(innerSums)
+	)*(-1)^n;
+}
+addhelp(matperm, "matperm(M): permanent of the matrix M.");
+
+
 primezeta(s)=
 {
 	if (type(s) == "t_COMPLEX" || s <= 1,

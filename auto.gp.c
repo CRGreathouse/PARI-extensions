@@ -5,7 +5,7 @@
 //#include <inttypes.h>
 /*
 GP;install("matperm","G","matperm","./auto.gp.so");
-GP;addhelp(matperm, "matperm(x): permanent of the matrix x.");
+GP;addhelp(matperm, "matperm(M): permanent of the matrix M.");
 GP;install("primezeta","D0,G,p","primezeta","./auto.gp.so");
 GP;addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 GP;install("isfactorial","lG","isfactorial","./auto.gp.so");
