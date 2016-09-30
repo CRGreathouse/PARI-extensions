@@ -84,7 +84,7 @@ primezeta_real(GEN s)
 }
 
 
-// Checked up to 10,000 with the 64-bit version.
+// Checked up to 42,000 with the 64-bit version.
 GEN
 Bell(long n)
 {
