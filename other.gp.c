@@ -28,14 +28,11 @@ matperm(GEN M)
 #endif
   
   pari_sp ltop = avma;
-  GEN outerSum = gen_0;
-  GEN innerSums = cgetg(n+1, t_COL);
-  long i;
+  GEN outerSum = gen_0, innerSums = cgetg(n+1, t_COL);
+  long i, x, upper = (1L<<n) - 1;
   for (i = 1; i <= n; ++i) gel(innerSums, i) = gen_0;
-  long p2 = (1<<n) - 1;
   pari_sp btop = avma;
-  long x;
-  for (x = 0; x < p2; ) {
+  for (x = 0; x < upper; ) {
     x++;
     long gray = x ^ (x>>1);
     long k = vals(x), kp1 = k+1;
