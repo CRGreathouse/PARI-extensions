@@ -7,6 +7,55 @@ assume (int expr)
 }
 
 
+GEN
+matperm(GEN M)
+{
+  if (typ(M) != t_MAT) pari_err_TYPE("matperm", M);
+  long n = lg(M)-1;
+  if (!n) return gen_1;
+  if (n != nbrows(M)) pari_err_DIM("matperm");
+  if (n == 1) return gcopy(gmael(M,1,1));
+  
+  /* The restriction is based on the use of vals, which requires a long
+   * rather than a ulong. A different solution would allow these limits
+   * to be increased by 1. A limit of 63 is already impractical (would
+   * take thousands of years) so this really only matters in the
+   * 32-bit case. */
+#ifdef LONG_IS_64BIT
+  if (n > 63) pari_err_IMPL("large matrix permanant");
+#else
+  if (n > 31) pari_err_IMPL("large matrix permanant");
+#endif
+  
+  pari_sp ltop = avma;
+  GEN outerSum = gen_0;
+  GEN innerSums = cgetg(n+1, t_COL);
+  long i;
+  for (i = 1; i <= n; ++i) gel(innerSums, i) = gen_0;
+  long p2 = (1<<n) - 1;
+  pari_sp btop = avma;
+  long x;
+  for (x = 0; x < p2; ) {
+    x++;
+    long gray = x ^ (x>>1);
+    long k = vals(x), kp1 = k+1;
+    if (gray & (1L<<k)) {
+      for (i = 1; i <= n; ++i) gel(innerSums, i) = gadd(gel(innerSums, i), gmael(M, i, kp1));
+    } else {
+      for (i = 1; i <= n; ++i) gel(innerSums, i) = gsub(gel(innerSums, i), gmael(M, i, kp1));
+    }
+    if (hamming_word(gray)&1)
+      outerSum = gsub(outerSum, factorback(innerSums));
+    else
+      outerSum = gadd(outerSum, factorback(innerSums));
+    if (gc_needed(btop, 1))
+      gerepileall(btop, 2, &innerSums, &outerSum);
+  }
+  if (n&1) setsigne(outerSum, -signe(outerSum));
+  return gerepilecopy(ltop, outerSum);
+}
+
+
 long
 consistency(void)
 {

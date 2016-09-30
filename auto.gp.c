@@ -4,6 +4,8 @@
 #include <limits.h>
 //#include <inttypes.h>
 /*
+GP;install("matperm","G","matperm","./auto.gp.so");
+GP;addhelp(matperm, "matperm(x): permanent of the matrix x.");
 GP;install("primezeta","D0,G,p","primezeta","./auto.gp.so");
 GP;addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 GP;install("isfactorial","lG","isfactorial","./auto.gp.so");
@@ -130,6 +132,7 @@ GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
 GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
 */
 
+GEN matperm(GEN M);
 GEN Bell(long n);
 long checkmult(GEN v, long verbose);
 long checkcmult(GEN v, long verbose);
