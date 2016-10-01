@@ -6,7 +6,8 @@ assume (int expr)
     if (!expr) __builtin_unreachable();
 }
 
-
+// B=[3,2,1,1,0;2,5,3,0,0;3,2,3,3,0;5,1,2,3,1;4,1,2,5,3]~;matperm(Mod(B,6))==Mod(matperm(B),6)
+// 
 GEN
 matperm(GEN M)
 {
@@ -49,8 +50,13 @@ matperm(GEN M)
       gerepileall(btop, 2, &innerSums, &outerSum);
   }
   if (n&1) {
-    long s = signe(outerSum);
-    if (s) setsigne(outerSum, -s);
+    long t = typ(outerSum);
+    if (t == t_INT) {
+      long s = signe(outerSum);
+      if (s) setsigne(outerSum, -s);
+    } else if (t == t_INTMOD) {
+      outerSum = gmul(outerSum, gen_m1);
+    }
   }
   return gerepilecopy(ltop, outerSum);
 }
