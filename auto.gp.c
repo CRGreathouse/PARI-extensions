@@ -122,12 +122,7 @@ GP;install("HurwitzClassNumber","G","H","./auto.gp.so");
 GP;addhelp(H, "H(n): The Hurwitz class number. Counts the number of equivalence classes of positive definite quadratic forms ax^2 + bxy + cy^2 with discriminant b^2-4ac = -n, counting forms equivalent to x^2+y^2 with weight 1/2 and forms equivalent to x^2+xy+y^2 with weight 1/3.");
 GP;install("Collatz","lG","Collatz","./auto.gp.so");
 GP;addhelp(Collatz, "Collatz(n): Number of triplings to reach 1 via the Collatz relation; Sloane's A006667.");
-// Testing \/
-GP;install("tetrMod","GGG","tetrMod","./auto.gp.so");
-GP;addhelp(tetrMod, "tetrMod(a,b,M): Returns a^^b mod M.");
-* // Testing /\
 // No associated help
-GP;install("consistency","l","consistency","./auto.gp.so");
 GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
 GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
 */
@@ -138,7 +133,6 @@ long checkmult(GEN v, long verbose);
 long checkcmult(GEN v, long verbose);
 long checkdiv(GEN v, long verbose);
 GEN solvePell(GEN n);
-GEN tetrMod(GEN a, GEN b, GEN M);
 GEN Engel(GEN x);
 GEN Eng(GEN n);
 GEN Eng_small(long n);
@@ -237,14 +231,12 @@ ulong lpfu(ulong n);
 int palhelper(long digits, GEN a, GEN b, GEN code);
 GEN prodtree_small(GEN A, long start, long stop);
 GEN rev(GEN n, long B);
-ulong tetrMod_tiny(ulong a, ulong b, ulong M);
 ulong ucomposite(long n);
 ulong ucountPowerfuli(GEN n);
 GEN listtovec_shallow(GEN v);
 void listput_shallow(GEN L, GEN x);
 long Collatz(GEN n);
 long Collatz_tiny(ulong n);
-long consistency(void);
 long issm3(long n) __attribute__ ((const));
 long ispow3_tiny(ulong n) __attribute__ ((const));
 long isSmallFib(long n) __attribute__ ((const));
