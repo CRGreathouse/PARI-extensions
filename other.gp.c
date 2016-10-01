@@ -48,7 +48,10 @@ matperm(GEN M)
     if (gc_needed(btop, 1))
       gerepileall(btop, 2, &innerSums, &outerSum);
   }
-  if (n&1) setsigne(outerSum, -signe(outerSum));
+  if (n&1) {
+    long s = signe(outerSum);
+    if (s) setsigne(outerSum, -s);
+  }
   return gerepilecopy(ltop, outerSum);
 }
 
