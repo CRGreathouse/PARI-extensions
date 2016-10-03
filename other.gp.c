@@ -27,20 +27,28 @@ matperm(GEN M)
 #else
   if (n > 31) pari_err_IMPL("large matrix permanant");
 #endif
-  
+
+  if (RgM_is_ZM(M)) return ZM_perm(M);
+
   pari_sp ltop = avma;
   GEN outerSum = gen_0, innerSums = cgetg(n+1, t_COL);
-  long i, x, upper = (1L<<n) - 1;
+#ifdef LONG_IS_64BIT
+  long upper = 0x7FFFFFFFFFFFFFFF>>(63-n);
+#else
+  long upper = 0x7FFFFFFF>>(31-n);
+#endif
+  long i, x;
   for (i = 1; i <= n; ++i) gel(innerSums, i) = gen_0;
+
   pari_sp btop = avma;
   for (x = 0; x < upper; ) {
     x++;
     long gray = x ^ (x>>1);
     long k = vals(x), kp1 = k+1;
     if (gray & (1L<<k)) {
-      for (i = 1; i <= n; ++i) gel(innerSums, i) = gadd(gel(innerSums, i), gmael(M, i, kp1));
+      for (i = 1; i <= n; ++i) gel(innerSums, i) = gadd(gel(innerSums, i), gcoeff(M, i, kp1));
     } else {
-      for (i = 1; i <= n; ++i) gel(innerSums, i) = gsub(gel(innerSums, i), gmael(M, i, kp1));
+      for (i = 1; i <= n; ++i) gel(innerSums, i) = gsub(gel(innerSums, i), gcoeff(M, i, kp1));
     }
     if (hamming_word(gray)&1)
       outerSum = gsub(outerSum, factorback(innerSums));
