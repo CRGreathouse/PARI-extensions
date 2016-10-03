@@ -15,8 +15,8 @@ matperm(GEN M)
   long n = lg(M)-1;
   if (!n) return gen_1;
   if (n != nbrows(M)) pari_err_DIM("matperm");
-  if (n == 1) return gcopy(gmael(M,1,1));
-  
+  if (n == 1) return gcopy(gcoeff(M,1,1));
+
   /* The restriction is based on the use of vals, which requires a long
    * rather than a ulong. A different solution would allow these limits
    * to be increased by 1. A limit of 63 is already impractical (would
@@ -412,17 +412,17 @@ Engel(GEN x)
             for (; i <= n; ++i)
                 gel(v, i) = gen_1;
             return v;
-            
+
         case t_FRAC:
             pari_err_IMPL("fractions in Engel");
-        
+
         case t_REAL:
             break;
-        
+
         default:
             pari_err_TYPE("Engel", x);
     }
-    
+
     pari_sp ltop = avma;
     v = listcreate();
     pari_sp btop = avma, st_lim = stack_lim(btop, 1);
@@ -522,7 +522,7 @@ Eng_tiny(long n)
         ret = gerepileupto(av, ret);
         return ret;
     }
-    
+
     long tmp = n / 10;
     static const char* lookup[] = {"","","twenty","thirty","forty","fifty","sixty",
     "seventy","eighty","ninety"};
