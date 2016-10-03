@@ -60,9 +60,8 @@ matperm(GEN M)
   if (n&1) {
     long t = typ(outerSum);
     if (t == t_INT) {
-      long s = signe(outerSum);
-      if (s) setsigne(outerSum, -s);
-    } else if (t == t_INTMOD) {
+      togglesign(outerSum);
+    } else {
       outerSum = gmul(outerSum, gen_m1);
     }
   }
