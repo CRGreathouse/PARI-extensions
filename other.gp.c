@@ -6,8 +6,73 @@ assume (int expr)
     if (!expr) __builtin_unreachable();
 }
 
-// B=[3,2,1,1,0;2,5,3,0,0;3,2,3,3,0;5,1,2,3,1;4,1,2,5,3]~;matperm(Mod(B,6))==Mod(matperm(B),6)
-// 
+
+static GEN
+_mulii1(void *ignored, GEN x, GEN y)
+{
+  (void)ignored;
+  if (signe(x)) {
+    return signe(y) ? mulii(x, y) : x;
+  } else {
+    return signe(y) ? y : gen_1;
+  }
+}
+
+
+/* Returns the absolute value of the product of the nonzero integers in c */
+GEN
+ZC_maxprodabs(GEN c)
+{
+  pari_sp ltop = avma;
+  GEN pr = gen_product(c, NULL, &_mulii1);
+  if (is_pm1(pr)) {
+    avma = ltop;
+    return gen_1;
+  }
+  setsigne(pr, 1);
+  return gerepileuptoint(ltop, pr);
+}
+
+
+GEN
+ZM_maxprodabs(GEN M)
+{
+  pari_sp ltop = avma;
+  GEN mx = gen_1;
+  long i, n = lg(M);
+  for (i = 1; i < n; i++) {
+    GEN t = ZC_maxprodabs(gel(M, i));
+    if (cmpii(mx, t) < 0) mx = t;
+  }
+  return gerepileuptoint(ltop, mx);
+}
+
+static GEN
+_mulii(void *ignored, GEN x, GEN y) { (void)ignored; return mulii(x,y);}
+static GEN
+_powii(void *ignored, GEN x, GEN y) { (void)ignored; return powii(x,y);}
+GEN
+vecsmall_factorback(GEN v)
+{
+  pari_sp ltop = avma;
+  long n = lg(v)-1, k;
+  switch (n) {
+    case 0: return gen_1;
+    case 1: return stoi(v[1]);
+    case 2: return mulss(v[1], v[2]);
+  }
+  GEN V = cgetg((n+1)/2 + 1, t_VEC);
+  for (k = 2; k <= n; k += 2) {
+    gel(V,k/2) = mulss(v[k-1], v[k]);
+  }
+  if (n&1) gel(V, (n+1)/2) = stoi(v[n]);
+  /* GEN V = vecsmall_to_vec(v); */ /* Alternative, slower method. */
+  GEN pr = gen_factorback(V, NULL, &_mulii, &_powii, NULL);
+  return gerepileuptoint(ltop, pr);
+}
+
+
+/* Ryser's formula */
 GEN
 matperm(GEN M)
 {
@@ -66,6 +131,81 @@ matperm(GEN M)
     }
   }
   return gerepilecopy(ltop, outerSum);
+}
+
+
+/* Assumes M is a square matrix with t_INT components. The dimensions
+ * cannot exceed 31x31 (32-bit) or 63x63 (64-bit). */
+GEN
+ZM_perm(GEN M)
+{
+  pari_sp ltop = avma;
+  long n = lg(M)-1, biggest = itos_or_0(ZM_maxprodabs(M));
+  if (biggest && (LONG_MAX / biggest) >> n) {
+    return gerepileuptoint(ltop, zm_perm(ZM_to_zm(M)));
+  }
+
+  GEN outerSum = gen_0, innerSums = cgetg(n+1, t_COL);
+  long i, x, upper = (1L<<n) - 1;
+  for (i = 1; i <= n; ++i) gel(innerSums, i) = gen_0;
+  pari_sp btop = avma;
+  for (x = 0; x < upper; ) {
+    x++;
+    long gray = x ^ (x>>1);
+    long k = vals(x), kp1 = k+1;
+    if (gray & (1L<<k)) {
+      for (i = 1; i <= n; ++i) gel(innerSums, i) = addii(gel(innerSums, i), gcoeff(M, i, kp1));
+    } else {
+      for (i = 1; i <= n; ++i) gel(innerSums, i) = subii(gel(innerSums, i), gcoeff(M, i, kp1));
+    }
+    if (hamming_word(gray)&1)
+      outerSum = subii(outerSum, factorback(innerSums));
+    else
+      outerSum = addii(outerSum, factorback(innerSums));
+    if (gc_needed(btop, 1))
+      gerepileall(btop, 2, &innerSums, &outerSum);
+  }
+  if (n&1) togglesign(outerSum);
+  return gerepilecopy(ltop, outerSum);
+}
+
+
+/* Assumes M is a square matrix with t_INT components. The dimensions
+ * cannot exceed 31x31 (32-bit) or 63x63 (64-bit). */
+GEN
+zm_perm(GEN M)
+{
+  long n = lg(M)-1;
+
+  pari_sp ltop = avma;
+  GEN outerSum = gen_0, innerSums = cgetg(n+1, t_VECSMALL);
+  long i, x, upper = (1L<<n) - 1;
+  for (i = 1; i <= n; ++i) innerSums[i] = 0L;
+  pari_sp btop = avma;
+  for (x = 0; x < upper; ) {
+    x++;
+    long gray = x ^ (x>>1);
+    long k = vals(x), kp1 = k+1;
+    GEN col = gel(M, kp1);
+    if (gray & (1L<<k)) {
+      for (i = 1; i <= n; ++i) innerSums[i] += col[i];
+    } else {
+      for (i = 1; i <= n; ++i) innerSums[i] -= col[i];
+    }
+    // TODO: replace factorback(vecsmall_to_vec(...)) with custom function
+    if (hamming_word(gray)&1)
+      outerSum = subii(outerSum, vecsmall_factorback(innerSums));
+    else
+      outerSum = addii(outerSum, vecsmall_factorback(innerSums));
+
+    if (gc_needed(btop, 1))
+      gerepileall(btop, 2, &innerSums, &outerSum);
+  }
+  if (n&1) {
+    long s = signe(outerSum);
+    if (s) setsigne(outerSum, -s);
+  }
+  return gerepileuptoint(ltop, outerSum);
 }
 
 

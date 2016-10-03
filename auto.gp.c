@@ -128,6 +128,11 @@ GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
 */
 
 GEN matperm(GEN M);
+GEN ZM_perm(GEN M);
+GEN zm_perm(GEN M);
+GEN ZC_maxprodabs(GEN c);
+GEN ZM_maxprodabs(GEN M);
+GEN vecsmall_factorback(GEN v);
 GEN Bell(long n);
 long checkmult(GEN v, long verbose);
 long checkcmult(GEN v, long verbose);
