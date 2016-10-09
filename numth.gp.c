@@ -12,7 +12,7 @@ Collatz(GEN n)
     pari_sp ltop = avma;
 
     long v = vali(n);
-    if (v) n = shifti(n, -v);	// Possible stack garbage
+    if (v) n = shifti(n, -v);	/* Possible stack garbage */
     ulong nn = itou_or_0(n);
 #ifdef LONG_IS_64BIT
     if (nn && nn < 23035537407UL)
@@ -38,11 +38,12 @@ Collatz(GEN n)
     return iterations + Collatz_tiny(itou_or_0(n));
 }
 
+
 long
 Collatz_tiny(ulong n)
 {
     long iterations = 0;
-    //n >>= vals(n);	// It is the caller's responsibility to pass an odd number
+    /*n >>= vals(n);*/	/* It is the caller's responsibility to pass an odd number */
     while (n > 1) {
         iterations++;
         n += (n>>1)+1;
@@ -62,7 +63,7 @@ isfactorial(GEN n)
     if(mod2(n))
         return isint1(n);
     
-    // Remove small factorials with a combined binary-linear search
+    /* Remove small factorials with a combined binary-linear search */
     ulong nn = itou_or_0(n);
     if (nn) {
         return
@@ -82,9 +83,8 @@ isfactorial(GEN n)
         ;
     }
     
-    // 
     pari_sp ltop = avma;
-    long v2 = vali(n);	// 2-adic valuation of n: 2^k || n.
+    long v2 = vali(n);	/* 2-adic valuation of n: 2^k || n. */
 #ifdef LONG_IS_64BIT
     if (v2 < 18)
 #else
