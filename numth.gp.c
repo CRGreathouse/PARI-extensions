@@ -23,9 +23,9 @@ Collatz(GEN n)
     
     long iterations = 0;
 #ifdef LONG_IS_64BIT
-    while (cmpiu(n, 23035537407UL) >= 0) {
+    while (cmpiu(n, 23035537407UL) >= 0) { /* A006884(48), peak value is 34419078320774113520 > ULONG_MAX = 2^64 - 1 */
 #else
-    while (cmpiu(n, 159487UL) >= 0) {
+    while (cmpiu(n, 159487UL) >= 0) { /* A006884(48), peak value is 8601188876 > ULONG_MAX = 2^32 - 1 */
 #endif
         iterations++;
         n = addii(n, addis(shifti(n, -1), 1));
