@@ -608,6 +608,55 @@ addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and 
 \\ *	                                    Polynomials                                              *
 \\ ***************************************************************************************************
 
+testPQ(P:pol,verbose:bool=0)={
+	my(disc=poldisc(P),lead=pollead(P),lin,quad);
+	forprime(p=2,,
+		if(lead%p==0, next);
+		my(f=lift(factor(Mod(P,p))[,1]),d=Set(apply(poldegree,f)));
+		if (d==[1],
+			lin++
+		, d==[2],
+			quad++
+		, d==[1,2] && disc%p==0,
+			\\ Ignore primes dividing the discriminant, they can factor into
+			\\ linear and quadratic factors.
+		,
+			if(verbose,
+				print("Fails at p = "p": "d" with factors "f)
+			);
+			return(0)
+		);
+		if(lin + quad > 1000, break)
+	);
+	if(verbose,
+		print("Appears to be polyquadratic");
+	);
+	[lin,quad]
+};
+
+
+isPolyquadratic(P:pol)={
+	if(type(P) != "t_POL", error("Not a polynomial in isPolyquadratic"));
+	if(!isZX(P), error("Not an integer polynomial in isPolyquadratic"));
+	if(!polisirreducible(P),
+		my(f=factor(P)[,1]);
+		for(i=1,#f,
+			if(!isPolyquadratic(f[i]), return(0))
+		);
+		return(1)
+	);
+	my(d=poldegree(P));
+	if (d < 3, return(1));
+	if (d>>valuation(d,2) != 1, return(0));
+	if (d < 16,
+		my(g=polgalois(P));
+		return(g == [4, 1, 1, "E(4) = 2[x]2"] || g == [8, 1, 3, "E(8)=2[x]2[x]2"])
+	);
+	if(testPQ(P,0), "probably polyquadratic", 0)
+};
+addhelp(isPolyquadratic, "isPolyquadratic(P): Are the roots of the integer polynomial P polyquadratic, i.e., the sum of rational multiples of square roots of integers?");
+
+
 finiteOrbit(f:pol, x:mp)={
 	my(a=pollead(f), y=variable(f), v, d, b);
 	if(a < 0, error("Not implemented: negative leading coefficient"));
