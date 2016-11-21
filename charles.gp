@@ -1022,7 +1022,8 @@ addhelp(findrec, "findrec(v): Tries to find a homogeneous linear recurrence rela
 
 rec(v[..])={
 	if(#v==1 && type(v[1])=="t_VEC", v=v[1]);
-	if(#v==1 && type(v[1])=="t_CLOSURE", v=vector(100,n,v[1](n)));
+	if(#v==1 && type(v[1])=="t_POL", v[1]=eval(Str(variable(v[1]),"->",v[1])));
+	if(#v==1 && type(v[1])=="t_CLOSURE", v=vector(100,n,v[1](n)); print(v));
 	if (#v < 3,
 		warning(Str("findrec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again."));
 		return
@@ -1082,7 +1083,7 @@ rec(v[..])={
 	);
 	c
 };
-addhelp(rec, "rec(v): Given a sequence, find a linear recurrence, if possible, and print associated information. This is a driver function for findrec, which contains the actual machinery. This function can take a sequence in a number of ways:\n* As a vector of numbers (generally integers)\n* As individual numbers (the function is variadic)\n* As a function, from which terms are calculated.")
+addhelp(rec, "rec(v): Given a sequence, find a linear recurrence, if possible, and print associated information. This is a driver function for findrec, which contains the actual machinery. This function can take a sequence in a number of ways:\n* As a vector of numbers (generally integers)\n* As individual numbers (the function is variadic)\n* As a function, from which terms are calculated\n* As a polynomial, from which terms are calculated")
 
 
 /* Third argument, verbose, is deprecated. Use rec() if you want verbosity. */
