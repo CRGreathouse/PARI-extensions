@@ -31,6 +31,13 @@ addhelp(isRicePoly, "isRicePoly(P): Checks if a polynomial P fits the conditions
 \\ *					Uncategorized
 \\ ***************************************************************************************************
 
+ries(x)={
+	if(type(x) != "t_REAL", error("Bad type in ries."));
+	system(Str("~/mth/ries ",x))
+};
+addhelp(ries, "ries(x): Feed a number to RIES.");
+
+
 yafu(n)={
 	if(type(n) != "t_INT", error("Bad type in yafu."));
 	system(Str("~/mth/yafu-1.34.3/yafu 'factor(",n,")'"))
