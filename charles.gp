@@ -159,7 +159,7 @@ rand(b:small)={
 				if(#binary(t)==b,return(list2fac(v)));
 			)
 		);
-			
+
 	)
 };
 addhelp(rand, "rand(b): Gives a random factored n-bit integer.");
@@ -230,7 +230,7 @@ primesin(P:pol)={
 		return([0])
 	);
 	if (t!="t_POL", error("bad type"));
-	
+
 	if (poldegree(P) == 1,
 		my(a=polcoeff(P,1),b=polcoeff(P,0),g,t);
 		if (type(a) == "t_INT" && type(b) == "t_INT",
@@ -1152,7 +1152,7 @@ findCycle(ff:closure,startAt)={
 		hare = ff(hare);
 		len++
 	);
-	
+
 	my (mu=0);
 	tortoise=hare=startAt;
 	for (i=1,len,
@@ -1198,11 +1198,11 @@ binomialIntervalExact(n:int,k:int,conf=.05)={
 		k = n - k;
 	);
 	a = if (k*8 < n - 10, .5, 1);
-	
+
 	v = vector(k+1,i,binomial(n,i-1));
 	result = [solve(p=0,.5,1-conf-sum(i=0,k-1,v[i+1]*p^i*(1-p)^(n-i))),
 	solve(p=0,a,sum(i=0,k,v[i+1]*p^i*(1-p)^(n-i))-conf)];
-	
+
 	if(flip,[1 - result[2], 1 - result[1]], result)
 };
 addhelp(binomialIntervalExact, "binomialIntervalExact(n,k,conf=.05): Gives a confidence interval for the probability of an event which happens k times in n independent trials with fixed probability. Uses a direct inversion of the exact combinatorial probability; seems to be the Clopper-Pearson interval.");
@@ -1251,7 +1251,7 @@ addhelp(Li, "Offset logarithmic integral, an estimate for primepi. Crandall and 
 piBounds(x,verbose=0)={
 	my(lower,upper,t,srcLower,srcUpper,lowerRH,upperRH,lowerC,upperC,roundFlag);
 	roundFlag=default(realprecision)>sizedigit(x);
-	
+
 	if(roundFlag, x = floor(x));
 	if (x < default(primelimit) || x < 65557,
 		lower=primepi(x);
@@ -1266,17 +1266,17 @@ piBounds(x,verbose=0)={
 	lower = x/lx * (1 + 1/lx + 1.8/lx^2);	\\ Dusart 1998, x >= 32299
 	upper = x/(lx - 1.1);					\\ Dusart 1998, x >= 60184
 	srcLower = srcUpper = "Dusart1998";
-	
+
 	if (x >= 88783,
 		lower = x/lx * (1 + 1/lx + 2/lx^2);		\\ Dusart 2010, x >= 88783
 		srcLower = "Dusart2010"
 	);
-	
+
 	if (x >= 1332450001,
 		lower = x/lx * (1 + 1/lx + 2/lx^2 + 5.65/lx^3 + 23.65/lx^4 + 118.25/lx^5 + 709.5/lx^6 + 4966.5/lx^7);		\\ Axler 2014, x >= 1332450001
 		srcLower = "Axler2014"
 	);
-	
+
 	if (x >= 355991,
 		t = x/lx * (1 + 1/lx + 2.51/lx^2);	\\ Dusart 1998, x >= 355991
 		if (upper > t,
@@ -1284,7 +1284,7 @@ piBounds(x,verbose=0)={
 			srcUpper = "Dusart1998"
 		)
 	);
-	
+
 	if (x >= 2953652302,
 		t = x/lx * (1 + 1/lx + 2.334/lx^2);	\\ Dusart 2010, x >= 2 953 652 302
 		if (upper > t,
@@ -1292,7 +1292,7 @@ piBounds(x,verbose=0)={
 			srcUpper = "Dusart2010"
 		)
 	);
-	
+
 	if (x >= 13041027276,
 		\\ This is the best in [13041027276, 16526414332]
 		t = x/lx * (1 + 1.0992/lx);			\\ Dusart 1998, x >= 1.332e10
@@ -1305,7 +1305,7 @@ piBounds(x,verbose=0)={
 			)
 		)
 	);
-	
+
 	if (x >= 2,
 		t = x/lx * (1 + 1/lx + 2/lx^2 + 6.35/lx^3 + 24.35/lx^4 + 121.75/lx^5 + 730.5/lx^6 + 6801.4/lx^7);	\\ Axler 2014, x >= 2
 		if (upper > t,
@@ -1313,7 +1313,7 @@ piBounds(x,verbose=0)={
 			srcUpper = "Axler2014"
 		)
 	);
-	
+
 	if(x >= 2 && x <= 1e18,
 		if(upper > lix,
 			upper = lix;
@@ -1326,14 +1326,14 @@ piBounds(x,verbose=0)={
 	upperRH = lix+t;					\\ Schoenfield, x >= 2657
 	lowerC = lix-sqrt(x);				\\ Kotnik, x >= 2
 	upperC = Rx+sqrt(x);				\\ Kotnik, x >= 2
-	
+
 	\\ Note: Stoll & Demichael have even tighter, even more conjectural bounds:
 	\\ lix +- (lix-Rx)*(1+(log(log(lx))+1)/exp(1)). But this is so close --
 	\\ +- 1/e vs. Omega_{+-}(1) -- to Littlewood's bound that it scares me a bit.
-	
+
 	\\ primepi(10770325941) = 488450930
 	\\ 10770325941 being the Dusart-Axler crossover
-	
+
 	if (roundFlag,
 		lowerRH = ceil(lowerRH);
 		upperRH = floor(upperRH);
@@ -1376,7 +1376,7 @@ piBounds(x,verbose=0)={
 		print(upperRH" (upper bound under the RH)");
 	);
 	print(upper" (upper bound)");
-	
+
 	if (verbose,
 		if (srcLower == "Dusart1998" || srcUpper == "Dusart1998" || srcUpper == "Dusart1998+finite",
 			if(srcLower == "Dusart1998" && (srcUpper == "Dusart1998" || srcUpper == "Dusart1998+finite"),
@@ -1390,7 +1390,7 @@ piBounds(x,verbose=0)={
 				print("  plus finite checking (crg4)")
 			)
 		);
-		
+
 		if (srcLower == "Dusart2010" || srcUpper == "Dusart2010",
 			if(srcLower == "Dusart2010" && srcUpper == "Dusart2010",
 				print("\nUpper and lower bounds:")
@@ -1400,7 +1400,7 @@ piBounds(x,verbose=0)={
 			print("Pierre Dusart, 'Estimates of some functions over primes without R.H.',");
 			print("preprint (2010), arXiv:1002.0442.");
 		);
-		
+
 		if (srcLower == "Axler2014" || srcUpper == "Axler2014",
 			if(srcLower == "Axler2014" && srcUpper == "Axler2014",
 				print("\nUpper and lower bounds:")
@@ -1410,13 +1410,13 @@ piBounds(x,verbose=0)={
 			print("Christian Axler, New bounds for the prime counting function pi(x), preprint");
 			print("(2014), arXiv:1409.1780.");
 		);
-		
+
 		if(srcUpper == "StollDemichael2011",
 			print("\nUpper bound:");
 			print("Douglas A. Stoll and Patrick Demichel, The impact of zeta(s) complex zeros on");
 			print("pi(x) for x < 10^10^13, Math. Comp. 80:276 (2011), pp. 2381-2394.")
 		);
-		
+
 		t=(srcUpper == "Buthe2014")+(srcLower == "Buthe2014");
 		if(t,
 			if(t==2,
@@ -1429,7 +1429,7 @@ piBounds(x,verbose=0)={
 			print("Jan Buthe, Estimating pi(x) and related functions under partial RH assumptions,");
 			print("preprint (2014), arXiv:1410.7015.");
 		);
-		
+
 		t=(lowerRH > lower) + (upperRH < upper);
 		if (t,
 			if(t==1,
@@ -1476,7 +1476,7 @@ pBounds(n, verbose:bool=0)={
 	n = floor(n);
 	l = log(n);
 	ll = log(l);
-	
+
 	lower = n * (l + ll - 1);						\\ Dusart, n >= 2
 	if (n > 13196,
 		lower = n * (l + ll - 1 + ll/l - 2.25/l)	\\ Dusart, n >= 2
@@ -1490,16 +1490,16 @@ pBounds(n, verbose:bool=0)={
 	if (n >= 39017,
 		upper = min(upper, n * (l + ll - .9484))	\\ Dusart, n >= 39017
 	);
-	
+
 	lower = ceil(lower);
 	upper = floor(upper);
-	
+
 	print(lower" (lower bound)");
 	if (lower<appx && appx<upper,
 		print(appx" (approximate)")
 	);
 	print(upper" (upper bound)");
-	
+
 	if (verbose,
 		print("\nPierre Dusart, 'Autour de la fonction qui compte le nombre de nombres");
 		print("premiers', doctoral thesis for l'Université de Limoges (1998).");
@@ -1508,7 +1508,7 @@ pBounds(n, verbose:bool=0)={
 			print("rendus hebdomadaires des séances de l'Académie des sciences 119, pp. 848-849.")
 		);
 	);
-	
+
 	\\t = sqrt(x)/8/Pi*log(x);
 	\\lowerRH = ceil(li(x)-t);					\\ Schoenfield, x >= 2657
 	\\upperRH = floor(li(x)+t);					\\ Schoenfield, x >= 2657
@@ -1592,7 +1592,7 @@ Psi(x, B)={
 
 	if (x <= 1e6,
 		x = floor(x);
-		
+
 		return (sum(n = 1, x, gpf(n) <= B));
 	);
 
@@ -1618,7 +1618,6 @@ Psi(x, B)={
 	x * DickmanRho(u)
 };
 addhelp(Psi, "Psi(x, B): Calculates or estimates the count of B-smooth number up to x. Psi(1000, 10) counts the number of numbers up to 1000 which have no prime factor greater than 10.");
-
 
 default(timer, timervalue);
 
