@@ -1031,7 +1031,45 @@ rec(v[..])={
 		print1("Recurrence relation is a(n) = 0.");
 		return([0]~);
 	);
-	my(c=findrec(v),gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly));
+	my(c=findrec(v),gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly),init=1,s);
+	print1("Recurrence relation is a(n) = ");
+	for(i=1,#c,
+		if(c[i] == 0, next);
+		if(init,
+			s = initial(c[i], Str("a(n-", i, ")"));
+			init = 0
+		,
+			s = Str(s, medial(c[i], Str("a(n-", i, ")")))
+		)
+	);
+	print(s".");
+	if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
+		print("Sequence has period "#c".");
+	,
+		my(g=0);
+		for(i=1,#c,
+			if(c[i] != 0, g = gcd(g, i))
+		);
+		/*
+		if (g > 1,
+			my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
+			for(i=1,#gvec,
+				if(gvec[i] == 0, next);
+				if(init,
+					s = initial(gvec[i], Str("a(n - ", i, ")"));
+					init = 0
+				,
+					s = Str(s, medial(gvec[i], Str("a(n - ", i, ")")))
+				)
+			);
+			print("Can be though of as "g" interlocking sequences, each of the form a(n) = "s".")
+		)*/
+	);
+	print1("<a href=\"/index/Rec#order_"if(d<10,"0","")d"\">");
+	print1("Index entries for linear recurrences with constant coefficients</a>, signature ("c[1]);
+	for(i=2,#c,print1(","c[i]));
+	print(").");
+	print((#v-2*d)" d.f.")
 	if(c == 0,
 		print("Cannot be described by a homogeneous linear recurrence relation with ",(#v-1)\2," or fewer coefficients.");
 		return(0)
@@ -1046,7 +1084,9 @@ rec(v[..])={
 };
 
 
-findrecd(v:vec, d:int, verbose:bool=1)={
+/* Third argument, verbose, is deprecated. Use rec() if you want verbosity. */
+findrecd(v:vec, d:int, verbose:bool=1)=
+{
 	my(M,c);
 	if (#v < 2*d,
 		warning(Str("findrec: Not enough information to determine if the sequence is a "d"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again."));
@@ -1059,50 +1099,9 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 	for(n=2*d+1,#v,
 		if(v[n] != sum(i=1,d,v[n-i] * c[i]),return(0))
 	);
-	if(verbose,
-		my(init=1,s);
-		print1("Recurrence relation is a(n) = ");
-		for(i=1,#c,
-			if(c[i] == 0, next);
-			if(init,
-				s = initial(c[i], Str("a(n-", i, ")"));
-				init = 0
-			,
-				s = Str(s, medial(c[i], Str("a(n-", i, ")")))
-			)
-		);
-		print(s".");
-		if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
-			print("Sequence has period "#c".");
-		,
-			my(g=0);
-			for(i=1,#c,
-				if(c[i] != 0, g = gcd(g, i))
-			);
-			/*
-			if (g > 1,
-				my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
-				for(i=1,#gvec,
-					if(gvec[i] == 0, next);
-					if(init,
-						s = initial(gvec[i], Str("a(n - ", i, ")"));
-						init = 0
-					,
-						s = Str(s, medial(gvec[i], Str("a(n - ", i, ")")))
-					)
-				);
-				print("Can be though of as "g" interlocking sequences, each of the form a(n) = "s".")
-			)*/
-		);
-		print1("<a href=\"/index/Rec#order_"if(d<10,"0","")d"\">");
-		print1("Index entries for linear recurrences with constant coefficients</a>, signature ("c[1]);
-		for(i=2,#c,print1(","c[i]));
-		print(").");
-		print((#v-2*d)" d.f.")
-	);
 	c
 };
-addhelp(findrecd, "findrecd(v, d, {verbose=1}): Helper function for findrec. Tries to find a d-coefficient homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+addhelp(findrecd, "findrecd(v, d): Helper function for findrec. Tries to find a d-coefficient homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
 
 
 initial(n:int, s:str)={	\\ Helper function
