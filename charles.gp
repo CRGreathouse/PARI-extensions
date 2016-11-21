@@ -97,11 +97,12 @@ plt(mn,mx,ff,flags:small=0,n:small=0)={
 	my(o=mn\1-1,k);
 	if(mx-mn < 2*n || (!n && mx-mn < 500),
 		my(v=vector(ceil(mx)-o,i,ff(i+o)));
-		ploth(x=max(mn,mn\1+eps()),min(mx,ceil(mx)-eps()),
+ploth(x=1,2,sin(x));
+		ploth(x=max(mn\1+eps(),mn),min(ceil(mx)-eps(),mx),
 			k=x\1;v[k-o]*(k+1-x)+v[k-o+1]*(x-k), flags, n
 		)
 	,
-		ploth(x=max(mn,mn\1+eps()),min(mx,ceil(mx)-eps()),
+		ploth(x=max(mn\1+eps(),mn),min(ceil(mx)-eps(),mx),
 			k=x\1;ff(k-o)*(k+1-x)+ff(k-o+1)*(x-k), flags, n
 		)
 	)
