@@ -1082,6 +1082,7 @@ rec(v[..])={
 	);
 	c
 };
+addhelp(rec, "rec(v): Given a sequence, find a linear recurrence, if possible, and print associated information. This is a driver function for findrec, which contains the actual machinery. This function can take a sequence in a number of ways:\n* As a vector of numbers (generally integers)\n* As individual numbers (the function is variadic)\n* As a function, from which terms are calculated.")
 
 
 /* Third argument, verbose, is deprecated. Use rec() if you want verbosity. */
