@@ -408,11 +408,12 @@ addhelp(forgap, "forgap(ff): Runs the command (closure) ff on each prime 2 < p <
 
 
 forpseudo(ff)={
-	if(default(parisize) < 2e8,
+	if(default(parisize) < 2e8 && default(parisizemax) < 2e8,
 		print("Not enough memory!  Resizing, please rerun command.");
 		allocatemem(200<<20)	\\ Need ~200 MB of stack space!
 	);
 	for(i=0,89,
+		if(default(debug), print("Reading chunk ",i+1," of 90"));
 		read(concat("psp/psp-chunk", i));
 		trap(e_USER,
 			print("User error, ending loop...");
@@ -421,7 +422,7 @@ forpseudo(ff)={
 		,
 			for(j=1,#pspChunk,
 				my(t=ff(pspChunk[j]));
-				if(t,return(t))
+				if(t,pspChunk=0; return(t))
 			)
 		);
 		pspChunk=0
