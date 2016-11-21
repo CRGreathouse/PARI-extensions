@@ -1031,9 +1031,9 @@ rec(v[..])={
 		print1("Recurrence relation is a(n) = 0.");
 		return([0]~);
 	);
-	my(c=findrec(v),gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly),init=1,s);
+	my(c=findrec(v),d=#c,gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly),init=1,s);
 	print1("Recurrence relation is a(n) = ");
-	for(i=1,#c,
+	for(i=1,d,
 		if(c[i] == 0, next);
 		if(init,
 			s = initial(c[i], Str("a(n-", i, ")"));
@@ -1044,15 +1044,15 @@ rec(v[..])={
 	);
 	print(s".");
 	if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
-		print("Sequence has period "#c".");
+		print("Sequence has period "d".");
 	,
 		my(g=0);
-		for(i=1,#c,
+		for(i=1,d,
 			if(c[i] != 0, g = gcd(g, i))
 		);
 		/*
 		if (g > 1,
-			my(gvec = vector(#c/g, i, c[i*g]),s,init=1);
+			my(gvec = vector(d/g, i, c[i*g]),s,init=1);
 			for(i=1,#gvec,
 				if(gvec[i] == 0, next);
 				if(init,
@@ -1067,9 +1067,9 @@ rec(v[..])={
 	);
 	print1("<a href=\"/index/Rec#order_"if(d<10,"0","")d"\">");
 	print1("Index entries for linear recurrences with constant coefficients</a>, signature ("c[1]);
-	for(i=2,#c,print1(","c[i]));
+	for(i=2,d,print1(","c[i]));
 	print(").");
-	print((#v-2*d)" d.f.")
+	print((#v-2*d)" d.f.");
 	if(c == 0,
 		print("Cannot be described by a homogeneous linear recurrence relation with ",(#v-1)\2," or fewer coefficients.");
 		return(0)
