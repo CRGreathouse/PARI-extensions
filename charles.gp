@@ -1006,37 +1006,39 @@ findBinet(v:vec,offset:int=1)={
 addhelp(findBinet, "findBinet(v, {offset}): Find a Binet-style formula for a linear recurrence given by the terms in the vector v. Assumes the roots are distinct -- no polynomial multipliers.");
 
 
-findrec(v:vec, verbose:bool=1)={
+findrec(v:vec)={
 	my(c,d = (#v - 1) >> 1, firstNonzero = 0);
+	forstep(i=d,1,-1,
+		if(v[i] != 0, firstNonzero = i)
+	);
+	for (i=firstNonzero,d,
+		c = findrecd(v,i);
+		if(c, return(c))
+	);
+	0
+};
+addhelp(findrec, "findrec(v): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
+
+
+rec(v[..])={
+	if(#v==1 && type(v[1])=="t_VEC", v=v[1]);
+	if(#v==1 && type(v[1])=="t_CLOSURE", v=vector(100,n,v[1](n)));
 	if (#v < 3,
 		warning(Str("findrec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again."));
 		return
 	);
-	forstep(i=d,1,-1,
-		if(v[i] != 0, firstNonzero = i)
-	);
-	if(firstNonzero == 0,
-		if(verbose,
-			print1("Recurrence relation is a(n) = 0.");
-		);
+	if (v==vector(#v),
+		print1("Recurrence relation is a(n) = 0.");
 		return([0]~);
 	);
-	for (i=firstNonzero,d,
-		c = findrecd(v,i,verbose);
-		if(c, return(c))
+	my(c=findrec(v),gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly));
+	if(c == 0,
+		print("Cannot be described by a homogeneous linear recurrence relation with ",(#v-1)\2," or fewer coefficients.");
+		return(0)
 	);
-	if(verbose,print("Cannot be described by a homogeneous linear recurrence relation with "d" or fewer coefficients."));
-	0
-};
-addhelp(findrec, "findrec(v, {verbose=1}): Tries to find a homogeneous linear recurrence relation with constant coefficients to fit the vector v.");
-
-
-rec(v:vec, verbose:bool=1)={
-	my(c=findrec(v,verbose),gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly));
-	if(c == 0, return(0));
 	print("G.f. denominator: "gf);
 	print("Roots have magnitude up to "precision(vecmax(abs(roots)),9)".");
-	print("Roots: "roots);
+	\\print("Roots: "roots);
 	if(#f[,1]>1 || f[1,2]>1,
 		print("Polynomial factors as: "nice(f));
 	);
@@ -1071,7 +1073,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 		);
 		print(s".");
 		if((vecmax(c) == 1 && vecmin(c) == 0 && vecsum(c) == 1) || c == [1]~,
-			print("Sequence has period "#c".");		
+			print("Sequence has period "#c".");
 		,
 			my(g=0);
 			for(i=1,#c,
@@ -1093,7 +1095,7 @@ findrecd(v:vec, d:int, verbose:bool=1)={
 			)*/
 		);
 		print1("<a href=\"/index/Rec#order_"if(d<10,"0","")d"\">");
-		print1("Index to sequences with linear recurrences with constant coefficients</a>, signature ("c[1]);
+		print1("Index entries for linear recurrences with constant coefficients</a>, signature ("c[1]);
 		for(i=2,#c,print1(","c[i]));
 		print(").");
 		print((#v-2*d)" d.f.")
