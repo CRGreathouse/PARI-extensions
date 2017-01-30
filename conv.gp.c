@@ -94,28 +94,20 @@ toC(GEN n)
     long words = lgefint(n) - 2;
 #endif
 
-    if (words == 1)
+	/* 32 bits */
+	if (words == 1)
     {
         if (signe(n) > 0)
             return pari_sprintf("utoipos(%Ps)", n);
         else
             return pari_sprintf("utoineg(%Ps)", absi(n));
     }
-    if (words == 2)
-    {
-        if (signe(n) > 0) {
-            return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
-        } else {
-            n = absi(n);
-            return pari_sprintf("uutoineg(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
-        }
-    }
 
-    // Handle negatives
-    if (signe(n) < 0) {
-        // This format is ugly, is there a good way to improve this?
-        return pari_sprintf("variable_name=%s;\nsetsigne(variable_name, -1);", toC(absi(n)));
-    }
+	/* 64 bits */
+	if (words == 2 && signe(n) > 0) return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
+
+	/* Handle negatives */
+	if (signe(n) < 0) return pari_sprintf("negi(%s)", toC(absi(n)));
     
     // Large numbers
     // N.B., this requires sprintf rather than pari_sprintf.
