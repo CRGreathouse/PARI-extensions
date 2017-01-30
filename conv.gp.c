@@ -40,6 +40,8 @@ gToC(GEN n)
 
 
 /* Given a PARI object, return a string containing a C representation.
+ * The C representation should work regardless of whether LONG_IS_64BIT
+ * is set or not.
  * Works on t_INT and t_FRAC.
  * Tries to give a simple form when possible. This includes the
  * universal objects gen_0, gen_1, gen_m1, gen_2, gen_m2, and ghalf.
@@ -50,14 +52,16 @@ const char*
 toC(GEN n)
 {
     long t = typ(n);
+
+	/* Handle types other than t_INT */
     if (t == t_FRAC)
     {
         GEN num = gel(n, 1), den = gel(n, 2);
         if (equali1(num)) {
             if (cmpis(den, 2) == 0) return "ghalf";
-            return pari_sprintf("ginv(%Ps)", den);
+            return pari_sprintf("ginv(%s)", toC(den));
         }
-        return pari_sprintf("gdiv(%Ps, %Ps)", num, den);
+        return pari_sprintf("Qdivii(%s, %s)", toC(num), toC(den));
     }
     if (t != t_INT)
     {
