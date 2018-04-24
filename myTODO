@@ -20,20 +20,7 @@ Priority classification (first column): [subjective and debatable]
 3  add a 'variable' as an optional last argument in content, denominator,
    numerator, as is done in divrem (cf. 2.6.2)
 
-2  a type t_FILE [current: stream re-opened/flushed/closed after every single
-   write(): disaster when one wants to write often to the same file]
-
-
 **************************   Personal priorities  ***************************
-
-3  New loop that yields factored integers: perhaps forfactored(n=1,10,...)
-   where sieve is used to make this fast.  Would work nicely with a new
-   factored integer type (t_FACTORED?).
-
-2  Conjecture F related materials, including L-function computation.  But don't
-   spend too long on optimizing the L-fuctions, since Molin is working on
-   an efficient PARI solution:
-   http://pari.math.u-bordeaux.fr/archives/pari-users-1007/msg00004.html
 
 2  Let sqrt work on INTMOD objects with a composite modulus.
 
@@ -52,4 +39,3 @@ Priority classification (first column): [subjective and debatable]
 
 2  Script (function?) to deal 'nicely' with recurrence relations, finding Binet
    forms and searching for cycles (using cyclotomic junk above).
-
