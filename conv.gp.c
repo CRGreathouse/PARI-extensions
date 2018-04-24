@@ -102,7 +102,12 @@ toC(GEN n)
   }
 
   /* 64 bits */
-  if (words == 2 && signe(n) > 0) return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
+  if (words == 2) {
+    if (signe(n) > 0)
+      return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
+    n = absi(n);
+    return pari_sprintf("uu32toineg(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
+  }
 
   /* Handle negatives */
   if (signe(n) < 0) return pari_sprintf("negi(%s)", toC(absi(n)));
