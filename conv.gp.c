@@ -56,10 +56,11 @@ toC(GEN n)
   /* Handle types other than t_INT */
   if (t == t_FRAC) {
     GEN num = gel(n, 1), den = gel(n, 2);
-    if (equali1(num)) {
-       if (cmpis(den, 2) == 0) return "ghalf";
-       return pari_sprintf("ginv(%s)", toC(den));
+    if (cmpis(den, 2) == 0 && equali1(num)) return "ghalf";
+    if (cmpis(den, 0x7FFFFFFF) <= 1 && (signe(num) > 0 ? cmpis(num, 0x7FFFFFFF) <= 1 : cmpis(num, -0x80000000) >= 1)) {
+      return pari_sprintf("mkfracss(%ld, %ld)", itos(num), itos(den));
     }
+    if (equali1(num)) return pari_sprintf("ginv(%s)", toC(den));
     return pari_sprintf("Qdivii(%s, %s)", toC(num), toC(den));
   }
   if (t != t_INT) {
