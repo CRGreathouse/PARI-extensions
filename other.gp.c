@@ -244,11 +244,11 @@ GEN
 diffset(GEN a, GEN b)		/* vecsmall */
 {
     pari_sp ltop = avma;
-    GEN c = gen_0;
+    GEN c;
     long l1;
-    GEN p2 = gen_0;		/* vec */
+    GEN p2;		/* vec */
     long l3;
-    GEN p4 = gen_0;		/* vecsmall */
+    GEN p4;		/* vecsmall */
     l1 = glength(a)*glength(b);
     {
         long l5;
@@ -290,7 +290,7 @@ void
 pBounds(GEN n, GEN verbose, long prec)
 {
     pari_sp ltop = avma;
-    GEN lower = gen_0, upper = gen_0, appx = gen_0, l = gen_0, ll = gen_0;
+    GEN lower, upper, appx, l, ll;
     if (!verbose)
         verbose = gen_0;
     if (gcmpgs(n, 6548) < 0)
@@ -352,7 +352,7 @@ GEN
 checkVDW(GEN vv, GEN verbose)
 {
     pari_sp ltop = avma;
-    GEN r = gen_0, k = gen_0, s = gen_0, c = gen_0;
+    GEN r, k = gen_0, s = gen_0, c;
     if (!verbose)
         verbose = gen_1;
     r = stoi(glength(vv));
@@ -411,7 +411,7 @@ GEN
 longestProgression(GEN v)
 {
     pari_sp ltop = avma;
-    GEN r = gen_0, s = gen_0, t = gen_0, d = gen_0;
+    GEN r = gen_0, s, t = gen_0, d = gen_0;
     long l1, l2;
     if (glength(v) < 3)
     {
@@ -460,7 +460,7 @@ longestProgression1(GEN v)
     pari_sp ltop = avma;
     GEN Lstar = gen_2, L = gen_0, i = gen_0, k = gen_0, tmp = gen_0;
     long l1, l2;
-    GEN p3 = gen_0;		/* vec */
+    GEN p3;		/* vec */
     long l4, l5;
     l1 = glength(v);
     l2 = glength(v);
