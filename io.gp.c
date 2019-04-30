@@ -197,7 +197,7 @@ GEN
 fnice(GEN n)
 {
     pari_sp ltop = avma;
-    GEN f, s, s1, p1 = gen_0;
+    GEN f, s, s1, p1;
     long l2;
     if (typ(n) != t_INT)
         pari_err_TYPE("fnice", n);
@@ -241,8 +241,8 @@ GEN
 tonice(GEN o, long prec)
 {
     pari_sp ltop = avma;
-    GEN s = gen_0, t = gen_0, t1 = gen_0, v = gen_0, p1 = gen_0, p2 = gen_0, p3 = gen_0;
-    GEN p4 = gen_0;		/* genstr */
+    GEN s = gen_0, t = gen_0, t1 = gen_0, v, p1, p2, p3;
+    GEN p4;		/* genstr */
     if (typ(o) == t_POL)
     {
         t = content(o);
@@ -307,7 +307,7 @@ GEN
 initial(GEN n, char *s)
 {
     pari_sp ltop = avma;
-    GEN p2 = gen_0, p3 = gen_0;
+    GEN p2, p3;
     if (typ(n) != t_INT)
         pari_err_TYPE("initial", n);
     if (cmpis(n, 0) == 0)
@@ -336,7 +336,7 @@ GEN
 medial(GEN n, char *s)
 {
     pari_sp ltop = avma;
-    GEN p2 = gen_0, p3 = gen_0, p4 = gen_0, p5 = gen_0;
+    GEN p2, p3, p4, p5;
     if (typ(n) != t_INT)
         pari_err_TYPE("medial", n);
     if (cmpis(n, 0) == 0)
@@ -371,7 +371,7 @@ GEN
 monomialnice(GEN coeff, GEN degree, GEN v)
 {
     pari_sp ltop = avma;
-    GEN p1 = gen_0, p2 = gen_0;
+    GEN p1, p2;
     if (typ(coeff) != t_INT)
         pari_err_TYPE("monomialnice", coeff);
     if (typ(degree) != t_INT)

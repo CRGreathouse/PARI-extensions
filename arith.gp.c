@@ -405,7 +405,7 @@ istwo(GEN n)
 {
     // TODO: Serious improvements available with incremental factoring
     pari_sp ltop = avma;
-    GEN f = gen_0;
+    GEN f;
     long ret, l;
     if (typ(n) != t_INT)
         pari_err_TYPE("istwo", n);

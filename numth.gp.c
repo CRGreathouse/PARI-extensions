@@ -499,7 +499,7 @@ countSquarefree(GEN lim)
     else if (typ(lim) != t_INT)
         pari_err_TYPE("countSquarefree", lim);
 
-    GEN b, ret = gen_0, p3 = gen_0, p4 = gen_0;
+    GEN b, ret = gen_0, p3, p4 = gen_0;
     b = sqrti(shifti(lim, -1));
     pari_sp btop = avma, st_lim = stack_lim(btop, 1);
     GEN k = gen_0;
@@ -589,7 +589,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
     pari_sp ltop = avma;
 
     GEN v = cgetg(1, t_VEC);
-    GEN p1 = gen_0, p2 = gen_0;
+    GEN p1, p2;
     if (typ(a) != t_INT)
         pari_err_TYPE("bigfactor", a);
     if (typ(b) != t_INT)
@@ -630,7 +630,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
     }
     ulong p3 = minuu(itou(a), lm);
     pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    GEN p5 = gen_0;		/* int */
+    GEN p5;		/* int */
 
     long p;
     forprime_t primepointer;
@@ -648,7 +648,7 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
         v = gconcat(v, stoi(p));
         long i = 2;
         pari_sp ctop = avma, c_lim = stack_lim(btop, 1);
-        GEN p6 = gen_0;
+        GEN p6;
         for(;;)
         {
             if (cmpis(gcdii(a, stoi(p)), 1) > 0)
