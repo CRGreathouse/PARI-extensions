@@ -188,7 +188,7 @@ fin:
   /* An accumulated gcd was > 1 */
   if  (!equalii(g,n))
   { /* if it isn't n, and looks prime, return it */
-    if (MR_Jaeschke(g,17))
+    if (MR_Jaeschke(g))
     {
       if (DEBUGLEVEL >= 4)
       {
