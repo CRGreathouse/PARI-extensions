@@ -11,6 +11,32 @@ assume (int expr)
 /**															Set stuff																	 **/
 /******************************************************************************/
 
+GEN vecsum_zv(GEN x);
+GEN
+vecsum_zv(GEN x)
+{
+    if (typ(x) != t_VECSMALL) pari_err_TYPE("vecsum_zv", x);
+    /*
+     * TODO: handle likely special case where some top bits are unused and so
+     * many additions can be handled in long at a time.
+    long i, minval = 0, maxval = 0, lx = lg(x);
+    for (i=1; i<lx; i++) {
+        if (x[i] < minval) minval = x[i];
+        if (x[i] > maxval) maxval = x[i];
+    }
+    */
+    pari_sp av = avma;
+    GEN s = gen_0;
+    long i, lx = lg(x);
+    for (i=1; i<lx; i++) {
+        s = addis(s, x[i]);
+        if (gc_needed(av, 6)) s = gerepileuptoint(av, s);   // memory is 97% used
+        //if (gc_needed(av, 3)) s = gerepileuptoint(av, s);   // memory is 80% used
+    }
+    return gerepileuptoint(av, s);
+}
+
+
 GEN sumset_self(GEN a);
 GEN
 sumset_self(GEN a)
@@ -41,6 +67,54 @@ sumset(GEN a, GEN b)
     return gerepileupto(av, gtoset(z));
 }
 
+
+GEN
+sumset_lim(GEN a, GEN b, GEN lim)
+{
+    if (typ(a) != t_VEC) pari_err_TYPE("sumset_lim",a);
+    if (typ(b) != t_VEC) pari_err_TYPE("sumset_lim",b);
+    if (!is_intreal_t(typ(lim))) pari_err_TYPE("sumset_lim",lim);
+    pari_sp ltop = avma;
+
+    long stack_bits = 8*pari_mainstack->size;
+    if (gcmpgs(lim, stack_bits) >= 0) pari_err(e_MEM);   // morally: we'd overflow as soon as we'd try. Revise once we try sumset() first for appropriate inputs.
+    if (signe(lim) != 1) return cgetg(1,t_VEC); // return empty vector
+
+    long i, k = 0, slim = itos(gfloor(lim));  // fits in long because gcmpgs above is 0
+
+    if ((gcmpgs(gel(a, 1), 1) < 0) || (gcmpgs(gel(b, 1), 1) < 0)) pari_err_IMPL("not implemented: nonpositive in sumset_lim");
+    RgV_check_ZV(a, "sumset_lim");
+    RgV_check_ZV(b, "sumset_lim");
+
+    if (!setisset(a)) a = gtoset(a);
+    if (!setisset(b)) b = gtoset(b);
+    long lenA = lg(a);
+    long lenB = lg(b);
+
+    pari_sp vtop = avma;
+    GEN u, v = cgetg(slim+1, t_VECSMALL);
+    for (i = 1; i <= slim; ++i) v[i] = 0;   // TODO: There are better ways to do this...
+
+    for (i = 1; i < lenA; ++i) {
+        long j;
+        for (j = 1; j < lenB; ++j) {
+            long t = itos(addii(gel(a, i), gel(b, j)));
+            if (t > slim) break;
+            v[t] = 1;
+        }
+        if (gc_needed(vtop, 2)) v = gerepileupto(vtop, v);
+    }
+
+    u = cgetg(itos(vecsum_zv(v))+1, t_VEC);
+    pari_sp btop = avma;
+    for (i = 1; i <= slim; ++i) {
+        if (v[i]) {
+            gel(u, ++k) = stoi(i);
+            if (gc_needed(btop, 1)) u = gerepilecopy(btop, u);
+        }
+    }
+    return gerepilecopy(ltop, u);
+}
 
 GEN
 diffset(GEN a, GEN b)		/* vecsmall */
