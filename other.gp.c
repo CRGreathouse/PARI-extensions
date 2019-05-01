@@ -11,30 +11,34 @@ assume (int expr)
 /**															Set stuff																	 **/
 /******************************************************************************/
 
-// TODO: check if a = b and handle more efficiently (this is a common case)
+GEN sumset_self(GEN a);
 GEN
-sumset(GEN a, GEN b)		/* vecsmall */
+sumset_self(GEN a)
 {
-    pari_sp ltop = avma;
-    GEN c, p4;
-    long alen = glength(a), blen = glength(b);
-    long l1 = alen*blen;
-    c = cgetg(l1+1, t_VEC);
-    pari_sp btop = avma, b_lim = stack_lim(btop, 1);
-    long i;
-    for (i = 1; i <= alen; ++i)
-    {
-        long j;
-        for (j = 1; j <= blen; ++j)
-        {
-            gel(c, (i - 1)*blen + j) = gadd(gel(a, i), gel(b, j));
-        }
-        if (low_stack(b_lim, stack_lim(btop, 1)))
-            c = gerepilecopy(btop, c);
-    }
-    p4 = vecsort0(c, NULL, 8);
-    p4 = gerepileuptoleaf(ltop, p4);
-    return p4;
+    pari_sp av = avma;
+    long i, j, k = 1, len = lg(a);
+    GEN z = cgetg(len*(len-1)/2 + 1, t_VEC);
+    for (i = 1; i < len; i++)
+      for (j = 1; j <= i; j++)
+        gel(z, k++) = gadd(gel(a,i), gel(a,j));
+    return gerepileupto(av, gtoset(z));
+}
+
+
+GEN
+sumset(GEN a, GEN b)
+{
+    if (typ(a) != t_VEC) pari_err_TYPE("sumset",a);
+    if (b == NULL || gequal(a, b)) return sumset_self(a);
+    if (typ(b) != t_VEC) pari_err_TYPE("sumset",b);
+    //if (RgV_is_ZV(a) && RgV_is_ZV(b)) return sumset_ZV(a, b);
+    pari_sp av = avma;
+    long i, j, k = 1, lenA = lg(a), lenB = lg(b);
+    GEN z = cgetg((lenA-1)*(lenB-1) + 1, t_VEC);
+    for (i = 1; i < lenA; i++)
+      for (j = 1; j < lenB; j++)
+        gel(z, k++) = gadd(gel(a,i), gel(b,j));
+    return gerepileupto(av, gtoset(z));
 }
 
 
