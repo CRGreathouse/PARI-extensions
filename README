@@ -12,8 +12,10 @@ better solution is the script pari.sh which compiles them into a custom session.
 
 The purpose of this collection is to provide new functions for gp.  Some are
 designed to solve a problem which is not easily done in GP, while others merely
-make a common task easier. (It's easier to write vecprod(v) than
-prod(i=1,#v,v[i]), and the former allows functional style.)
+make a common task easier.
+
+Ultimately, the goal for most of these functions is to incorporate them into
+the mainline of PARI/GP, at which point they can be removed from this project.
 
 == The Functions ==
 
@@ -105,9 +107,8 @@ sopf(n): Sum of distinct prime factors of n. Sloane's A008472.
 sopfr(n): Sum of prime factors of n (with multiplicity). Sloane's A001414.
 sprp(n,b=2): Is n a b-strong probable prime?
 sumset(A, B): Set of all numbers of the form a+b, a in A, b in B.
+sumset_lim(A, B): Set of all numbers of the form a+b < lim, a in A, b in B.
 toC(n): Format n for use with the PARI library (e.g., with gp2c programs).
-vecprod(v): Product of the elements of v.
-vecsum(v): Sum of the elements of v.
 ways2(n): Number of ways that n can be represented as a sum of two squares.
     Sloane's A000161.
 ways3(n): Number of ways that n can be represented as a sum of three squares.

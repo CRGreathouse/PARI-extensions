@@ -1,4 +1,5 @@
 *.o
 *.so
 *.gp.run
+*.log
 *~
