@@ -669,9 +669,10 @@ lpf(GEN n)
 
     if (!signe(n))
         return gen_0;	// My choice of convention: lpf(0) = 0
+
+    /* Trial division to 661 */
     if (!mod2(n))
         return gen_2;
-
 #ifdef LONG_IS_64BIT
     static const ulong G = 16294579238595022365UL;
 #else
@@ -680,17 +681,55 @@ lpf(GEN n)
     ulong g = ugcd(umodiu(n, G), G);
     if (g > 1)
         return utoipos(lpfu(g));
-    
     forprime_t S;
 #ifdef LONG_IS_64BIT
-    u_forprime_init(&S, 59, tridiv_bound(n));
+    u_forprime_init(&S, 59, 661);
 #else
-    u_forprime_init(&S, 31, tridiv_bound(n));
+    u_forprime_init(&S, 31, 661);
 #endif
     long p = 0;
     while ((p = u_forprime_next_fast(&S))) {
-        if (dvdis(n, p))
-        {
+        if (dvdis(n, p)) {
+            avma = ltop;
+            return utoipos(p);
+        }
+    }
+
+    /* Check if we have a prime and can stop. */
+    if (BPSW_psp_nosmalldiv(n) && BPSW_isprime(n)) {
+        avma = ltop;
+        return icopy(n);
+    }
+
+    /* Check table of special primes */
+    long l = lg(primetab), i;
+    for (i = 1; i < l; i++) {
+        GEN q = gel(primetab,i);
+        if(dvdii(n, q)) {
+            avma = ltop;
+            return icopy(q);
+        }
+    }
+
+
+    /* How far should we search? If the number is small, just factor it. */
+    ulong lim = tridiv_bound(n);
+#ifdef LONG_IS_64BIT
+    if (expi(n) > 132) {
+        lim = 10000000000UL;
+#else
+    if (expi(n) > 95) {
+        lim = 0xFFFFFFFFUL;
+#endif
+    } else if (expi(n) > 62) {
+        /* Big enough that factoring the whole number might be impractical */
+        lim = itou(sqrtnint(n, 4));
+    }
+
+    u_forprime_init(&S, 673, lim);
+    p = 0;
+    while ((p = u_forprime_next_fast(&S))) {
+        if (dvdis(n, p)) {
             avma = ltop;
             return utoipos(p);
         }
