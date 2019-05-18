@@ -1,5 +1,5 @@
 /******************************************************************************/
-/**                             Convenience                                  **/
+/**														 Convenience																	**/
 /******************************************************************************/
 
 void
@@ -20,7 +20,7 @@ gtor(GEN x, const char* funcName, long prec)
 {
     switch (typ(x)) {
         case t_REAL:
-            return x;  // x, not a copy of x
+            return x;	// x, not a copy of x
         case t_INT:
         case t_FRAC:
             return cxcompotor(x, prec);
@@ -51,67 +51,76 @@ gToC(GEN n)
 const char*
 toC(GEN n)
 {
-  long t = typ(n);
+    long t = typ(n);
 
-  /* Handle types other than t_INT */
-  if (t == t_FRAC) {
-    GEN num = gel(n, 1), den = gel(n, 2);
-    if (cmpis(den, 2) == 0 && equali1(num)) return "ghalf";
-    if (cmpis(den, 0x7FFFFFFF) <= 1 && (signe(num) > 0 ? cmpis(num, 0x7FFFFFFF) <= 1 : cmpis(num, -0x80000000) >= 1)) {
-      return pari_sprintf("mkfracss(%ld, %ld)", itos(num), itos(den));
+    /* Handle types other than t_INT */
+    if (t != t_INT) {
+        if (t == t_FRAC) {
+            GEN num = gel(n, 1), den = gel(n, 2);
+            int numeratorIs1 = equali1(num);
+            if (cmpis(den, 2) == 0 && numeratorIs1) return "ghalf";
+            if (cmpis(den, 0x7FFFFFFF) <= 1 && (signe(num) > 0 ? cmpis(num, 0x7FFFFFFF) <= 1 : cmpis(num, -0x80000000) >= 1)) {
+              return pari_sprintf("mkfracss(%ld, %ld)", itos(num), itos(den));
+            }
+            if (numeratorIs1) {
+                return pari_sprintf("ginv(%s)", toC(den));
+            }
+            return pari_sprintf("Qdivii(%s, %s)", toC(num), toC(den));
+        }
+        pari_err_TYPE("toC", n);
+        __builtin_unreachable();
     }
-    if (equali1(num)) return pari_sprintf("ginv(%s)", toC(den));
-    return pari_sprintf("Qdivii(%s, %s)", toC(num), toC(den));
-  }
-  if (t != t_INT) {
-    pari_err_TYPE("toC", n);
-    __builtin_unreachable();
-  }
 
-  /* Handle special values */
-  if (abscmpiu(n, 3) < 0) {
-    if (cmpis(n, 2) == 0)
-      return "gen_2";
-    else if (equali1(n))
-      return "gen_1";
-    else if (signe(n) == 0)
-      return "gen_0";
-    else if (equalim1(n))
-      return "gen_m1";
-    else if (equalis(n, -2))
-      return "gen_m2";
-    __builtin_unreachable();
-  }
-  
-  if (ispow2(n)) return pari_sprintf("int2u(%ld)", expi(n));
+    /* Handle special values */
+    if (abscmpiu(n, 3) < 0) {
+        if (equalis(n, 2))
+            return "gen_2";
+        else if (equali1(n))
+            return "gen_1";
+        else if (signe(n) == 0)
+            return "gen_0";
+        else if (equalim1(n))
+            return "gen_m1";
+        else if (equalis(n, -2))
+            return "gen_m2";
+        __builtin_unreachable();
+    }
     
-  // words: number of 32-bit words in n.
+    // words: number of 32-bit words in n.
 #ifdef LONG_IS_64BIT
-  long words = (lgefint(n) - 2) << 1;
-  if ((ulong)*int_MSW(n) <= 0xFFFFFFFF)
-    words--;
+    long words = (lgefint(n) - 2) << 1;
+    if ((ulong)*int_MSW(n) <= 0xFFFFFFFF)
+        words--;
 #else
-  long words = lgefint(n) - 2;
+    long words = lgefint(n) - 2;
 #endif
 
-  /* 32 bits */
-  if (words == 1) {
-    if (signe(n) > 0)
-      return pari_sprintf("utoipos(%Ps)", n);
-    else
-      return pari_sprintf("utoineg(%Ps)", absi(n));
-  }
-
-  /* 64 bits */
-  if (words == 2) {
-    if (signe(n) > 0)
-      return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
-    n = absi(n);
-    return pari_sprintf("uu32toineg(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
-  }
 
   /* Handle negatives */
   if (signe(n) < 0) return pari_sprintf("negi(%s)", toC(absi(n)));
+    if (words == 1) {
+        if (signe(n) > 0)
+            return pari_sprintf("utoipos(%Ps)", n);
+        else
+            return pari_sprintf("utoineg(%Ps)", absi(n));
+    }
+
+    // utoipos is better than int2u, but int2u is probably better than uu32toi
+    if (ispow2(n)) return pari_sprintf("int2u(%ld)", expi(n));
+    if (ispow2(addiu(n, 1))) return pari_sprintf("int2um1(%ld)", expi(n)+1);
+
+    if (words == 2)
+    {
+        if (signe(n) > 0) {
+            return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
+        /*
+        } else {
+            // FIXME: fails on 64-bit machines
+            n = absi(n);
+            return pari_sprintf("uutoineg(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
+            */
+        }
+    }
     
   // Large numbers
   // N.B., this requires sprintf rather than pari_sprintf.
