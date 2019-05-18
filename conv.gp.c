@@ -95,9 +95,6 @@ toC(GEN n)
     long words = lgefint(n) - 2;
 #endif
 
-
-  /* Handle negatives */
-  if (signe(n) < 0) return pari_sprintf("negi(%s)", toC(absi(n)));
     if (words == 1) {
         if (signe(n) > 0)
             return pari_sprintf("utoipos(%Ps)", n);
@@ -105,9 +102,12 @@ toC(GEN n)
             return pari_sprintf("utoineg(%Ps)", absi(n));
     }
 
-    // utoipos is better than int2u, but int2u is probably better than uu32toi
+    /* utoipos is better than int2u, but int2u is probably better than uu32toi */
     if (ispow2(n)) return pari_sprintf("int2u(%ld)", expi(n));
     if (ispow2(addiu(n, 1))) return pari_sprintf("int2um1(%ld)", expi(n)+1);
+
+    /* Handle negatives */
+    if (signe(n) < 0) return pari_sprintf("negi(%s)", toC(absi(n)));
 
     if (words == 2)
     {
@@ -115,33 +115,36 @@ toC(GEN n)
             return pari_sprintf("uu32toi(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
         /*
         } else {
-            // FIXME: fails on 64-bit machines
+            // FIXME: fails on 64-bit machines; with this working, negatives should be handled below rather than above
             n = absi(n);
             return pari_sprintf("uutoineg(%Ps, %Ps)", shifti(n, -32), remi2n(n, 32));
             */
         }
     }
-    
-  // Large numbers
-  // N.B., this requires sprintf rather than pari_sprintf.
-  size_t maxSize = 9 + countdigits(stoi(words)) + 12*words;
-  char* buffer = (char*)pari_malloc(maxSize*sizeof(char));
-  int index = sprintf(buffer, "mkintn(%ld", words);  // 7+len(words) characters
-  long i = words - 1;
-  pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-  for (; i >= 0; i--) {
+
+    // Large numbers
+    // N.B., this requires sprintf rather than pari_sprintf, since it uses a
+    // buffer rather than having all its arguments in one line.
+    size_t maxSize = 9 + countdigits(stoi(words)) + 12*words;
+    char* buffer = (char*)pari_malloc(maxSize*sizeof(char));
+    int index = sprintf(buffer, "mkintn(%ld", words);	// 7+len(words) characters
+    long i = words - 1;
+    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+    for (; i >= 0; i--)
+    {
 #ifdef LONG_IS_64BIT
-    ulong chunk = mod2BIL(n) & 0xffffffff;
+        ulong chunk = mod2BIL(n) & 0xffffffff;
 #else
-    ulong chunk = mod2BIL(n);
+        ulong chunk = mod2BIL(n);
 #endif
-    index += sprintf(buffer+index, ", %lu", chunk);  // 12 characters max
-    n = shifti(n, -32); // a faster approach would use int_nextW
-    if (low_stack(st_lim, stack_lim(btop, 1)))
-      gerepileall(btop, 1, &n);
-  }
-  sprintf(buffer+index, ")");  // 2 characters with \0
-  return buffer;
+        index += sprintf(buffer+index, ", %lu", chunk);	// 12 characters max
+        n = shifti(n, -32); // a faster approach would use int_nextW
+        if (low_stack(st_lim, stack_lim(btop, 1)))
+            gerepileall(btop, 1, &n);
+
+    }
+    sprintf(buffer+index, ")");	// 2 characters with \0
+    return buffer;
 }
 
 
