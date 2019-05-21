@@ -13,6 +13,7 @@ listtovec_shallow(GEN v)
   return y;
 }
 
+
 // Parse a zero-terminated line to find the second number:
 // 20 10485876
 // would yield "1048576". Note that the input string is modified in the process.
@@ -40,6 +41,7 @@ getBValue(char* line)
 
   return line + start;
 }
+
 
 #define MAX_VECLEN 180000
 #define MAX_LINELEN 5000
@@ -105,6 +107,7 @@ bfilein(char* name)
   return v;
 }
 
+
 GEN
 bfile(GEN name, GEN v, GEN offset)
 {
@@ -168,9 +171,10 @@ bfile(GEN name, GEN v, GEN offset)
   char* filename = GSTR(name);
   if (!v) return bfilein(filename);
   bfileout(filename, name, v, Anum, cur + 1);
-  avma = ltop;
+  set_avma(ltop);
   return gnil;
 }
+
 
 void
 bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset)
@@ -204,6 +208,7 @@ bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset)
   pari_printf("A%Ps: Terms %ld..%ld written to %s\n", Anum, offset, cur,
               filename);
 }
+
 
 GEN
 fnice(GEN n)
@@ -246,6 +251,7 @@ fnice(GEN n)
   s = gerepileupto(ltop, s);
   return s;
 }
+
 
 /* Can handle only single-variable polynomials. */
 GEN
@@ -312,6 +318,7 @@ tonice(GEN o, long prec)
   return p4;
 }
 
+
 GEN
 initial(GEN n, char* s)
 {
@@ -320,7 +327,7 @@ initial(GEN n, char* s)
   if (typ(n) != t_INT) pari_err_TYPE("initial", n);
   if (cmpis(n, 0) == 0)
   {
-    avma = ltop;
+    set_avma(ltop);
     return strtoGENstr("");
   }
   if (equalim1(n))
@@ -331,13 +338,14 @@ initial(GEN n, char* s)
   }
   if (equali1(n))
   {
-    avma = ltop;
+    set_avma(ltop);
     return strtoGENstr(s);
   }
   p3 = Str(mkvec2(n, strtoGENstr(s)));
   p3 = gerepileupto(ltop, p3);
   return p3;
 }
+
 
 GEN
 medial(GEN n, char* s)
@@ -347,7 +355,7 @@ medial(GEN n, char* s)
   if (typ(n) != t_INT) pari_err_TYPE("medial", n);
   if (cmpis(n, 0) == 0)
   {
-    avma = ltop;
+    set_avma(ltop);
     return strtoGENstr("");
   }
   if (equalim1(n))
@@ -370,6 +378,7 @@ medial(GEN n, char* s)
   p5 = gerepileupto(ltop, p5);
   return p5;
 }
+
 
 /* Degree assumed to be positive */
 GEN
@@ -396,3 +405,4 @@ monomialnice(GEN coeff, GEN degree, GEN v)
   p2 = gerepileupto(ltop, p2);
   return p2;
 }
+

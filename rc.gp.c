@@ -156,7 +156,7 @@ Bell(long n)
   FIX_PRECISION:
     sz += logf(sz); // increase precion slightly
     pari_warn(warnprec, "Bell", sz);
-    avma = ltop;
+    set_avma(ltop);
   }
 }
 

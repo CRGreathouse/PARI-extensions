@@ -90,28 +90,27 @@ forpal(GEN a, GEN b, GEN code)
   if (lower_digits == upper_digits)
   {
     palhelper(lower_digits, a, b, code);
-    avma = av;
+    set_avma(av);
     return;
   }
 
   pari_sp btop = avma;
   if (palhelper(lower_digits, a, powuu(10, lower_digits), code))
   {
-    avma = av;
+    set_avma(av);
     return;
   }
-  avma = btop;
+  set_avma(btop);
   long d = lower_digits + 1;
   for (; d < upper_digits; d++)
   {
     if (palhelper(d, powuu(10, d - 1), powuu(10, d), code))
     {
-      avma = av;
+      set_avma(av);
       return;
     }
-    avma = btop;
+    set_avma(btop);
   }
   palhelper(upper_digits, powuu(10, upper_digits - 1), b, code);
-  avma = av;
+  set_avma(av);
 }
-

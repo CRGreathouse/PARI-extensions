@@ -15,9 +15,7 @@ issemiprime(GEN n)
   pari_sp ltop = avma;
   if (!mpodd(n))
   {
-    long ret = mod4(n) && isprime(shifti(n, -1));
-    avma = ltop;
-    return ret;
+    return gc_long(ltop, mod4(n) && isprime(shifti(n, -1)));
   }
 
 
@@ -28,9 +26,7 @@ issemiprime(GEN n)
   {
     if (dvdis(n, p))
     {
-      long ret = isprime(diviuexact(n, p));
-      avma = ltop;
-      return ret;
+      return gc_long(ltop, isprime(diviuexact(n, p)));
     }
   }
 
@@ -48,21 +44,17 @@ issemiprime(GEN n)
   long len = glength(expo);
   if (len > 2)
   {
-    avma = ltop;
-    return 0;
+    return gc_long(ltop, 0);
   }
   if (len == 2)
   {
     if (cmpis(gel(expo, 1), 1) > 0 || cmpis(gel(expo, 2), 1) > 0)
     {
-      avma = ltop;
-      return 0;
+      return gc_long(ltop, 0);
     }
     GEN P = gel(pr, 1);
     GEN Q = gel(pr, 2);
-    long ret = isprime(P) && isprime(Q) && equalii(mulii(P, Q), n);
-    avma = ltop;
-    return ret;
+    return gc_long(ltop, isprime(P) && isprime(Q) && equalii(mulii(P, Q), n));
   }
   if (len == 1)
   {
@@ -70,26 +62,21 @@ issemiprime(GEN n)
     if (e == 2)
     {
       GEN P = gel(pr, 1);
-      long ret = isprime(P) && equalii(sqri(P), n);
-      avma = ltop;
-      return ret;
+      return gc_long(ltop, isprime(P) && equalii(sqri(P), n));
     }
     else if (e > 2)
     {
-      avma = ltop;
-      return 0;
+      return gc_long(ltop, 0);
     }
     GEN P = gel(pr, 1);
-    long ret = isprime(P) && isprime(diviiexact(n, P));
-    avma = ltop;
-    return ret;
+    return gc_long(ltop, isprime(P) && isprime(diviiexact(n, P)));
   }
 
   pari_err_BUG(pari_sprintf(
     "Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...",
     fac, n));
   __builtin_unreachable();
-  avma = ltop;
+  set_avma(ltop);
   return NEVER_USED;
 }
 
@@ -230,13 +217,12 @@ uissemiprime(ulong n)
   GEN fac = pollardbrent(utoipos(n));
   if (fac == NULL)
   {
-    avma = ltop;
+    set_avma(ltop);
   }
   else if (typ(fac) == t_INT)
   {
     ulong f = itou(fac);
-    avma = ltop;
-    return uisprime_661(f) && uisprime_661(n / f);
+    return gc_long(ltop, uisprime_661(f) && uisprime_661(n / f));
   }
   else if (typ(fac) == t_VEC)
   {
@@ -246,8 +232,7 @@ uissemiprime(ulong n)
     //   a factor, an exponent (equal to one),  and a factor class (NULL
     //   for unknown or zero for known composite)"
     ulong f = itou(gel(fac, 1));
-    avma = ltop;
-    return uisprime_661(f) && uisprime_661(n / f);
+    return gc_long(ltop, uisprime_661(f) && uisprime_661(n / f));
   }
 
   // Second part of trial division loop: avoids the cube root calculation
@@ -319,9 +304,7 @@ prp(GEN n, GEN b)
     b = gen_2;
   else if (typ(b) != t_INT)
     pari_err_TYPE("prp", b);
-  long ret = gequal1(powgi(gmodulo(b, n), subis(n, 1)));
-  avma = ltop;
-  return ret;
+  return gc_long(ltop, gequal1(powgi(gmodulo(b, n), subis(n, 1))));
 }
 
 
@@ -346,8 +329,7 @@ sprp(GEN n, GEN b)
   d = powgi(gmodulo(b, n), d);
   if (gequal1(d))
   {
-    avma = ltop;
-    return 1;
+    return gc_long(ltop, 1);
   }
 
   pari_sp btop = avma, st_lim = stack_lim(btop, 1);
@@ -356,15 +338,12 @@ sprp(GEN n, GEN b)
   {
     if (gequalm1(d))
     {
-      avma = ltop;
-      return 1;
+      return gc_long(ltop, 1);
     }
     d = gsqr(d);
     if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 1, &d);
   }
-  ret = gequalm1(d);
-  avma = ltop;
-  return ret;
+  return gc_long(ltop, gequalm1(d));
 }
 
 
@@ -573,7 +552,7 @@ primorial(GEN n)
   {
     if (signe(n) < 1) return gen_1;
     nn = itou_or_0(floorr(n));
-    avma = ltop;
+    set_avma(ltop);
   }
   else if (typ(n) == t_INT)
   {
@@ -647,9 +626,7 @@ lpfu(ulong n)
   // This is a performance disaster, since factoru repeats trial division.
   // ifac_factoru would be better.
   pari_sp ltop = avma;
-  ulong ret = vecsmall_min(gel(factoru(n), 1));
-  avma = ltop;
-  return ret;
+  return gc_ulong(ltop, vecsmall_min(gel(factoru(n), 1)));
 }
 
 
@@ -666,12 +643,12 @@ lpf(GEN n)
     // Convention: lpf(1) = lpf(-1) = 1, lpf(0) = 0
     if (len == 0 || (len == 1 && equalii(gel(f, 1), gen_m1)))
     {
-      avma = ltop;
+      set_avma(ltop);
       return gen_1;
     }
     if (len == 1 && equalii(gel(f, 1), gen_0))
     {
-      avma = ltop;
+      set_avma(ltop);
       return gen_0;
     }
 
@@ -713,15 +690,14 @@ lpf(GEN n)
   {
     if (dvdis(n, p))
     {
-      avma = ltop;
-      return utoipos(p);
+      return utoipos(gc_ulong(ltop, p));
     }
   }
 
   /* Check if we have a prime and can stop. */
   if (BPSW_psp_nosmalldiv(n) && BPSW_isprime(n))
   {
-    avma = ltop;
+    set_avma(ltop);
     return icopy(n);
   }
 
@@ -732,8 +708,7 @@ lpf(GEN n)
     GEN q = gel(primetab, i);
     if (dvdii(n, q))
     {
-      avma = ltop;
-      return icopy(q);
+      return gerepileuptoint(ltop, q);
     }
   }
 
@@ -762,8 +737,7 @@ lpf(GEN n)
   {
     if (dvdis(n, p))
     {
-      avma = ltop;
-      return utoipos(p);
+      return utoipos(gc_ulong(ltop, p));
     }
   }
   res = gcoeff(Z_factor(n), 1,

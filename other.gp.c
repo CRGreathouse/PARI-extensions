@@ -182,7 +182,7 @@ pBounds(GEN n, GEN verbose, long prec)
       n = gfloor(n);
       pari_printf("p_%Ps = %Ps (exactly)\n", n, prime(gtos(n)));
     }
-    avma = ltop;
+    set_avma(ltop);
     return;
   }
   n = gfloor(n);
@@ -229,9 +229,10 @@ pBounds(GEN n, GEN verbose, long prec)
                   "119, pp. 848-849.\n");
     }
   }
-  avma = ltop;
+  set_avma(ltop);
   return;
 }
+
 
 /******************************************************************************/
 /* Works-in-progress / limited utility */
@@ -254,7 +255,7 @@ checkVDW(GEN vv, GEN verbose)
       {
         if (!gequal0(verbose))
           pari_printf("Not a partition: numbers repeated in color %Ps.\n", i);
-        avma = ltop;
+        set_avma(ltop);
         return gen_0;
       }
       s = gaddgs(s, glength(gel(vv, gtos(i))));
@@ -269,7 +270,7 @@ checkVDW(GEN vv, GEN verbose)
     if (!gequal0(verbose))
       pari_printf(
         "Not a natural number partition: negative numbers in a member array.\n");
-    avma = ltop;
+    set_avma(ltop);
     return gen_0;
   }
   if ((gcmpgs(gel(c, 1), 1) > 0) ||
@@ -279,7 +280,7 @@ checkVDW(GEN vv, GEN verbose)
       pari_printf(
         "Not a partition of an initial segment: not all numbers {1, 2, ..., %Ps} appear.\n",
         gel(c, glength(c)));
-    avma = ltop;
+    set_avma(ltop);
     return gen_0;
   }
   k = gaddgs(longestProgression(gel(vv, 1)), 1);
@@ -302,12 +303,10 @@ longestProgression(GEN v)
 {
   pari_sp ltop = avma;
   GEN r = gen_0, s, t = gen_0, d = gen_0;
-  long l1, l2;
+  long l2;
   if (glength(v) < 3)
   {
-    l1 = glength(v);
-    avma = ltop;
-    return stoi(l1);
+    return stoi(gc_long(ltop, glength(v)));
   }
   s = gtoset(v);
   l2 = glength(v) - 1;
@@ -366,7 +365,7 @@ longestProgression1(GEN v)
   L = p3;
   if (glength(v) < 3)
   {
-    l4 = glength(v);
+    return stoi(gc_long(ltop, glength(v)));
     avma = ltop;
     return stoi(l4);
   }

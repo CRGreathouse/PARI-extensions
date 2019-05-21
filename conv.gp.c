@@ -157,8 +157,7 @@ countdigits(GEN x)
   pari_sp av = avma;
   long s = sizedigit(x) - 1;
   if (gcmp(x, powis(utoipos(10), s)) >= 0) s++;
-  avma = av;
-  return s;
+  return gc_long(av, s);
 }
 
 GEN

@@ -69,8 +69,7 @@ ispow3(GEN n)
     double sz3 = dbllog2r(itor(n, DEFAULTPREC)) / log2(3);
     int e = (int)(sz3 + 0.5);
     long ret = equalii(n, powis(utoipos(3), e));
-    avma = ltop;
-    return ret;
+    return gc_long(ltop, ret);
 }
 
 
@@ -144,8 +143,7 @@ isFibonacci(GEN n)
     GEN k = sqri(n);
     k = addis(mulis(k, 5), 4);	// Multiplication via shifts is slower here (by ~4 cycles)
     long res = Z_issquare(k) || (signe(n) > 0 && Z_issquare(subis(k, 8)));
-    avma = ltop;
-    return res;
+    return gc_long(ltop, res);
 }
 
 
@@ -295,8 +293,7 @@ fibmod(GEN n, GEN m)
     if (!signe(n))
         return gen_0;
 
-    GEN f, t, res;
-    long l;
+    GEN f, t;
     pari_sp ltop = avma;
     if (cmpis(m, 6) < 0)
     {
@@ -307,37 +304,21 @@ fibmod(GEN n, GEN m)
             
         switch (itos_or_0(m)) {
         case 1:	
-            avma = ltop;
+            set_avma(ltop);
             return gen_0;
         case 2:
-            l = smodis(n, 3) > 0;
-            avma = ltop;
-            return utoipos(l);
+            return utoipos(gc_long(ltop, smodis(n, 3) > 0));
         case 3:
-            l = fmod3[mod8(n)];
-            avma = ltop;
-            return utoipos(l);
+            return utoipos(gc_long(ltop, fmod3[mod8(n)]));
         case 4:
-            l = fmod4[smodis(n, 6)];
-            avma = ltop;
-            return utoipos(l);
+            return utoipos(gc_long(ltop, fmod4[smodis(n, 6)]));
         case 5:
-            l = fmod5[smodis(n, 20)];
-            avma = ltop;
-            return utoipos(l);
+            return utoipos(gc_long(ltop, fmod5[smodis(n, 20)]));
         }
     }
-    // Rough estimate of the break-even point.	Yes, it's quite large.
-    /*
-    if (cmpis(n, 1000) < 0)
-    {
-        res = modii(fibo(itos(n)), m);
-        res = gerepileupto(ltop, res);
-        return res;
-    }*/
     
     f = Z_factor(m);
-    long e;
+    long e, l;
     t = gmodulo(gen_0, gen_1);
     l = glength(gel(f, 1));
     pari_sp btop = avma;
@@ -348,9 +329,7 @@ fibmod(GEN n, GEN m)
         t = chinese(t, gmodulo(fibo(smodis(n, Pisano(itos(gcoeff(f, i, 1)), e))), powis(gcoeff(f, i, 1), e)));
         t = gerepileupto(btop, t);
     }
-    res = lift(t);
-    res = gerepileupto(ltop, res);
-    return res;
+    return gerepileupto(ltop, lift(t));
 }
 
 
@@ -407,7 +386,7 @@ istwo(GEN n)
     // TODO: Serious improvements available with incremental factoring
     pari_sp ltop = avma;
     GEN f;
-    long ret, l;
+    long l;
     if (typ(n) != t_INT)
         pari_err_TYPE("istwo", n);
     
@@ -419,9 +398,7 @@ istwo(GEN n)
     // Remove negatives
     if (cmpis(n, 3) < 0)
     {
-        ret = signe(n) >= 0;
-        avma = ltop;
-        return ret;
+        return gc_long(ltop, signe(n) >= 0);
     }
 
     // End early if possible: numbers that are 3 mod 4 always have some prime factor 3 mod 4 raised to an odd power.
@@ -435,12 +412,10 @@ istwo(GEN n)
     {
         if (mod4(gcoeff(f, i, 1)) == 3 && mod2(gcoeff(f, i, 2)))
         {
-            avma = ltop;
-            return 0;
+            return gc_long(ltop, 0);
         }
     }
-    avma = ltop;
-    return 1;
+    return gc_long(ltop, 1);
 }
 
 
@@ -462,7 +437,7 @@ ways2(GEN n)
         {
             if (mod2(gcoeff(f, i, 2)))
             {
-                avma = ltop;
+                set_avma(ltop);
                 return gen_0;
             }
         } else {
@@ -488,9 +463,7 @@ isthree(GEN n)
     if (tmp & 1)
         return 1;
     pari_sp ltop = avma;
-    long l1 = mod8(shifti(n, -tmp)) != 7;
-    avma = ltop;
-    return l1;
+    return gc_long(ltop, mod8(shifti(n, -tmp)) != 7);
 }
 
 
@@ -509,7 +482,7 @@ sways3s(ulong n)
         t = n - k * k;
         if (!istwo(stoi(t)))
             continue;
-        avma = ltop;
+        set_avma(ltop);
         p2 = (long)usqrt(t>>1);
         switch (tmod4) {
             case 0:
@@ -548,13 +521,12 @@ ways3(GEN n)
         n = shifti(n, -(vali(n) >> 1) << 1);
     }
     if (mod8(n) == 7) {
-        avma = ltop;
+        set_avma(ltop);
         return gen_0;
     }
     ulong small = itou_or_0(n);
     if (small) {
-        avma = ltop;
-        return stoi(sways3s(small));
+        return stoi(gc_long(ltop, sways3s(small)));
     }
     
     p1 = sqrtint(truedivis(n, 3));
@@ -681,8 +653,7 @@ fusc_small(GEN n)
         tmp >>= 8;
     }
     
-    avma = ltop;
-    return b;
+    return gc_ulong(ltop, b);
     #undef fusc8bits
 }
 
