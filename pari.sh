@@ -100,4 +100,9 @@ egrep '^GP;' auto.gp.c | sed 's/^GP;//' > auto.gp.run
 #{ for f in html/*.png ; do pngout $f ; done } &
 
 # Run gp itself
+
+mv auto.gp.run ../pari
+mv auto.gp.so ../pari
+cd ../pari
 gp
+cd ../PARI-extensions
