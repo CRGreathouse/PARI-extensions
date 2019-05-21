@@ -266,7 +266,8 @@ fibomod_tiny(long n, ulong m)
     lucasmod_tiny((ulong)(labs(n)-1), (ulong)(5*m), &a, &b);
     a = (((a << 1) + b) / 5) % m;
     
-    return n < 0 && !odd(n) ? m-a : a;
+    //return (n < 0 && !odd(n)) ? m-a : a;
+    return (n > 0 || odd(n)) ? a : m-a;
 }
 
 

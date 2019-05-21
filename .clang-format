@@ -1,0 +1,11 @@
+BasedOnStyle: Mozilla
+IndentWidth: 2
+---
+Language: Cpp
+AllowShortIfStatementsOnASingleLine: true # WithoutElse
+BreakBeforeBraces: Allman
+ReflowComments: true
+BinPackArguments: true
+BinPackParameters: true
+BreakStringLiterals: false
+MaxEmptyLinesToKeep: 2
