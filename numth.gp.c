@@ -128,9 +128,7 @@ isfactorial(GEN n)
     else
       return 0;
   }
-  c = equalii(mulu_interval(2UL, (ulong)mn), n);
-  avma = ltop;
-  return c;
+  return gc_bool(ltop, equalii(mpfact(mn), n));
 }
 
 

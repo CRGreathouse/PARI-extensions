@@ -68,8 +68,7 @@ ispow3(GEN n)
     pari_sp ltop = avma;
     double sz3 = dbllog2r(itor(n, DEFAULTPREC)) / log2(3);
     int e = (int)(sz3 + 0.5);
-    long ret = equalii(n, powis(utoipos(3), e));
-    return gc_long(ltop, ret);
+    return gc_bool(ltop, equalii(n, powis(utoipos(3), e)));
 }
 
 
@@ -142,8 +141,7 @@ isFibonacci(GEN n)
     }
     GEN k = sqri(n);
     k = addis(mulis(k, 5), 4);	// Multiplication via shifts is slower here (by ~4 cycles)
-    long res = Z_issquare(k) || (signe(n) > 0 && Z_issquare(subis(k, 8)));
-    return gc_long(ltop, res);
+    return gc_bool(ltop, Z_issquare(k) || (signe(n) > 0 && Z_issquare(subis(k, 8))));
 }
 
 
@@ -398,7 +396,7 @@ istwo(GEN n)
     // Remove negatives
     if (cmpis(n, 3) < 0)
     {
-        return gc_long(ltop, signe(n) >= 0);
+        return gc_bool(ltop, signe(n) >= 0);
     }
 
     // End early if possible: numbers that are 3 mod 4 always have some prime factor 3 mod 4 raised to an odd power.
@@ -412,10 +410,10 @@ istwo(GEN n)
     {
         if (mod4(gcoeff(f, i, 1)) == 3 && mod2(gcoeff(f, i, 2)))
         {
-            return gc_long(ltop, 0);
+            return gc_bool(ltop, 0);
         }
     }
-    return gc_long(ltop, 1);
+    return gc_bool(ltop, 1);
 }
 
 
@@ -463,7 +461,7 @@ isthree(GEN n)
     if (tmp & 1)
         return 1;
     pari_sp ltop = avma;
-    return gc_long(ltop, mod8(shifti(n, -tmp)) != 7);
+    return gc_bool(ltop, mod8(shifti(n, -tmp)) != 7);
 }
 
 

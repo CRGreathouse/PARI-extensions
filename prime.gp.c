@@ -15,7 +15,7 @@ issemiprime(GEN n)
   pari_sp ltop = avma;
   if (!mpodd(n))
   {
-    return gc_long(ltop, mod4(n) && isprime(shifti(n, -1)));
+    return gc_bool(ltop, mod4(n) && isprime(shifti(n, -1)));
   }
 
 
@@ -26,7 +26,7 @@ issemiprime(GEN n)
   {
     if (dvdis(n, p))
     {
-      return gc_long(ltop, isprime(diviuexact(n, p)));
+      return gc_bool(ltop, isprime(diviuexact(n, p)));
     }
   }
 
@@ -44,17 +44,17 @@ issemiprime(GEN n)
   long len = glength(expo);
   if (len > 2)
   {
-    return gc_long(ltop, 0);
+    return gc_bool(ltop, 0);
   }
   if (len == 2)
   {
     if (cmpis(gel(expo, 1), 1) > 0 || cmpis(gel(expo, 2), 1) > 0)
     {
-      return gc_long(ltop, 0);
+      return gc_bool(ltop, 0);
     }
     GEN P = gel(pr, 1);
     GEN Q = gel(pr, 2);
-    return gc_long(ltop, isprime(P) && isprime(Q) && equalii(mulii(P, Q), n));
+    return gc_bool(ltop, isprime(P) && isprime(Q) && equalii(mulii(P, Q), n));
   }
   if (len == 1)
   {
@@ -62,14 +62,14 @@ issemiprime(GEN n)
     if (e == 2)
     {
       GEN P = gel(pr, 1);
-      return gc_long(ltop, isprime(P) && equalii(sqri(P), n));
+      return gc_bool(ltop, isprime(P) && equalii(sqri(P), n));
     }
     else if (e > 2)
     {
-      return gc_long(ltop, 0);
+      return gc_bool(ltop, 0);
     }
     GEN P = gel(pr, 1);
-    return gc_long(ltop, isprime(P) && isprime(diviiexact(n, P)));
+    return gc_bool(ltop, isprime(P) && isprime(diviiexact(n, P)));
   }
 
   pari_err_BUG(pari_sprintf(
@@ -222,7 +222,7 @@ uissemiprime(ulong n)
   else if (typ(fac) == t_INT)
   {
     ulong f = itou(fac);
-    return gc_long(ltop, uisprime_661(f) && uisprime_661(n / f));
+    return gc_bool(ltop, uisprime_661(f) && uisprime_661(n / f));
   }
   else if (typ(fac) == t_VEC)
   {
@@ -232,7 +232,7 @@ uissemiprime(ulong n)
     //   a factor, an exponent (equal to one),  and a factor class (NULL
     //   for unknown or zero for known composite)"
     ulong f = itou(gel(fac, 1));
-    return gc_long(ltop, uisprime_661(f) && uisprime_661(n / f));
+    return gc_bool(ltop, uisprime_661(f) && uisprime_661(n / f));
   }
 
   // Second part of trial division loop: avoids the cube root calculation
@@ -304,7 +304,7 @@ prp(GEN n, GEN b)
     b = gen_2;
   else if (typ(b) != t_INT)
     pari_err_TYPE("prp", b);
-  return gc_long(ltop, gequal1(powgi(gmodulo(b, n), subis(n, 1))));
+  return gc_bool(ltop, gequal1(powgi(gmodulo(b, n), subis(n, 1))));
 }
 
 
@@ -313,7 +313,6 @@ sprp(GEN n, GEN b)
 {
   pari_sp ltop = avma;
   GEN d;
-  long ret;
   if (typ(n) != t_INT)
     pari_err_TYPE("sprp", n);
   else if (cmpis(n, 3) < 0)
@@ -329,7 +328,7 @@ sprp(GEN n, GEN b)
   d = powgi(gmodulo(b, n), d);
   if (gequal1(d))
   {
-    return gc_long(ltop, 1);
+    return gc_bool(ltop, 1);
   }
 
   pari_sp btop = avma, st_lim = stack_lim(btop, 1);
@@ -338,12 +337,12 @@ sprp(GEN n, GEN b)
   {
     if (gequalm1(d))
     {
-      return gc_long(ltop, 1);
+      return gc_bool(ltop, 1);
     }
     d = gsqr(d);
     if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 1, &d);
   }
-  return gc_long(ltop, gequalm1(d));
+  return gc_bool(ltop, gequalm1(d));
 }
 
 
