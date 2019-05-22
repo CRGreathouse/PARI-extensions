@@ -547,226 +547,6 @@ countSquarefree(GEN lim)
   return ret;
 }
 
-/******************************************************************************/
-/* Factoring */
-/******************************************************************************/
-
-GEN
-Mfactor(GEN p, GEN lim, GEN start)
-{
-  pari_sp ltop = avma;
-
-  // Check types
-  if (typ(p) != t_INT) pari_err_TYPE("Mfactor", p);
-  if (typ(lim) == t_REAL)
-    lim = gfloor(lim);
-  else if (typ(lim) != t_INT)
-    pari_err_TYPE("Mfactor", lim);
-  if (!start)
-    start = gen_2;
-  else if (typ(start) != t_INT)
-    pari_err_TYPE("Mfactor", start);
-
-  GEN v, k, p1, p2;
-  v = cgetg(1, t_VEC);
-  if (signe(p) < 1 || !(isprime(p))) pari_err_PRIME("Mfactor", p);
-  if (mod4(p) != 3)
-    pari_warn(warner,
-              "p must be a Mersenne exponent equal to 3 mod 4... I think");
-
-  /* Really, only k in [0, 5, 8, 9] mod 12 need to be checked (at last for
-   * Mersenne prime exponents?). */
-  /* So this should use a quick check, then a full loop with step [10p, 6p, 2p,
-   * 6p]. */
-  /* Check for a factor of 3 also before starting loop. */
-  p2 = shifti(p, 1);
-  k = gceil(gdiv(subis(start, 1), p2));
-  p1 = addis(mulii(p2, k), 1);
-  pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-  GEN q = gen_0;
-  for (q = p1; cmpii(q, lim) <= 0; q = addii(q, p2))
-  {
-    if (mod8(q) != 1 && mod8(q) != 7) continue;
-    if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 2, &q, &v);
-    if (!gequal1(powgi(gmodulsg(2, q), modii(p, subis(q, 1))))) continue;
-    v = gconcat(v, q);
-    long i = 2;
-    while (gequal1(powgi(gmodulsg(2, powis(q, i)),
-                         modii(p, mulii(subis(q, 1), powis(q, i - 1))))))
-    {
-      v = gconcat(v, q);
-      i++;
-    }
-  }
-  v = gerepileupto(ltop, v);
-  return v;
-}
-
-
-// FIXME: Gives spurious factors of 2 sometimes
-GEN
-bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
-{
-  pari_sp ltop = avma;
-
-  GEN v = cgetg(1, t_VEC);
-  GEN p1, p2;
-  if (typ(a) != t_INT) pari_err_TYPE("bigfactor", a);
-  if (typ(b) != t_INT) pari_err_TYPE("bigfactor", b);
-  if (typ(c) != t_INT) pari_err_TYPE("bigfactor", c);
-  if (!start)
-    start = gen_2;
-  else if (typ(start) != t_INT)
-    pari_err_TYPE("bigfactor", start);
-  if (typ(lim) == t_REAL)
-    lim = gfloor(lim);
-  else if (typ(lim) != t_INT)
-    pari_err_TYPE("bigfactor", lim);
-  ulong lm = itou_or_0(lim);
-  if (lm > maxprime()) pari_err_MAXPRIME(lm);
-  if (!lm)
-    pari_err(e_MISC,
-             "bigfactor: Not enough primes on your architechture for that!");
-
-  if (signe(b) < 0)
-  {
-    // TODO: These two should have their formats changed to match that given
-    // below.
-    if (equali1(a))
-    {
-      p1 = Z_factor(subsi(1, c));
-      p1 = gerepileupto(ltop, p1);
-      return p1;
-    }
-    if (equalim1(a))
-    {
-      p2 = Z_factor(subii(mod2(b) ? gen_m1 : gen_1, c));
-      p2 = gerepileupto(ltop, p2);
-      return p2;
-    }
-    /* a^b not in Z */
-    pari_err_OP("bigfactor", a, b);
-  }
-  ulong p3 = minuu(itou(a), lm);
-  pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-  GEN p5; /* int */
-
-  long p;
-  forprime_t primepointer;
-  u_forprime_init(&primepointer, 3, lm);
-  while ((ulong)(p = u_forprime_next(&primepointer)) <= p3)
-  {
-    if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 1, &v);
-    if (cmpis(gcdii(a, stoi(p)), 1) > 0)
-      p5 = b; // What's the right way to handle this case?	It seems that
-              // something more efficient could be done.
-    else
-      p5 = stoi(smodis(b, p - 1));
-    if (!gequal(powgi(gmodulo(a, stoi(p)), p5), c)) continue;
-    v = gconcat(v, stoi(p));
-    long i = 2;
-    pari_sp ctop = avma, c_lim = stack_lim(btop, 1);
-    GEN p6;
-    for (;;)
-    {
-      if (cmpis(gcdii(a, stoi(p)), 1) > 0)
-        p6 = b;
-      else
-        p6 = modii(b, mulis(powuu(p, i - 1), p - 1));
-      if (!gequal(powgi(gmodulo(a, powuu(p, i)), p6), c)) break;
-      v = gconcat(v, stoi(p));
-      i++;
-      if (low_stack(c_lim, stack_lim(ctop, 1))) v = gerepileupto(ctop, v);
-    }
-  }
-  v = gerepileupto(btop, v);
-  btop = avma;
-  st_lim = stack_lim(btop, 1);
-
-  // Second loop -- most of the work is done here
-  while ((p = u_forprime_next(&primepointer)))
-  {
-    if (cmpsi(p, lim) > 0) break;
-    if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 1, &v);
-    if (!gequal(gpowgs(gmodulo(a, stoi(p)), smodis(b, p - 1)), c)) continue;
-    v = gconcat(v, stoi(p));
-    long i = 2;
-    while (gequal(powgi(gmodulo(a, powis(stoi(p), i)),
-                        modii(b, mulis(powis(stoi(p), i - 1), p - 1))),
-                  c))
-    {
-      v = gconcat(v, stoi(p));
-      i++;
-    }
-  }
-  v = gerepileupto(ltop, v);
-  return v;
-}
-
-
-// Does d divide a^b - c?
-long
-bigdiv(GEN a, GEN b, GEN c, GEN d)
-{
-  pari_sp ltop = avma;
-  long ret;
-  if (typ(a) != t_INT) pari_err_TYPE("bigdiv", a);
-  if (typ(b) != t_INT) pari_err_TYPE("bigdiv", b);
-  if (typ(c) != t_INT) pari_err_TYPE("bigdiv", c);
-  if (typ(d) != t_INT) pari_err_TYPE("bigdiv", d);
-
-  if (signe(b) < 0)
-  {
-    if (equali1(a))
-    {
-      // Does d divide 1 - c?
-      ret = !signe(modii(subsi(1, c), d));
-      avma = ltop;
-      return ret;
-    }
-    if (equalim1(a))
-    {
-      // Does d divide (-1)^b - c?
-      ret = !signe(modii(subsi(mpodd(b) ? -1 : 1, c), d));
-      avma = ltop;
-      return ret;
-    }
-    /* a^b not in Z */
-    pari_err_OP("bigdiv", a, b);
-  }
-  else if (!signe(b))
-  {
-    // Does d divide a^0 - c?
-    ret = !signe(modii(signe(a) ? subii(a, c) : subsi(1, c), d));
-    avma = ltop;
-    return ret;
-  }
-
-  if (signe(d) < 0) d = negi(d);
-  if (cmpis(d, 2) <= 0)
-  {
-    if (cmpis(d, 0) == 0) pari_err(e_INV);
-    if (equali1(d))
-    {
-      // Does 1 divide a^b - c?
-      avma = ltop;
-      return 1;
-    }
-
-    // Does 2 divide a^b - c?
-    ret = !mpodd(subii(a, c));
-    avma = ltop;
-    return ret;
-  }
-
-  if (cmpis(gcdii(a, d), 1) > 0)
-    ret = gequal(powgi(gmodulo(a, d), b), c); // Not as slow as it looks
-  else
-    ret = gequal(powgi(gmodulo(a, d), modii(b, eulerphi(d))), c);
-  avma = ltop;
-  return ret;
-}
-
 
 GEN
 solvePell(GEN n)
@@ -1300,4 +1080,225 @@ tau(GEN n)
   for (i = 1; i <= l1; ++i)
     ret = mulii(ret, taup(gcoeff(f, i, 1), itos(gcoeff(f, i, 2))));
   return gerepileupto(ltop, ret);
+}
+
+
+/******************************************************************************/
+/* Factoring */
+/******************************************************************************/
+
+GEN
+Mfactor(GEN p, GEN lim, GEN start)
+{
+  pari_sp ltop = avma;
+
+  // Check types
+  if (typ(p) != t_INT) pari_err_TYPE("Mfactor", p);
+  if (typ(lim) == t_REAL)
+    lim = gfloor(lim);
+  else if (typ(lim) != t_INT)
+    pari_err_TYPE("Mfactor", lim);
+  if (!start)
+    start = gen_2;
+  else if (typ(start) != t_INT)
+    pari_err_TYPE("Mfactor", start);
+
+  GEN v, k, p1, p2;
+  v = cgetg(1, t_VEC);
+  if (signe(p) < 1 || !(isprime(p))) pari_err_PRIME("Mfactor", p);
+  if (mod4(p) != 3)
+    pari_warn(warner,
+              "p must be a Mersenne exponent equal to 3 mod 4... I think");
+
+  /* Really, only k in [0, 5, 8, 9] mod 12 need to be checked (at last for
+   * Mersenne prime exponents?). */
+  /* So this should use a quick check, then a full loop with step [10p, 6p, 2p,
+   * 6p]. */
+  /* Check for a factor of 3 also before starting loop. */
+  p2 = shifti(p, 1);
+  k = gceil(gdiv(subis(start, 1), p2));
+  p1 = addis(mulii(p2, k), 1);
+  pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+  GEN q = gen_0;
+  for (q = p1; cmpii(q, lim) <= 0; q = addii(q, p2))
+  {
+    if (mod8(q) != 1 && mod8(q) != 7) continue;
+    if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 2, &q, &v);
+    if (!gequal1(powgi(gmodulsg(2, q), modii(p, subis(q, 1))))) continue;
+    v = gconcat(v, q);
+    long i = 2;
+    while (gequal1(powgi(gmodulsg(2, powis(q, i)),
+                         modii(p, mulii(subis(q, 1), powis(q, i - 1))))))
+    {
+      v = gconcat(v, q);
+      i++;
+    }
+  }
+  v = gerepileupto(ltop, v);
+  return v;
+}
+
+
+// FIXME: Gives spurious factors of 2 sometimes
+GEN
+bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
+{
+  pari_sp ltop = avma;
+
+  GEN v = cgetg(1, t_VEC);
+  GEN p1, p2;
+  if (typ(a) != t_INT) pari_err_TYPE("bigfactor", a);
+  if (typ(b) != t_INT) pari_err_TYPE("bigfactor", b);
+  if (typ(c) != t_INT) pari_err_TYPE("bigfactor", c);
+  if (!start)
+    start = gen_2;
+  else if (typ(start) != t_INT)
+    pari_err_TYPE("bigfactor", start);
+  if (typ(lim) == t_REAL)
+    lim = gfloor(lim);
+  else if (typ(lim) != t_INT)
+    pari_err_TYPE("bigfactor", lim);
+  ulong lm = itou_or_0(lim);
+  if (lm > maxprime()) pari_err_MAXPRIME(lm);
+  if (!lm)
+    pari_err(e_MISC,
+             "bigfactor: Not enough primes on your architechture for that!");
+
+  if (signe(b) < 0)
+  {
+    // TODO: These two should have their formats changed to match that given
+    // below.
+    if (equali1(a))
+    {
+      p1 = Z_factor(subsi(1, c));
+      p1 = gerepileupto(ltop, p1);
+      return p1;
+    }
+    if (equalim1(a))
+    {
+      p2 = Z_factor(subii(mod2(b) ? gen_m1 : gen_1, c));
+      p2 = gerepileupto(ltop, p2);
+      return p2;
+    }
+    /* a^b not in Z */
+    pari_err_OP("bigfactor", a, b);
+  }
+  ulong p3 = minuu(itou(a), lm);
+  pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+  GEN p5; /* int */
+
+  long p;
+  forprime_t primepointer;
+  u_forprime_init(&primepointer, 3, lm);
+  while ((ulong)(p = u_forprime_next(&primepointer)) <= p3)
+  {
+    if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 1, &v);
+    if (cmpis(gcdii(a, stoi(p)), 1) > 0)
+      p5 = b; // What's the right way to handle this case?	It seems that
+              // something more efficient could be done.
+    else
+      p5 = stoi(smodis(b, p - 1));
+    if (!gequal(powgi(gmodulo(a, stoi(p)), p5), c)) continue;
+    v = gconcat(v, stoi(p));
+    long i = 2;
+    pari_sp ctop = avma, c_lim = stack_lim(btop, 1);
+    GEN p6;
+    for (;;)
+    {
+      if (cmpis(gcdii(a, stoi(p)), 1) > 0)
+        p6 = b;
+      else
+        p6 = modii(b, mulis(powuu(p, i - 1), p - 1));
+      if (!gequal(powgi(gmodulo(a, powuu(p, i)), p6), c)) break;
+      v = gconcat(v, stoi(p));
+      i++;
+      if (low_stack(c_lim, stack_lim(ctop, 1))) v = gerepileupto(ctop, v);
+    }
+  }
+  v = gerepileupto(btop, v);
+  btop = avma;
+  st_lim = stack_lim(btop, 1);
+
+  // Second loop -- most of the work is done here
+  while ((p = u_forprime_next(&primepointer)))
+  {
+    if (cmpsi(p, lim) > 0) break;
+    if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 1, &v);
+    if (!gequal(gpowgs(gmodulo(a, stoi(p)), smodis(b, p - 1)), c)) continue;
+    v = gconcat(v, stoi(p));
+    long i = 2;
+    while (gequal(powgi(gmodulo(a, powis(stoi(p), i)),
+                        modii(b, mulis(powis(stoi(p), i - 1), p - 1))),
+                  c))
+    {
+      v = gconcat(v, stoi(p));
+      i++;
+    }
+  }
+  v = gerepileupto(ltop, v);
+  return v;
+}
+
+
+// Does d divide a^b - c?
+long
+bigdiv(GEN a, GEN b, GEN c, GEN d)
+{
+  pari_sp ltop = avma;
+  long ret;
+  if (typ(a) != t_INT) pari_err_TYPE("bigdiv", a);
+  if (typ(b) != t_INT) pari_err_TYPE("bigdiv", b);
+  if (typ(c) != t_INT) pari_err_TYPE("bigdiv", c);
+  if (typ(d) != t_INT) pari_err_TYPE("bigdiv", d);
+
+  if (signe(b) < 0)
+  {
+    if (equali1(a))
+    {
+      // Does d divide 1 - c?
+      ret = !signe(modii(subsi(1, c), d));
+      avma = ltop;
+      return ret;
+    }
+    if (equalim1(a))
+    {
+      // Does d divide (-1)^b - c?
+      ret = !signe(modii(subsi(mpodd(b) ? -1 : 1, c), d));
+      avma = ltop;
+      return ret;
+    }
+    /* a^b not in Z */
+    pari_err_OP("bigdiv", a, b);
+  }
+  else if (!signe(b))
+  {
+    // Does d divide a^0 - c?
+    ret = !signe(modii(signe(a) ? subii(a, c) : subsi(1, c), d));
+    avma = ltop;
+    return ret;
+  }
+
+  if (signe(d) < 0) d = negi(d);
+  if (cmpis(d, 2) <= 0)
+  {
+    if (cmpis(d, 0) == 0) pari_err(e_INV);
+    if (equali1(d))
+    {
+      // Does 1 divide a^b - c?
+      avma = ltop;
+      return 1;
+    }
+
+    // Does 2 divide a^b - c?
+    ret = !mpodd(subii(a, c));
+    avma = ltop;
+    return ret;
+  }
+
+  if (cmpis(gcdii(a, d), 1) > 0)
+    ret = gequal(powgi(gmodulo(a, d), b), c); // Not as slow as it looks
+  else
+    ret = gequal(powgi(gmodulo(a, d), modii(b, eulerphi(d))), c);
+  avma = ltop;
+  return ret;
 }
