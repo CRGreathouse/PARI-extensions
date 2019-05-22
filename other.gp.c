@@ -3,7 +3,11 @@
 void
 assume(int expr)
 {
+#ifdef DEBUG
+  if (!expr) pari_err_BUG("assume");
+#else
   if (!expr) __builtin_unreachable();
+#endif
 }
 
 /******************************************************************************/

@@ -42,9 +42,8 @@ Collatz(GEN n)
 long
 Collatz_tiny(ulong n)
 {
+  assume(n&1); /* It is the caller's responsibility to pass an odd number */
   long iterations = 0;
-  /*n >>= vals(n);*/ /* It is the caller's responsibility to pass an odd number
-                      */
   while (n > 1)
   {
     iterations++;

@@ -388,6 +388,7 @@ monomialnice(GEN coeff, GEN degree, GEN v)
   GEN p1, p2;
   if (typ(coeff) != t_INT) pari_err_TYPE("monomialnice", coeff);
   if (typ(degree) != t_INT) pari_err_TYPE("monomialnice", degree);
+  assume(signe(degree) > 0);
   if (!v) v = pol_x(fetch_user_var("x"));
   if (equali1(coeff))
   {
