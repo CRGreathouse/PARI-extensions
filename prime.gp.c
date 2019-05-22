@@ -81,41 +81,6 @@ issemiprime(GEN n)
 }
 
 
-void
-dostuff(GEN lm)
-{
-  byteptr d = diffptr, d1 = diffptr;
-  ulong p = 0, q = 0;
-  ulong lim = maxprime();
-  if (lim < 1000000) pari_err_MAXPRIME(1000000);
-  lim -= 1000000;
-
-  lim = minuu(itou_or_0(lm), lim);
-
-  ulong sum =
-    0; // Is a ulong big enough?  Needs to hold approximately p^2 log p.
-  for (;;)
-  {
-    ulong pdiff = *d + 1; // Increase number of primes by g_n: lose one at the
-                          // beginning and add g_n + 1 at the end
-    NEXT_PRIME_VIADIFF(p, d);
-    while (pdiff)
-    {
-      NEXT_PRIME_VIADIFF(q, d1);
-      sum += q;
-      pdiff--;
-    }
-    sum -= p;
-
-    if (uisprime(sum)) printf("%llu, ", (long long unsigned int)p);
-
-    if (q > lim) break;
-  }
-
-  pari_printf("\n");
-}
-
-
 // FIXME: Handle the case of small primelimit
 /*
 P=primorial(661)/2;

@@ -224,7 +224,6 @@ GEN poleval_denseint(GEN x, GEN y);
 long checkadd(GEN v, long verbose);
 long checkcadd(GEN v, long verbose);
 GEN cuberootint(GEN x);
-void dostuff(GEN lm);
 GEN fibomod(long n, GEN m);
 ulong fibomod_tiny(long n, ulong m);
 void forpal(GEN a, GEN b, GEN code);
