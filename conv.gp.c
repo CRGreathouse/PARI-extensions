@@ -14,6 +14,7 @@ listput_shallow(GEN L, GEN x)
   z[0] = evaltyp(t_VEC) | evallg(l); /*must be after gel(z,index) is set*/
 }
 
+
 INLINE GEN
 gtor(GEN x, const char* funcName, long prec)
 {
@@ -31,11 +32,13 @@ gtor(GEN x, const char* funcName, long prec)
   return NEVER_USED;
 }
 
+
 void
 gToC(GEN n)
 {
   pari_printf("%s\n", toC(n));
 }
+
 
 /* Given a PARI object, return a string containing a C representation.
  * The C representation should work regardless of whether LONG_IS_64BIT
@@ -151,6 +154,7 @@ toC(GEN n)
   return buffer;
 }
 
+
 long
 countdigits(GEN x)
 {
@@ -159,6 +163,7 @@ countdigits(GEN x)
   if (gcmp(x, powis(utoipos(10), s)) >= 0) s++;
   return gc_long(av, s);
 }
+
 
 GEN
 eps(long prec)
