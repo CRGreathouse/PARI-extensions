@@ -491,8 +491,7 @@ ways2(GEN n)
     res = gerepileupto(btop, res);
   }
   res = shifti(addis(res, 1), -1);
-  res = gerepileuptoleaf(ltop, res);
-  return res;
+  return gerepileuptoleaf(ltop, res);
 }
 
 
@@ -512,7 +511,6 @@ isthree(GEN n)
 long
 sways3s(ulong n)
 {
-  pari_sp ltop = avma;
   long p1 = (long)usqrt(n);
   long res = 0;
   long k, t, m, p2, tmod4;
@@ -522,7 +520,6 @@ sways3s(ulong n)
     if (tmod4 == 3) continue;
     t = n - k * k;
     if (!istwo(stoi(t))) continue;
-    set_avma(ltop);
     p2 = (long)usqrt(t >> 1);
     switch (tmod4)
     {
@@ -570,7 +567,7 @@ ways3(GEN n)
 
   p1 = sqrtint(truedivis(n, 3));
   pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-  GEN k, p3, p4;
+  GEN k, p3;
   res = gen_0;
   for (k = gen_0; cmpii(k, p1) <= 0; k = addis(k, 1))
   {
@@ -578,17 +575,15 @@ ways3(GEN n)
     p3 = sqrtint(shifti(t, -1));
     pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
     GEN m;
-    p4 = gen_0;
+    ulong p4 = 0;
     for (m = k; cmpii(m, p3) <= 0; m = addis(m, 1))
     {
-      if (Z_issquare(subii(t, gsqr(m)))) p4 = addis(p4, 1);
-      if (low_stack(c_lim, stack_lim(ctop, 1))) gerepileall(ctop, 2, &p4, &m);
+      if (Z_issquare(subii(t, gsqr(m)))) p4++;
+      if (low_stack(c_lim, stack_lim(ctop, 1))) m = gerepileuptoint(ctop, m);
     }
-    res = addii(res, p4);
+    res = addiu(res, p4);
     if (low_stack(st_lim, stack_lim(btop, 1)))
-      gerepileall(btop, 4, &res, &k, &p3, &p4);
-    // gerepileall(btop, 2, &res, &k);	// This is significantly (15%+) slower --
-    // I don't know why.
+      gerepileall(btop, 2, &res, &k);
   }
   res = gerepileupto(ltop, res);
   return res;
