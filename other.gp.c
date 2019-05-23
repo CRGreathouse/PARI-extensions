@@ -1,3 +1,5 @@
+#include "ext.h"
+
 /* Error checking */
 
 void

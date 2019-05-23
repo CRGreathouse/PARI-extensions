@@ -77,7 +77,7 @@ O="$O -fno-strict-aliasing -fomit-frame-pointer -fPIC"
 O="$O -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -fgraphite-identity -floop-nest-optimize -floop-unroll-and-jam"
 
 # All options together here
-ALLOPT="-march=native -m64 $W $O -fdiagnostics-color=always"
+ALLOPT="-march=native -m64 $W $O -fdiagnostics-color=always" # -ftime-report
 
 # What warnings are missed?
 #$CC $ALLOPT -Q --help=warnings | fgrep '[disabled]' | egrep -v `echo "\s($ignore)\s" | tr ' ' '|' | sed s/+/[+]/g`
@@ -85,12 +85,10 @@ ALLOPT="-march=native -m64 $W $O -fdiagnostics-color=always"
 # What optimizations are turned off?
 #$CC $ALLOPT -Q --help=optimizers | fgrep '[disabled]'
 
-# Compile and link auto file
-echo Compiling
-#$CC -ftime-report -o auto.gp.o $ALLOPT -c -I"/usr/local/include" auto.gp.c
-$CC -o auto.gp.o $ALLOPT -c -I"/usr/local/include" auto.gp.c || exit # exit with status of last command on failure
-echo Linking
-$CC -o auto.gp.so $ALLOPT -shared -Wl,-shared auto.gp.o -lc -lm -L"/usr/local/lib" -lpari || exit # exit with status of last command on failure
+files="arith.gp.c conv.gp.c io.gp.c loops.gp.c numth.gp.c other.gp.c prime.gp.c rc.gp.c"
+
+echo Compiling and linking
+$CC -o auto.gp.so $ALLOPT -shared -Wl,-shared $files -I"/usr/local/include" -lc -lm -L"/usr/local/lib" -lpari || exit # exit with status of last command on failure
 
 # Create run file to install auto and add associated help entries
 egrep '^GP;' auto.gp.c | sed 's/^GP;//' > auto.gp.run

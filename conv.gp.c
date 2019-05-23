@@ -1,3 +1,5 @@
+#include "ext.h"
+
 /******************************************************************************/
 /* Convenience */
 /******************************************************************************/
@@ -15,7 +17,7 @@ listput_shallow(GEN L, GEN x)
 }
 
 
-INLINE GEN
+GEN
 gtor(GEN x, const char* funcName, long prec)
 {
   switch (typ(x))

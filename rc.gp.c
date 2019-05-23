@@ -1,7 +1,10 @@
+#include "ext.h"
+
+static GEN primezeta_complex_helper(void * _cargs, GEN k);
+
 /******************************************************************************/
 /* Real and complex functions */
 /******************************************************************************/
-
 
 // This uses a fairly naive method. See
 // H. Cohen, High Precision Computation of Hardy-Littlewood Constants
