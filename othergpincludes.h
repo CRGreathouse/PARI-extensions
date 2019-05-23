@@ -1,12 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////
+/* These functions are used in some .gp.c files, but not all, hence unused. */
+static void ensure_nb(GEN L, long l) __attribute__((unused));
+static GEN pollardbrent(GEN n) __attribute__((unused));
+static ulong utridiv_bound(ulong n) __attribute__((unused));
+
 #define VALUE(x) gel(x,0)
 #define EXPON(x) gel(x,1)
 #define CLASS(x) gel(x,2)
 
 INLINE long hamming_word(ulong w) __attribute__ ((pure));
-static void ensure_nb(GEN L, long l);
-static GEN pollardbrent(GEN n);
-static ulong utridiv_bound(ulong n);
 INLINE ulong u_forprime_next_fast(forprime_t *T);
 static void one_iter(GEN *x, GEN *P, GEN x1, GEN n, long delta);
 static void rho_dbg(pari_timer *T, long c, long msg_mask);
