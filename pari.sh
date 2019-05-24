@@ -96,6 +96,7 @@ egrep '^GP;' auto.gp.c | sed 's/^GP;//' > auto.gp.run
 ## Create documentation -- takes a long time
 #doxygen Doxyfile
 #{ for f in html/*.png ; do pngout $f ; done } &
+#xdg-open html/index.html
 
 # Run gp itself
 
