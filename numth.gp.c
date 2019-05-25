@@ -427,7 +427,7 @@ GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
 ulong
 ucountPowerfuli(GEN n)
 {
-#define uCBRTis(n, k) itou(cuberootint(divii((n), mulss(k, k))))
+#define uCBRTis(n, k) itou(cuberootint(divii(n, sqrs(k))))
   pari_sp ltop = avma;
   int i, crossover = (int)exp(dbllog2r(itor(n, MEDDEFAULTPREC)) * 0.09);
   ulong k, res = 0;
