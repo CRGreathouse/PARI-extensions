@@ -388,9 +388,8 @@ log_2(GEN x, long prec)
       pari_err_TYPE("lg", x);
       __builtin_unreachable();
   }
-  ret = divrr(ret, mplog2(prec));
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  ret = divrr(ret, mplog2(precision(ret)));
+  return gerepileuptoleaf(ltop, ret);
 }
 
 
