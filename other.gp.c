@@ -1,6 +1,13 @@
 #include "ext.h"
 
-/* Error checking */
+/* General stuff */
+
+void
+init_auto(void)
+{
+    rnormal_cached = 0;
+}
+
 
 void
 assume(int expr)
