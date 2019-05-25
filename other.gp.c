@@ -12,6 +12,7 @@ assume(int expr)
 #endif
 }
 
+
 /******************************************************************************/
 /* Set stuff */
 /******************************************************************************/
@@ -43,6 +44,7 @@ vecsum_zv(GEN x)
   return gerepileuptoint(av, s);
 }
 
+
 GEN
 sumset_self(GEN a);
 GEN
@@ -57,6 +59,18 @@ sumset_self(GEN a)
   return gerepileupto(av, gtoset(z));
 }
 
+
+/*
+GP;install("sumset","GDG","sumset","./auto.gp.so");
+GP;addhelp(sumset, "sumset(A, B): Set of all numbers of the form a+b, a in A, b in B. If B is omitted, assume A = B.");
+*/
+/**
+ * @brief Given sets A and B, returns the set of all numbers of the form a+b, a in A, b in B.
+ * 
+ * @param a First input set
+ * @param b Second input set
+ * @return GEN Sumset of a and b
+ */
 GEN
 sumset(GEN a, GEN b)
 {
@@ -73,6 +87,19 @@ sumset(GEN a, GEN b)
   return gerepileupto(av, gtoset(z));
 }
 
+
+/*
+GP;install("sumset_lim","GGDG","sumset_lim","./auto.gp.so");
+GP;addhelp(sumset_lim, "sumset_lim(A, B, lim): Set of all numbers of the form a+b <= lim, a in A, b in B.");
+*/
+/**
+ * @brief Given sets A and B, returns the set of all numbers of the form a+b <= lim, a in A, b in B.
+ * 
+ * @param a First input set
+ * @param b Second input set
+ * @param lim Highest sum to consider
+ * @return GEN Sumset of a and b up to a limit of lim
+ */
 GEN
 sumset_lim(GEN a, GEN b, GEN lim)
 {
@@ -130,6 +157,18 @@ sumset_lim(GEN a, GEN b, GEN lim)
   return gerepilecopy(ltop, u);
 }
 
+
+/*
+GP;install("diffset","D0,G,D0,G,","diffset","./auto.gp.so");
+GP;addhelp(diffset, "diffset(A, B): Set of all numbers of the form a-b, a in A, b in B.");
+*/
+/**
+ * @brief Given sets A and B, returns the set of all numbers of the form a-b, a in A, b in B.
+ * 
+ * @param a First set
+ * @param b Second set
+ * @return GEN Difference set of a and b
+ */
 GEN
 diffset(GEN a, GEN b) /* vecsmall */
 {
@@ -168,6 +207,7 @@ diffset(GEN a, GEN b) /* vecsmall */
   p4 = gerepileuptoleaf(ltop, p4);
   return p4;
 }
+
 
 /******************************************************************************/
 /* Verbose monstrosities */
@@ -244,6 +284,17 @@ pBounds(GEN n, GEN verbose, long prec)
 /* Works-in-progress / limited utility */
 /******************************************************************************/
 
+/*
+GP;install("checkVDW","D0,G,DG","checkVDW","./auto.gp.so");
+GP;addhelp(checkVDW, "checkVDW(vv): Given a partition vv = [p1, p2, ...] with union(p1, p2, ...) = [1, 2, ..., n], finds a lower-bound proof for van der Waerden numbers based on the partition. Returns 0 if vv is not a partition of any initial segment, and k if vv proves that W(#vv, k) > n.");
+*/
+/**
+ * @brief Given a partition vv = [p1, p2, ...] with union(p1, p2, ...) = [1, 2, ..., n], finds a lower-bound proof for van der Waerden numbers based on the partition. Returns 0 if vv is not a partition of any initial segment, and k if vv proves that W(#vv, k) > n.
+ * 
+ * @param vv A vector of disjoint vectors vv = [p1, p2, ...] with union(p1, p2, ...) = [1, 2, ..., n]
+ * @param verbose 1 to print additional details or 0 to omit
+ * @return GEN Returns 0 if vv is not a partition of any initial segment, and k if vv proves that W(#vv, k) > n.
+ */
 GEN
 checkVDW(GEN vv, GEN verbose)
 {
@@ -304,6 +355,17 @@ checkVDW(GEN vv, GEN verbose)
   return k;
 }
 
+
+/*
+GP;install("longestProgression","D0,G,","longestProgression","./auto.gp.so");
+GP;addhelp(longestProgression, "longestProgression(v): Finds the length of the longest arithmetic progression in v. Assumes that v is a vector of integers sorted from smallest to largest. Uses a space-efficient naive algorithm.");
+*/
+/**
+ * @brief Finds the length of the longest arithmetic progression in the given vector.
+ * 
+ * @param v A vector
+ * @return GEN Length of the longest arithmetic progression
+ */
 GEN
 longestProgression(GEN v)
 {
@@ -348,6 +410,17 @@ longestProgression(GEN v)
   return r;
 }
 
+
+/*
+GP;install("longestProgression1","D0,G,","longestProgression1","./auto.gp.so");
+GP;addhelp(longestProgression1, "longestProgression1(v): Uses a quadratic algorithm of Jeff Erickson, which is worst-case optimal; better algorithms are available when there are long progressions (> lg #v lg lg #v).");
+*/
+/**
+ * @brief Finds the length of the longest arithmetic progression in the given vector. Uses a quadratic algorithm of Jeff Erickson, which is worst-case optimal; better algorithms are available when there are long progressions (> lg #v lg lg #v).
+ * 
+ * @param v A vector
+ * @return GEN Length of the longest arithmetic progression
+ */
 GEN
 longestProgression1(GEN v)
 {
@@ -427,6 +500,7 @@ longestProgression1(GEN v)
   return Lstar;
 }
 
+
 /*
 Continued fraction:
         av = avma; lx = lg(x);
@@ -440,6 +514,16 @@ Continued fraction:
 
 // FIXME: Needs numerical analysis to determine stopping point.  Also needs to
 // handle rational numbers and intgers.
+/*
+GP;install("Engel","G","Engel","./auto.gp.so");
+GP;addhelp(Engel, "Engel(x): Engel expansion of x.");
+*/
+/**
+ * @brief Engel expansion of the given number.
+ * 
+ * @param x Number to find Engel expansion for.
+ * @return GEN Engel expansion
+ */
 GEN
 Engel(GEN x)
 {
@@ -488,6 +572,17 @@ Engel(GEN x)
   return NEVER_USED;
 }
 
+
+/*
+GP;install("Eng","G","Eng","./auto.gp.so");
+GP;addhelp(Eng, "Eng(n): English name of the number n.");
+*/
+/**
+ * @brief English name of the number.
+ * 
+ * @param n Number to name
+ * @return GEN English name
+ */
 GEN
 Eng(GEN n)
 {
@@ -508,6 +603,7 @@ Eng(GEN n)
     return Eng_small(itos(n));
   }
 }
+
 
 GEN
 Eng_small(long n)
@@ -537,6 +633,7 @@ Eng_small(long n)
   s = gerepileupto(av, s);
   return s;
 }
+
 
 GEN
 Eng_tiny(long n)
@@ -584,6 +681,7 @@ Eng_tiny(long n)
   return s;
 }
 
+
 GEN
 Edigit(long n)
 {
@@ -591,3 +689,4 @@ Edigit(long n)
                                   "five", "six", "seven", "eight", "nine" };
   return strtoGENstr(lookup[n]);
 }
+

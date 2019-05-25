@@ -110,6 +110,18 @@ bfilein(char* name)
 }
 
 
+/*
+GP;install("bfile","GDGDG","bfile","./auto.gp.so");
+GP;addhelp(bfile, "bfile(name, v, offset=1): If v is given, creates a b-file with the values of v, using name as the A-number (given as a number or a filename). If v is not given, open the b-file name (again, as a filename or number) and return a vector of its values.");
+*/
+/**
+ * @brief Either returns a vector with the terms of a sequence (if the second parameter is omitted) or writes it to a file (if it is given).
+ * 
+ * @param name The A-number of the sequence
+ * @param v The terms of the sequence, if used
+ * @param offset The offset of the sequence
+ * @return GEN The terms of the sequence, if used
+ */
 GEN
 bfile(GEN name, GEN v, GEN offset)
 {
@@ -212,6 +224,16 @@ bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset)
 }
 
 
+/*
+GP;install("fnice","G","fnice","./auto.gp.so");
+GP;addhelp(fnice, "fnice(n): Returns a string with a 'nice' factorization of n.");
+*/
+/**
+ * @brief Returns a string with a 'nice' factorization of the number.
+ * 
+ * @param n The number to factor.
+ * @return GEN A genstr with the factorization.
+ */
 GEN
 fnice(GEN n)
 {
@@ -256,6 +278,17 @@ fnice(GEN n)
 
 
 /* Can handle only single-variable polynomials. */
+/*
+GP;install("tonice","D0,G,p","nice","./auto.gp.so");
+GP;addhelp(nice, "nice(o): Reformats the object o 'nicely' when possible. Currently chokes on multivariable polynomials.");
+*/
+/**
+ * @brief Reformats the polynomial 'nicely' when possible.
+ * 
+ * @param o The polynomial (or other object, if supported)
+ * @param prec Precision, in words
+ * @return GEN Genstr with reformatted object
+ */
 GEN
 tonice(GEN o, long prec)
 {

@@ -4,6 +4,16 @@
 /* Other arithmetic functions */
 /******************************************************************************/
 
+/*
+GP;install("oddres","G","oddres","./auto.gp.so");
+GP;addhelp(oddres, "oddres(n): Returns the greatest odd number dividing n.");
+*/
+/**
+ * @brief Greatest odd number dividing the number.
+ * 
+ * @param n The number
+ * @return GEN Greatest odd number dividing n
+ */
 GEN
 oddres(GEN n)
 {
@@ -13,13 +23,23 @@ oddres(GEN n)
 }
 
 
-// Faster than
-//	 !cmpii(n, int2n(vali(n)))
-//	 !cmpis(shifti(n, -vali(n)), 1)
-//	 expi(n) == vali(n)
-//	 hamming(n) == 1
-// even for single-word values, and much faster for multiword values.
-// If all you have is a word, you can just use n & !(n & (n-1)).
+/*
+GP;install("ispow2","lG","ispow2","./auto.gp.so");
+GP;addhelp(ispow2, "ispow2(n): Is n a power of two? Characteristic function of Sloane's A000079.");
+Faster than
+ * !cmpii(n, int2n(vali(n)))
+ * !cmpis(shifti(n, -vali(n)), 1)
+ * expi(n) == vali(n)
+ * hamming(n) == 1
+even for single-word values, and much faster for multiword values.
+If all you have is a word, you can just use n & !(n & (n-1)).
+*/
+/**
+ * @brief Tests if the number is a power of 2.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is a power of 2 and 0 otherwise.
+ */
 long
 ispow2(GEN n)
 {
@@ -41,6 +61,16 @@ ispow2(GEN n)
 }
 
 
+/*
+GP;install("ispow3","lG","ispow3","./auto.gp.so");
+GP;addhelp(ispow3, "ispow3(n): Is n a power of three? Characteristic function of Sloane's A000244.");
+*/
+/**
+ * @brief Tests if the number is a power of 3.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is a power of 3 and 0 otherwise.
+*/
 long
 ispow3(GEN n)
 {
@@ -67,6 +97,16 @@ ispow3(GEN n)
 }
 
 
+/*
+GP;install("issm3","lL","issm3","./auto.gp.so");
+GP;addhelp(issm3, "issm3(n): Is n 3-smooth? Sloane's A065333; characteristic function of Sloane's A003586.");
+*/
+/**
+ * @brief Test if the number is 3-smooth.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is 3-smooth and 0 otherwise
+*/
 long
 issm3(long n)
 {
@@ -94,23 +134,16 @@ ispow3_tiny(ulong n)
 }
 
 
-// Approximate speed on a Phenom II at various input sizes:
-// size	 cycles		time
-// 1e00			110	 40 ns
-// 1e10			150	 50 ns
-// 1e20			268	100 ns
-// 1e30			282	100 ns
-// 1e50			297	110 ns
-// 1e75			316	110 ns
-// 1e100		 322	120 ns
-// 1e200		 385	140 ns
-// 1e500		 569	200 ns
-// 1e1000		941	300 ns
-// 1e2000	 1710	600 ns
-// 1e5000	 3910	1.4 µs
-// 1e10000	7540		3 µs
-// 1e20000 15200		5 µs
-// 1e50000 37000	 13 µs
+/*
+GP;install("isFibonacci","lG","isFibonacci","./auto.gp.so");
+GP;addhelp(isFibonacci, "isFibonacci(n): Is n a Fibonacci number? Sloane's A010056; characteristic function of Sloane's A000045.");
+*/
+/**
+ * @brief Tests if a number is a Fibonacci number.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is a Fibonacci number and 0 otherwise
+*/
 long
 isFibonacci(GEN n)
 {
@@ -302,6 +335,17 @@ fibomod_tiny(long n, ulong m)
 }
 
 
+/*
+GP;install("fibmod","GG","fibmod","./auto.gp.so");
+GP;addhelp(fibmod, "fibmod(n,m): Returns the nth Fibonacci number mod m. Same as finonacci(n)%m, but faster for large n.");
+*/
+/**
+ * @brief The n-th Fibonacci number mod m.
+ * 
+ * @param n Index of the Fibonacci number
+ * @param m Modulus
+ * @return GEN n-th Fibonacci number, reduced mod m (as an integer, not an intmod)
+ */
 GEN
 fibmod(GEN n, GEN m)
 {
@@ -428,6 +472,16 @@ Pisano(long p, long e)
 }
 
 
+/*
+GP;install("istwo","lG","istwo","./auto.gp.so");
+GP;addhelp(istwo, "istwo(n): Is the number a sum of two squares? Characteristic function of Sloane's A001481.");
+*/
+/**
+ * @brief Tests if the number is a sum of two squares.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is a sum of two squares, or 0 otherwise
+*/
 long
 istwo(GEN n)
 {
@@ -465,6 +519,16 @@ istwo(GEN n)
 }
 
 
+/*
+GP;install("ways2","G","ways2","./auto.gp.so");
+GP;addhelp(ways2, "ways2(n): Number of ways that n can be represented as a sum of two squares. Sloane's A000161.");
+*/
+/**
+ * @brief Number of ways the number can be written as the sum of two squares.
+ * 
+ * @param n Number to write as a sum of two squares
+ * @return GEN Number of representations as a sum of two squares
+ */
 GEN
 ways2(GEN n)
 {
@@ -497,6 +561,16 @@ ways2(GEN n)
 }
 
 
+/*
+GP;install("isthree","lG","isthree","./auto.gp.so");
+GP;addhelp(isthree, "isthree(n): Is the number the sum of three squares? Sloane's A071374; characteristic function of Sloane's A000378.");
+*/
+/**
+ * @brief Tests if the number is a sum of three squares.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is a sum of three squares and 0 otherwise
+ */
 long
 isthree(GEN n)
 {
@@ -543,6 +617,16 @@ sways3s(ulong n)
 }
 
 
+/*
+GP;install("ways3","G","ways3","./auto.gp.so");
+GP;addhelp(ways3, "ways3(n): Number of ways that n can be represented as a sum of three squares. Sloane's A000164.");
+*/
+/**
+ * @brief Number of ways to represent the number as a sum of three squares.
+ * 
+ * @param n Number to write as a sum of three squares
+ * @return GEN Number of representations as a sum of three squares
+ */
 GEN
 ways3(GEN n)
 {
@@ -592,8 +676,18 @@ ways3(GEN n)
 }
 
 
-// Looking for A000523?  Try expi.  A029837 and A070939 are similar.
-// See also __builtin_clzl (also __builtin_ffsl for the lsb)
+/*
+GP;install("msb","G","msb","./auto.gp.so");
+GP;addhelp(msb, "msb(n): Most significant bit of n: returns the greatest power of 2 <= the number. Sloane's A053644.");
+Looking for A000523?  Try expi.  A029837 and A070939 are similar.
+See also __builtin_clzl (also __builtin_ffsl for the lsb)
+*/
+/**
+ * @brief Most significant bit of the number.
+ * 
+ * @param n Number of which to find the most significant bit
+ * @return GEN Most significant bit of n
+ */
 GEN
 msb(GEN n)
 {
@@ -608,6 +702,16 @@ msb(GEN n)
 }
 
 
+/*
+GP;install("fusc","D0,G,","fusc","./auto.gp.so");
+GP;addhelp(fusc, "fusc(n): Stern's diatomic series, which has many interpretations. Sloane's A002487.");
+*/
+/**
+ * @brief Stern's diatomic series at n.
+ * 
+ * @param n Input number
+ * @return GEN Stern's diatomic series at n
+ */
 GEN
 fusc(GEN n)
 {

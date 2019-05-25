@@ -4,6 +4,16 @@
 /* Other number theory */
 /******************************************************************************/
 
+/*
+GP;install("Collatz","lG","Collatz","./auto.gp.so");
+GP;addhelp(Collatz, "Collatz(n): Number of triplings to reach 1 via the Collatz relation; Sloane's A006667.");
+*/
+/**
+ * @brief Number of triplings to reach 1 via the Collatz relation.
+ * 
+ * @param n Initial input to the Collatz function
+ * @return long Number of triplings
+ */
 long
 Collatz(GEN n)
 {
@@ -55,7 +65,16 @@ Collatz_tiny(ulong n)
   return iterations;
 }
 
-
+/*
+GP;install("isfactorial","lG","isfactorial","./auto.gp.so");
+GP;addhelp(isfactorial, "isfactorial(n): Is n a factorial? Sloane's A012245; characteristic function of Sloane's A000142.");
+*/
+/**
+ * @brief Test if the number is a factorial.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is a factorial and 0 otherwise
+*/
 long
 isfactorial(GEN n)
 {
@@ -132,7 +151,17 @@ isfactorial(GEN n)
   return gc_bool(ltop, equalii(mpfact(mn), n));
 }
 
-
+/*
+GP;install("Faulhaber","LDG","Faulhaber","./auto.gp.so");
+GP;addhelp(Faulhaber, "Faulhaber(e,{a='x}): Returns the polynomial for the sum 1^e + 2^e + ... + x^e, evaluated at a.");
+*/
+/**
+ * @brief Returns the Faulhaber polynomial 1^e + 2^e + ... + x^e for the given exponent e.
+ * 
+ * @param e Exponent
+ * @param a Value at which to evaluate the polynomial (defaults to x)
+ * @return GEN Faulhaber polynomial
+ */
 GEN
 Faulhaber(long e, GEN a)
 {
@@ -391,6 +420,10 @@ ucountPowerfulu(ulong n)
 // n.  If there is overflow, let the calling function handle it if the actual
 // number (not mod 2^32 or 2^64) is desired.
 // TODO: Use a sieve to determine if k is squarefree.
+
+/*
+GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
+*/
 ulong
 ucountPowerfuli(GEN n)
 {
@@ -442,8 +475,18 @@ ucountPowerfuli(GEN n)
 }
 
 
-// Varies as zeta(3/2)/zeta(3) n^1/2 + zeta(2/3)/zeta(2) n^1/3 + o(n^1/6)
-// estPowerful(n)=zeta(3/2)/zeta(3)*sqrt(n) + zeta(2/3)/zeta(2)*n^(1/3)
+/*
+GP;install("countPowerful","D0,G,","countPowerful","./auto.gp.so");
+GP;addhelp(countPowerful, "countPowerful(lim): Number of powerful numbers up to lim. Partial sum of characteristic function of of Sloane's A001694.");
+Varies as zeta(3/2)/zeta(3) n^1/2 + zeta(2/3)/zeta(2) n^1/3 + o(n^1/6)
+estPowerful(n)=zeta(3/2)/zeta(3)*sqrt(n) + zeta(2/3)/zeta(2)*n^(1/3)
+*/
+/**
+ * @brief Counts the number of powerful numbers up to the given number.
+ * 
+ * @param n Limit up to which to count the powerful numbers
+ * @return GEN Number of powerful numbers.
+ */
 GEN
 countPowerful(GEN n)
 {
@@ -499,6 +542,9 @@ countPowerful(GEN n)
 
 // TODO: Doesn't really save much time vs. the original.  To improve, a sieve
 // would be needed (to calculate the values of moebius faster).
+/*
+GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
+*/
 ulong
 ucountSquarefree(ulong lim)
 {
@@ -514,6 +560,16 @@ ucountSquarefree(ulong lim)
 }
 
 
+/*
+GP;install("countSquarefree","D0,G,","countSquarefree","./auto.gp.so");
+GP;addhelp(countSquarefree, "countSquarefree(lim): Counts the number of squarefree numbers up to lim.");
+*/
+/**
+ * @brief Count the number of squarefree numbers up to the indicated limit.
+ * 
+ * @param lim The limit up to which to count the number of squarefree numbers
+ * @return GEN The count of squarefree numbers
+ */
 GEN
 countSquarefree(GEN lim)
 {
@@ -549,6 +605,16 @@ countSquarefree(GEN lim)
 }
 
 
+/*
+GP;install("solvePell","G","solvePell","./auto.gp.so");
+GP;addhelp(solvePell, "solvePell(n): Returns a solution to the equation x^2 - ny^2 = 1.");
+*/
+/**
+ * @brief Returns a solution to the equation x^2 - ny^2 = 1.
+ * 
+ * @param n Coefficient in the Pell equation
+ * @return GEN Solution to the Pell equation
+ */
 GEN
 solvePell(GEN n)
 {
@@ -592,6 +658,17 @@ solvePell(GEN n)
 }
 
 
+/*
+GP;install("checkmult","lGD1,L,","checkmult","./auto.gp.so");
+GP;addhelp(checkmult, "checkmult(v,{verbose=1}): Is the sequence v multiplicative?");
+*/
+/**
+ * @brief Checks that the vector represents a multiplicative sequence.
+ * 
+ * @param v The sequence
+ * @param verbose 1 to write additional information or 0 to omit
+ * @return long 1 if the sequence is multiplicative or 0 otherwise
+ */
 long
 checkmult(GEN v, long verbose)
 {
@@ -656,6 +733,17 @@ checkmult(GEN v, long verbose)
 }
 
 
+/*
+GP;install("checkcmult","lGD1,L,","checkcmult","./auto.gp.so");
+GP;addhelp(checkcmult, "checkcmult(v,{verbose=1}): Is the sequence v completely multiplicative?");
+*/
+/**
+ * @brief Checks that the vector represents a completely multiplicative sequence.
+ * 
+ * @param v The sequence
+ * @param verbose 1 to write additional information or 0 to omit
+ * @return long 1 if the sequence is completely multiplicative or 0 otherwise
+ */
 long
 checkcmult(GEN v, long verbose)
 {
@@ -719,6 +807,17 @@ checkcmult(GEN v, long verbose)
 }
 
 
+/*
+GP;install("checkadd","lGD1,L,","checkadd","./auto.gp.so");
+GP;addhelp(checkadd, "checkadd(v,{verbose=1}): Is the sequence v additive?");
+*/
+/**
+ * @brief Checks that the vector represents an additive sequence.
+ * 
+ * @param v The sequence
+ * @param verbose 1 to write additional information or 0 to omit
+ * @return long 1 if the sequence is additive or 0 otherwise
+ */
 long
 checkadd(GEN v, long verbose)
 {
@@ -782,6 +881,17 @@ checkadd(GEN v, long verbose)
 }
 
 
+/*
+GP;install("checkcadd","lGD1,L,","checkcadd","./auto.gp.so");
+GP;addhelp(checkcadd, "checkcadd(v,{verbose=1}): Is the sequence v completely additive?");
+*/
+/**
+ * @brief Checks that the vector represents a completely additive sequence.
+ * 
+ * @param v The sequence
+ * @param verbose 1 to write additional information or 0 to omit
+ * @return long 1 if the sequence is completely additive or 0 otherwise
+ */
 long
 checkcadd(GEN v, long verbose)
 {
@@ -841,6 +951,17 @@ checkcadd(GEN v, long verbose)
 }
 
 
+/*
+GP;install("checkdiv","lGD1,L,","checkdiv","./auto.gp.so");
+GP;addhelp(checkdiv, "checkdiv(v,{verbose=1}): Is v a divisibility sequence?");
+*/
+/**
+ * @brief Checks that the vector represents a divisibility sequence.
+ * 
+ * @param v The sequence
+ * @param verbose 1 to write additional information or 0 to omit
+ * @return long 1 if the sequence is a divisibility sequence or 0 otherwise
+ */
 long
 checkdiv(GEN v, long verbose /*=1*/)
 {
@@ -939,6 +1060,16 @@ classno_fast(GEN n)
 
 // The Hurwitz class number of n. An integer unless n is of the form 3k^2 or
 // 4k^2.
+/*
+GP;install("HurwitzClassNumber","G","H","./auto.gp.so");
+GP;addhelp(H, "H(n): The Hurwitz class number. Counts the number of equivalence classes of positive definite quadratic forms ax^2 + bxy + cy^2 with discriminant b^2-4ac = -n, counting forms equivalent to x^2+y^2 with weight 1/2 and forms equivalent to x^2+xy+y^2 with weight 1/3.");
+*/
+/**
+ * @brief The Hurwitz class number. Counts the number of equivalence classes of positive definite quadratic forms ax^2 + bxy + cy^2 with discriminant b^2-4ac = -n, counting forms equivalent to x^2+y^2 with weight 1/2 and forms equivalent to x^2+xy+y^2 with weight 1/3.
+ * 
+ * @param n Discriminant
+ * @return GEN Hurwitz class number H(n)
+ */
 GEN
 HurwitzClassNumber(GEN n)
 {
@@ -1071,6 +1202,16 @@ taup(GEN p, long e)
 }
 
 
+/*
+GP;install("tau","G","tau","./auto.gp.so");
+GP;addhelp(tau, "tau(n): Ramanujan's tau function, Sloane's A000594.");
+*/
+/**
+ * @brief Ramanujan's tau function.
+ * 
+ * @param n Input
+ * @return GEN Ramanujan's tau function
+ */
 GEN
 tau(GEN n)
 {
@@ -1088,6 +1229,18 @@ tau(GEN n)
 /* Factoring */
 /******************************************************************************/
 
+/*
+GP;install("Mfactor","GD0,G,DG","Mfactor","./auto.gp.so");
+GP;addhelp(Mfactor, "Mfactor(p,lim,{start=2}): Returns factors of the Mersenne number 2^p-1 up to lim, starting at start, provided p is a prime = 3 mod 4. Same as bigfactor(2,p,1,lim,start) but faster because it checks only factors of the form 2kp+1 that are +/- 1 mod 8.");
+*/
+/**
+ * @brief Partial factorization of 2^p - 1 up to lim.
+ * 
+ * @param p Exponent
+ * @param lim Upper limit of factorization (larger primes cannot be found)
+ * @param start Lower limit of factorization (smaller primes cannot be found)
+ * @return GEN Vector of primes dividing 2^p - 1
+ */
 GEN
 Mfactor(GEN p, GEN lim, GEN start)
 {
@@ -1141,6 +1294,20 @@ Mfactor(GEN p, GEN lim, GEN start)
 
 
 // FIXME: Gives spurious factors of 2 sometimes
+/*
+GP;install("bigfactor","GGGD0,G,DG","bigfactor","./auto.gp.so");
+GP;addhelp(bigfactor, "bigfactor(a,b,c,lim,{start=2}): Find small prime factors of a^b - c (up to lim). Optional parameter start gives a starting point below which primes are not checked.");
+*/
+/**
+ * @brief Find small prime factors of a^b - c (up to lim).
+ * 
+ * @param a Base
+ * @param b Exponent
+ * @param c Subtrahend
+ * @param lim Upper limit of factorization (larger primes cannot be found)
+ * @param start Lower limit of factorization (smaller primes cannot be found)
+ * @return GEN Vector of primes dividing a^b - c
+ */
 GEN
 bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 {
@@ -1241,7 +1408,19 @@ bigfactor(GEN a, GEN b, GEN c, GEN lim, GEN start)
 }
 
 
-// Does d divide a^b - c?
+/*
+GP;install("bigdiv","lGGGG","bigdiv","./auto.gp.so");
+GP;addhelp(bigdiv, "bigdiv(a,b,c,d): Does d divide a^b - c? Same as (a^b-c)%d == 0, but faster for large b. Example: bigdiv(2,p,1,d) checks if d divides the p-th Mersenne number.");
+*/
+/**
+ * @brief Given arguments a, b, c, and d, does d divide a^b - c?
+ * 
+ * @param a Base
+ * @param b Exponent
+ * @param c Subtrahend
+ * @param d Divisor
+ * @return long 1 if d divides a^b - c and 0 otherwise
+ */
 long
 bigdiv(GEN a, GEN b, GEN c, GEN d)
 {

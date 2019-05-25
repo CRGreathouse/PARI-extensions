@@ -35,6 +35,15 @@ gtor(GEN x, const char* funcName, long prec)
 }
 
 
+/*
+GP;install("gToC","vG","toC","./auto.gp.so");
+GP;addhelp(toC, "toC(n): Format n for use with the PARI library (e.g., with gp2c programs).");
+*/
+/**
+ * @brief Shows the number in the format needed by C with the PARI library.
+ * 
+ * @param n The input number
+ */
 void
 gToC(GEN n)
 {
@@ -167,6 +176,16 @@ countdigits(GEN x)
 }
 
 
+/*
+GP;install("eps","p","eps","./auto.gp.so");
+GP;addhelp(eps, "eps(): Returns machine epsilon for the current precision.");
+*/
+/**
+ * @brief Machine epsilon for the given precision.
+ * 
+ * @param prec The precision
+ * @return GEN The epsilon value
+ */
 GEN
 eps(long prec)
 {

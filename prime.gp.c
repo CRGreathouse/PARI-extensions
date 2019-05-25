@@ -4,10 +4,20 @@
 /**                     Prime-related arithmetic functions                   **/
 /******************************************************************************/
 
-// TODO: Optimize multi-word inputs
+/*
+GP;install("issemiprime","lG","issemi","./auto.gp.so");
+GP;addhelp(issemi, "issemi(n): Is n a semiprime? Sloane's A064911; characteristic function of Sloane's A001358.");
+*/
+/**
+ * @brief Test if the number is semiprime.
+ * 
+ * @param n Number to test
+ * @return long 1 if the number is semiprime and 0 otherwise
+ */
 long
 issemiprime(GEN n)
 {
+  // TODO: Optimize multi-word inputs
   if (typ(n) != t_INT) pari_err_TYPE("issemiprime", n);
   if (signe(n) <= 0) return 0;
 
@@ -229,6 +239,16 @@ mulNii(void* a, GEN x, GEN y)
 } // for rad
 
 
+/*
+GP;install("rad","G","rad","./auto.gp.so");
+GP;addhelp(rad, "rad(n): Radical of n, the largest squarefree number dividing n. Sloane's A007947.");
+*/
+/**
+ * @brief Radical: the largest squarefree number dividing the given number.
+ * 
+ * @param n The number of which to take the radical
+ * @return GEN The radical of n
+ */
 GEN
 rad(GEN n)
 {
@@ -262,6 +282,17 @@ valu(ulong n)
 }
 
 
+/*
+GP;install("prp","lGDG","prp","./auto.gp.so");
+GP;addhelp(prp, "prp(n,b=2): Is n a b-probable prime?");
+*/
+/**
+ * @brief Tests if a number is a probable prime.
+ * 
+ * @param n Number to test
+ * @param b Base of test (defaults to 2)
+ * @return long 1 if the number is a probable prime or 0 otherwise.
+ */
 long
 prp(GEN n, GEN b)
 {
@@ -275,6 +306,17 @@ prp(GEN n, GEN b)
 }
 
 
+/*
+GP;install("sprp","lGDG","sprp","./auto.gp.so");
+GP;addhelp(sprp, "sprp(n,b=2): Is n a b-strong probable prime?");
+*/
+/**
+ * @brief Tests if a number is a strong probable prime.
+ * 
+ * @param n Number to test
+ * @param b Base of test (defaults to 2)
+ * @return long 1 if the number is a strong probable prime or 0 otherwise.
+ */
 long
 sprp(GEN n, GEN b)
 {
@@ -313,6 +355,16 @@ sprp(GEN n, GEN b)
 }
 
 
+/*
+GP;install("sopf","G","sopf","./auto.gp.so");
+GP;addhelp(sopf, "sopf(n): Sum of distinct prime factors of n. Sloane's A008472.");
+*/
+/**
+ * @brief Sum of the distinct prime factors of the number.
+ * 
+ * @param n The input number
+ * @return GEN The sum of the distinct prime factors of n
+*/
 GEN
 sopf(GEN n)
 {
@@ -331,6 +383,16 @@ sopf(GEN n)
 }
 
 
+/*
+GP;install("sopfr","G","sopfr","./auto.gp.so");
+GP;addhelp(sopfr, "sopfr(n): Sum of prime factors of n (with multiplicity). Sloane's A001414.");
+*/
+/**
+ * @brief Sum of the prime factors of the number, with repetition.
+ * 
+ * @param n The input number
+ * @return GEN The sum of the prime factors of n with repetition
+*/
 GEN
 sopfr(GEN n)
 {
@@ -349,6 +411,16 @@ sopfr(GEN n)
 }
 
 
+/*
+GP;install("gpf","G","gpf","./auto.gp.so");
+GP;addhelp(gpf, "gpf(n): The greatest prime factor of a number. Sloane's A006530.");
+*/
+/**
+ * @brief Greatest prime factor of a given number.
+ * 
+ * @param n Number of which to find the greatest prime factor
+ * @return GEN Greatest prime factor
+ */
 GEN
 gpf(GEN n)
 {
@@ -492,6 +564,16 @@ prodtree_small(GEN A, long start, long stop)
 }
 
 
+/*
+GP;install("primorial","G","primorial","./auto.gp.so");
+GP;addhelp(primorial, "primorial(n): Returns the product of each prime less than or equal to n. Sloane's A034386.");
+*/
+/**
+ * @brief Primorial, that is, product of the primes up to the given number.
+ * 
+ * @param n Number up to which primes are multiplied
+ * @return GEN Product of primes
+*/
 GEN
 primorial(GEN n)
 {
@@ -596,6 +678,16 @@ lpfu(ulong n)
 }
 
 
+/*
+GP;install("lpf","G","lpf","./auto.gp.so");
+GP;addhelp(lpf, "lpf(n): The least prime factor of a number. Sloane's A020639.");
+*/
+/**
+ * @brief Least prime factor of a given number.
+ * 
+ * @param n Number of which to find the least prime factor
+ * @return GEN Least prime factor
+ */
 GEN
 lpf(GEN n)
 {
@@ -734,6 +826,16 @@ ucomposite(long n)
 }
 
 
+/*
+GP;install("composite","L","composite","./auto.gp.so");
+GP;addhelp(composite, "composite(n): Returns the n-th composite. Sloane's A002808.");
+*/
+/**
+ * @brief Returns the n-th composite number.
+ * 
+ * @param n Index
+ * @return GEN Composite number
+ */
 GEN
 composite(long n)
 {

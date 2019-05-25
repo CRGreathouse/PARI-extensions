@@ -6,9 +6,20 @@ static GEN primezeta_complex_helper(void * _cargs, GEN k);
 /* Real and complex functions */
 /******************************************************************************/
 
-// This uses a fairly naive method. See
-// H. Cohen, High Precision Computation of Hardy-Littlewood Constants
-// for a beter method.
+/*
+GP;install("primezeta","D0,G,p","primezeta","./auto.gp.so");
+GP;addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
+This uses a fairly naive method. See
+  H. Cohen, High Precision Computation of Hardy-Littlewood Constants
+for a beter method.
+*/
+/**
+ * @brief Prime zeta function: sum p^-s over all primes p.
+ * 
+ * @param s Complex exponent
+ * @param prec Precision in words
+ * @return GEN Sum of p^-s over all primes p
+*/
 GEN
 primezeta(GEN s, long prec)
 {
@@ -87,8 +98,17 @@ primezeta_real(GEN s)
   return accum;
 }
 
-
-// Checked up to 42,000 with the 64-bit version.
+/*
+GP;install("Bell","L","Bell","./auto.gp.so");
+GP;addhelp(Bell, "Bell(n): Returns the n-th Bell or exponential number, Sloane's A000110.");
+Checked up to 42,000 with the 64-bit version.
+*/
+/**
+ * @brief The Bell (or exponential) number.
+ * 
+ * @param n Which Bell number to find
+ * @return GEN The indicated Bell number
+*/
 GEN
 Bell(long n)
 {
@@ -192,6 +212,16 @@ lnBell(long n)
 }
 
 
+/*
+GP;install("glnBell","L","lnBell", "./auto.gp.so");
+GP;addhelp(lnBell, "lnBell(n): Returns a low-precision approximation of the logarithm of the n-th Bell number.");
+*/
+/**
+ * @brief Low-precision logarithm of the Bell number.
+ * 
+ * @param n Which Bell number to find
+ * @return GEN Logarithm of indicated Bell number
+*/
 GEN
 glnBell(long n)
 {
@@ -223,6 +253,17 @@ deBruijnXi(GEN x)
 }
 
 
+/*
+GP;install("rhoest","Gp","rhoest","./auto.gp.so");
+GP;addhelp(rhoest, "rhoest(x): de Bruijn's asymptotic approximation for rho(x), rewritten as in van de Lune and Wattel 1969.  Curiously, their paper shows values for this estimate that differ from those calculated by this function, often as soon as the second decimal place -- but as the difference is in the direction of the true value, I have not looked further into this.");
+*/
+/**
+ * @brief de Bruijn's asymptotic approximation for rho(x).
+ * 
+ * @param x Input
+ * @param prec Precision in words
+ * @return GEN de Bruijn's asymptotic approximation at x
+ */
 GEN
 rhoest(GEN x, long prec)
 {
@@ -240,6 +281,17 @@ rhoest(GEN x, long prec)
 }
 
 
+/*
+GP;install("DickmanRho","Gp","DickmanRho","./auto.gp.so");
+GP;addhelp(DickmanRho, "DickmanRho(x): Estimates the value of the Dickman rho function. For x <= 3 the exact values are used, up to rounding; up to 15 the value is interpolated using known values and rhoest; after 15 rhoest is used, along with a correction factor based on the last value in rhoTable.");
+*/
+/**
+ * @brief Estimates the value of the Dickman rho function.
+ * 
+ * @param x Input
+ * @param prec Precision in words
+ * @return GEN Dickman rho function at x
+ */
 GEN
 DickmanRho(GEN x, long prec)
 {
@@ -303,7 +355,17 @@ DickmanRho(GEN x, long prec)
 }
 
 
-// Convenience function: binary logarithm of x
+/*
+GP;install("log_2","Gp","lg","./auto.gp.so");
+GP;addhelp(lg, "lg(x): Binary logarithm of x.");
+*/
+/**
+ * @brief Binary logarithm.
+ * 
+ * @param x Number of which to take logarithm
+ * @param prec Precision in words
+ * @return GEN Binary (base-2) logarithm
+ */
 GEN
 log_2(GEN x, long prec)
 {
@@ -331,6 +393,17 @@ log_2(GEN x, long prec)
 }
 
 
+/*
+GP;install("contfracback","D0,G,DG","contfracback","./auto.gp.so");
+GP;addhelp(contfracback, "contfracback(v, terms): Given a continued fraction v, gives the real number back. If terms is given, use only that many terms.");
+*/
+/**
+ * @brief Given a continued fraction, recover a fraction representing its value.
+ * 
+ * @param v The continued fraction
+ * @param terms The number of terms to use; if omitted, use all terms
+ * @return GEN The fraction
+ */
 GEN
 contfracback(GEN v, GEN terms)
 {
@@ -423,6 +496,18 @@ isExtendedReal(GEN x)
 
 
 // FIXME: Infinities are broken?
+/*
+GP;install("normd","D0,G,D0,G,p","normd","./auto.gp.so");
+GP;addhelp(normd, "normd(a,b): Amount of the normal distribution between a and b standard deviations. Plus/minus infinity coded as [+1]/[-1].");
+*/
+/**
+ * @brief Amount of the normal distribution between a and b standard deviations.
+ * 
+ * @param a Lower bound
+ * @param b Upper bound
+ * @param prec Precision in words
+ * @return GEN Amount of the distribution between a and b
+ */
 GEN
 normd(GEN a, GEN b, long prec)
 {
@@ -478,6 +563,16 @@ normd(GEN a, GEN b, long prec)
 
 // Use the Box-Muller transform to generate random normal variables. Caches
 // values, so multiple calls at the same precision are fast.
+/*
+GP;install("rnormal","p","rnormal","./auto.gp.so");
+GP;addhelp(rnormal, "rnormal(): Returns a random normal variable with mean 0 and standard deviation 1 at the current precision.");
+*/
+/**
+ * @brief Random normal variable with mean 0 and standard deviation 1 at the current precision.
+ * 
+ * @param prec Precision in words
+ * @return GEN Random normal variable with mean 0 and standard deviation 1
+ */
 GEN
 rnormal(long prec)
 {

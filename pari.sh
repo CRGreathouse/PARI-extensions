@@ -91,7 +91,7 @@ echo Compiling and linking
 $CC -o auto.gp.so $ALLOPT -shared -Wl,-shared $files -I"/usr/local/include" -lc -lm -L"/usr/local/lib" -lpari || exit # exit with status of last command on failure
 
 # Create run file to install auto and add associated help entries
-egrep '^GP;' auto.gp.c | sed 's/^GP;//' > auto.gp.run
+cat *.gp.c | egrep '^GP;' | sed 's/^GP;//g' > auto.gp.run
 
 ## Create documentation -- takes a long time
 #doxygen Doxyfile
