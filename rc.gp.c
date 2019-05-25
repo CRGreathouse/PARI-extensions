@@ -1,4 +1,5 @@
 #include "ext.h"
+#include <float.h>
 
 static GEN primezeta_complex_helper(void * _cargs, GEN k);
 

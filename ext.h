@@ -8,8 +8,6 @@
 #  pragma clang diagnostic pop
 #endif
 #include "othergpincludes.h"
-#include <float.h>
-#include <limits.h>
 
 GEN Bell(long n);
 long checkmult(GEN v, long verbose);
