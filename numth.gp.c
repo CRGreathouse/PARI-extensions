@@ -490,8 +490,8 @@ estPowerful(n)=zeta(3/2)/zeta(3)*sqrt(n) + zeta(2/3)/zeta(2)*n^(1/3)
 GEN
 countPowerful(GEN n)
 {
+  if (!is_intreal_t(typ(n))) pari_err_TYPE("countPowerful", n);
   if (signe(n) < 1) return gen_0;
-  if (typ(n) != t_INT && typ(n) != t_REAL) pari_err_TYPE("countPowerful", n);
 
   GEN ret;
   pari_sp ltop = avma;
