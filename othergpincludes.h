@@ -3,6 +3,8 @@
 static void ensure_nb(GEN L, long l) __attribute__((unused));
 static GEN pollardbrent(GEN n) __attribute__((unused));
 static ulong utridiv_bound(ulong n) __attribute__((unused));
+static long precREAL(GEN x) __attribute__((unused));
+static long prec0(long e) __attribute__((unused));
 
 #define VALUE(x) gel(x,0)
 #define EXPON(x) gel(x,1)
@@ -335,4 +337,7 @@ u_forprime_next_fast(forprime_t *T)
 }
 
 #endif
+
+static long precREAL(GEN x) { return signe(x) ? realprec(x): prec0(expo(x)); }
+static long prec0(long e) { return (e < 0)? nbits2prec(-e): 2; }
 ////////////////////////////////////////////////////////////////////////////////

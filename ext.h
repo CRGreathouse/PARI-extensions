@@ -101,8 +101,6 @@ GEN fibomod(long n, GEN m);
 ulong fibomod_tiny(long n, ulong m);
 void forpal(GEN a, GEN b, GEN code);
 GEN glnBell(long n);
-long infinite(GEN x);
-long isExtendedReal(GEN x);
 long isfactorial(GEN n);
 double lnBell(long n);
 GEN log_2(GEN x, long prec);
@@ -122,6 +120,7 @@ long ispow3_tiny(ulong n) __attribute__ ((const));
 long isSmallFib(long n) __attribute__ ((const));
 ulong cuberoot(ulong n) __attribute__ ((const));
 ulong fusc_small(GEN n) __attribute__ ((pure));
+long isExtendedReal(GEN x) __attribute__ ((pure));
 void assume (int expr);
 
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain

@@ -474,31 +474,18 @@ W_small(double x)
 /* Statistics */
 /******************************************************************************/
 
-long
-infinite(GEN x)
-{
-  if (typ(x) != t_VEC || glength(x) != 1) return 0;
-  GEN e = gel(x, 1); // Nothing is created, so no garbage... right?
-
-  // If e is gen_0, then is_pm1 is unpredicatable, but that doesn't matter
-  // because then both branches return 0.
-  return (typ(e) == t_INT && is_pm1(e)) ? signe(e) : 0;
-}
-
 
 long
 isExtendedReal(GEN x)
 {
   long t = typ(x);
-  if (t == t_INT || t == t_FRAC || t == t_REAL) return 1;
-  return infinite(x);
+  return is_real_t(t) || t == t_INFINITY;
 }
 
 
-// FIXME: Infinities are broken?
 /*
 GP;install("normd","D0,G,D0,G,p","normd","./auto.gp.so");
-GP;addhelp(normd, "normd(a,b): Amount of the normal distribution between a and b standard deviations. Plus/minus infinity coded as [+1]/[-1].");
+GP;addhelp(normd, "normd(a,b): Amount of the normal distribution between a and b standard deviations (possibly -oo or oo).");
 */
 /**
  * @brief Amount of the normal distribution between a and b standard deviations.
@@ -511,53 +498,42 @@ GP;addhelp(normd, "normd(a,b): Amount of the normal distribution between a and b
 GEN
 normd(GEN a, GEN b, long prec)
 {
-  // Error type follows that of intnum in language/intnum.c
-  if (!isExtendedReal(a) || !isExtendedReal(b))
-    pari_err(e_MISC, "incorrect endpoint in normd");
+  if (!isExtendedReal(a)) pari_err_TYPE("normd", a);
+  if (!isExtendedReal(b)) pari_err_TYPE("normd", b);
   pari_sp ltop = avma;
-  long tmp;
   GEN ret;
 
-  /* Infinities */
-  if ((tmp = infinite(a))) // Assignment and test-if-0
+  if (gcmp(a, b) >= 0)
   {
-    pari_warn(warner, "Doesn't work properly with infinities");
-    if (tmp < 0) // (-oo, b)
+    if (gequal(a, b))
     {
-      tmp = infinite(b);
-      if (tmp > 0)
-        ret = gen_1;
-      else if (tmp < 0)
-        ret = gen_0;
-      else
-        ret = gdivgs(mpneg(gerfc(mpdiv(b, gsqrt(gen_2, prec)), prec)), 2);
+      int aReal = typ(a) == t_REAL;
+      int bReal = typ(b) == t_REAL;
+      if (aReal && bReal) return real_0(minss(precREAL(a), precREAL(b)));
+      if (aReal) return real_0(precREAL(a));
+      if (bReal) return real_0(precREAL(b));
+      return gen_0;
     }
-    else
-    { // (oo, b)
-      if (infinite(b) == 1)
-        ret = gen_1;
-      else
-        pari_err(e_MISC, "incorrect endpoint in normd");
-      // Error type follows that of intnum in language/intnum.c
-      __builtin_unreachable();
-    }
+    pari_err(e_MISC, "need %Ps <= %Ps in normd", a, b);
+    __builtin_unreachable();
   }
-  else if ((tmp = infinite(b)))
-  { // Assignment and test-if-0
-    pari_warn(warner, "Doesn't work properly with infinities");
-    if (tmp < 0) // (a, -oo)
-      pari_err(e_MISC, "incorrect endpoint in normd");
-    // Error type follows that of intnum in language/intnum.c
-    ret = gdivgs(gerfc(mpdiv(a, gsqrt(gen_2, prec)), prec), 2);
+
+  GEN root2 = gsqrt(gen_2, prec);
+  if (typ(a) == t_INFINITY)
+  {
+    if (typ(b) == t_INFINITY)
+      return gen_1;
+    ret = gsubsg(1, gdivgs(gerfc(mpdiv(b, root2), prec), 2));
+  }
+  else if (typ(b) == t_INFINITY)
+  {
+    ret = gdivgs(gerfc(mpdiv(a, root2), prec), 2);
   }
   else
-  {
-    GEN root2 = gsqrt(gen_2, prec);
-    ret =
-      gdivgs(gsub(gerfc(gdiv(a, root2), prec), gerfc(gdiv(b, root2), prec)), 2);
+  { /* no infinities */
+    ret = gdivgs(gsub(gerfc(gdiv(a, root2), prec), gerfc(gdiv(b, root2), prec)), 2);
   }
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoleaf(ltop, ret);
 }
 
 
