@@ -2,7 +2,6 @@
 #include "extprv.h"
 
 static GEN mulNii(void* a, GEN x, GEN y);
-INLINE long valu(ulong n) __attribute__ ((const));
 static GEN prodtree(GEN A, long start, long stop);
 static GEN prodtree_small(GEN A, long start, long stop);
 static ulong ucomposite(long n);
@@ -271,7 +270,7 @@ rad(GEN n)
 
 
 // 2-adic valuation of n
-INLINE long
+long
 valu(ulong n)
 {
 #if 1

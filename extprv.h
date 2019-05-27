@@ -14,3 +14,4 @@ GEN primezeta_real(GEN s);
 double lnBell(long n);
 double W_small(double x);
 long isExtendedReal(GEN x) __attribute__ ((pure));
+long valu(ulong n) __attribute__ ((const));
