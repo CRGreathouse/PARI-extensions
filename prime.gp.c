@@ -264,8 +264,7 @@ rad(GEN n)
   if (!f) f = Z_factor(n);
   ret = gen_product(gel(f, 1), NULL, &mulNii);
   if (signe(ret) < 0) setabssign(ret);
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 
@@ -384,8 +383,7 @@ sopf(GEN n)
   {
     ret = addii(ret, gcoeff(f, i, 1));
   }
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 
@@ -412,8 +410,7 @@ sopfr(GEN n)
   {
     ret = addii(ret, mulii(gcoeff(f, i, 1), gcoeff(f, i, 2)));
   }
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 
@@ -710,8 +707,7 @@ lpf(GEN n)
     {
       res = gel(f, 1);
     }
-    res = gerepileupto(ltop, res);
-    return res;
+    return gerepileuptoint(ltop, res);
   }
 
   ulong nn = itou_or_0(n);
@@ -761,7 +757,6 @@ lpf(GEN n)
     }
   }
 
-
   /* How far should we search? If the number is small, just factor it. */
   ulong lim = tridiv_bound(n);
 #ifdef LONG_IS_64BIT
@@ -791,8 +786,7 @@ lpf(GEN n)
   }
   res = gcoeff(Z_factor(n), 1,
                1); // TODO: Partial factorization?  Tricky to do right...
-  res = gerepileupto(ltop, res);
-  return res;
+  return gerepileuptoint(ltop, res);
 }
 
 
