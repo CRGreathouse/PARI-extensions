@@ -1,3 +1,5 @@
+#include "ext.h"
+
 GEN poleval_denseint(GEN x, GEN y);
 void listput_shallow(GEN L, GEN x);
 GEN gtor(GEN x, const char* funcName, long prec);

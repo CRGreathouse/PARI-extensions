@@ -1,3 +1,5 @@
+#ifndef EXT_H
+#define EXT_H
 #ifdef __clang__
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Weverything"
@@ -78,3 +80,5 @@ long isSmallFib(long n) __attribute__ ((const));
 
 #define NEVER_USED 0	// Used to initialize values so the compiler doesn't complain
 GEN rnormal_cached;
+
+#endif
