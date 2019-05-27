@@ -7,6 +7,17 @@ static const char* toC(GEN n);
 /* Convenience */
 /******************************************************************************/
 
+/**
+ * @brief Returns the number of words available on the PARI stack.
+ *
+ * @return long Available words
+ */
+long words_free(void)
+{
+  return (avma - pari_mainstack->bot)/sizeof(long);
+}
+
+
 void
 listput_shallow(GEN L, GEN x)
 {
