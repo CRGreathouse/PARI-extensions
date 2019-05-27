@@ -444,29 +444,22 @@ gpf(GEN n)
 
   ret = gel(f, len);
   if (equalii(ret, gen_m1)) ret = gen_1;
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 
 static GEN
 prodtree(GEN A, long start, long stop)
 {
-  pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
+  pari_sp ltop = avma;
   long diff = stop - start;
   if (diff >= 8)
   {
     diff >>= 1;
-    GEN leftprod = prodtree(A, start, start + diff);
-    if (low_stack(st_lim, stack_lim(ltop, 1)))
-      leftprod = gerepileupto(ltop, leftprod);
+    GEN leftprod = gerepileuptoint(ltop, prodtree(A, start, start + diff));
     pari_sp btop = avma;
-    GEN rightprod = prodtree(A, start + diff + 1, stop);
-    // if (low_stack(st_lim, stack_lim(ltop, 1)))
-    rightprod = gerepileupto(btop, rightprod);
-    GEN ret = mulii(leftprod, rightprod);
-    ret = gerepileupto(ltop, ret);
-    return ret;
+    GEN rightprod = gerepileuptoint(btop, prodtree(A, start + diff + 1, stop));
+    return gerepileuptoint(ltop, mulii(leftprod, rightprod));
   }
 
   GEN ret, a, b, c, d;
@@ -504,29 +497,32 @@ prodtree(GEN A, long start, long stop)
       pari_err_BUG("prodtree passed small argument");
       __builtin_unreachable();
   }
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 
+/**
+ * @brief Given a vecsmall, returns the product of the elements at (1-based)
+ * indices from start to stop. Assumes all members are at most
+ * sqrt(ULONG_MAX); verifying this is the responsibility of the caller.
+ *
+ * @param A The vecsmall you wish to multiply
+ * @param start First index
+ * @param stop Last index
+ * @return GEN Product
+ */
 static GEN
 prodtree_small(GEN A, long start, long stop)
 {
-  pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
+  pari_sp ltop = avma;
   long diff = stop - start;
   if (diff >= 8)
   {
     diff >>= 1;
-    GEN leftprod = prodtree(A, start, start + diff);
-    if (low_stack(st_lim, stack_lim(ltop, 1)))
-      leftprod = gerepileupto(ltop, leftprod);
+    GEN leftprod = gerepileuptoint(ltop, prodtree(A, start, start + diff));
     pari_sp btop = avma;
-    GEN rightprod = prodtree(A, start + diff + 1, stop);
-    // if (low_stack(st_lim, stack_lim(ltop, 1)))
-    rightprod = gerepileupto(btop, rightprod);
-    GEN ret = mulii(leftprod, rightprod);
-    ret = gerepileupto(ltop, ret);
-    return ret;
+    GEN rightprod = gerepileuptoint(btop, prodtree(A, start + diff + 1, stop));
+    return gerepileuptoint(ltop, mulii(leftprod, rightprod));
   }
 
   GEN ret;
@@ -565,8 +561,7 @@ prodtree_small(GEN A, long start, long stop)
       pari_err_BUG("prodtree_small passed small argument");
       __builtin_unreachable();
   }
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 
@@ -619,8 +614,8 @@ primorial(GEN n)
     __builtin_unreachable();
   }
 
-  if (nn > maxprime() || nn == 0) // nn == 0 if n didn't fit into a word
-    pari_err_MAXPRIME(nn);
+  if (nn == 0) pari_err_OVERFLOW("primorial [wordsize only please]");
+
 #ifdef LONG_IS_64BIT
   if (nn < 53)
 #else
@@ -631,28 +626,18 @@ primorial(GEN n)
   ulong primeCount = uprimepi(nn);
   GEN pr = primes_zv(primeCount);
 #ifdef LONG_IS_64BIT
-  if (primeCount < 146144319)
+  if (primeCount < 4294967295)
 #else
-  if (primeCount < 4793)
+  if (primeCount < 6543)
 #endif
   {
     ret = prodtree_small(pr, 1, primeCount);
   }
   else
   {
-    /*
-    pari_sp btop;
-    GEN right = prodtree(pr, primeCount>>1 + 1, primeCount);
-    // how to mark latter half of pr as unallocated?
-    right = gerepileupto(btop, right);
-    ret = mulii(prodtree(pr, 1, primeCount>>1), right);
-    */
-    ret = prodtree(pr, 1,
-                   primeCount); // Possible TODO: Free memory from latter half
-                                // of array once its product is calculated?
+    ret = prodtree(pr, 1, primeCount);
   }
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 
