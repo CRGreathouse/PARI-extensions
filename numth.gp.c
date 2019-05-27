@@ -266,13 +266,11 @@ cuberootint(GEN x)
     ret = subis(ret, 1);
     while (cmpii(powis(ret, 3), x) == 1)
       ret = subis(ret, 1);
-    ret = gerepileupto(ltop, ret);
-    return ret;
+    return gerepileuptoint(ltop, ret);
   }
   while (cmpii(powis(addis(ret, 1), 3), x) < 1)
     ret = addis(ret, 1);
-  ret = gerepileupto(ltop, ret);
-  return ret;
+  return gerepileuptoint(ltop, ret);
 }
 
 

@@ -910,5 +910,5 @@ poleval_denseint(GEN x, GEN y)
   GEN ret = gel(x, i);
   for (i--; i >= imin; i--)
     ret = addii(mulii(ret, y), gel(x, i));
-  return gerepileupto(ltop, ret);
+  return gerepileuptoint(ltop, ret);
 }

@@ -22,8 +22,7 @@ rev(GEN n, long B)
     n = divis(n, B);
     if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 2, &m, &n);
   }
-  m = gerepilecopy(av, m);
-  return m;
+  return gerepileuptoint(av, m);
 }
 
 
