@@ -4,8 +4,6 @@
 static char* getBValue(char*);
 static GEN bfilein(char* name);
 static void bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset);
-static GEN initial(GEN n, char *s);
-static GEN medial(GEN n, char *s);
 static GEN monomialnice(GEN coeff, GEN degree, GEN v);
 
 /******************************************************************************/
@@ -359,67 +357,6 @@ tonice(GEN o, long prec)
   p4 = gcopy(GENtoGENstr(o));
   p4 = gerepileupto(ltop, p4);
   return p4;
-}
-
-
-static GEN
-initial(GEN n, char* s)
-{
-  pari_sp ltop = avma;
-  GEN p2, p3;
-  if (typ(n) != t_INT) pari_err_TYPE("initial", n);
-  if (cmpis(n, 0) == 0)
-  {
-    set_avma(ltop);
-    return strtoGENstr("");
-  }
-  if (equalim1(n))
-  {
-    p2 = Str(mkvec2(strtoGENstr("-"), strtoGENstr(s)));
-    p2 = gerepileupto(ltop, p2);
-    return p2;
-  }
-  if (equali1(n))
-  {
-    set_avma(ltop);
-    return strtoGENstr(s);
-  }
-  p3 = Str(mkvec2(n, strtoGENstr(s)));
-  p3 = gerepileupto(ltop, p3);
-  return p3;
-}
-
-
-static GEN
-medial(GEN n, char* s)
-{
-  pari_sp ltop = avma;
-  GEN p2, p3, p4, p5;
-  if (typ(n) != t_INT) pari_err_TYPE("medial", n);
-  if (cmpis(n, 0) == 0)
-  {
-    set_avma(ltop);
-    return strtoGENstr("");
-  }
-  if (equalim1(n))
-  {
-    p2 = Str(mkvec2(strtoGENstr(" - "), strtoGENstr(s)));
-    p2 = gerepileupto(ltop, p2);
-    return p2;
-  }
-  if (equali1(n))
-  {
-    p3 = Str(mkvec2(strtoGENstr(" + "), strtoGENstr(s)));
-    p3 = gerepileupto(ltop, p3);
-    return p3;
-  }
-  if (cmpis(n, 0) < 0)
-    p4 = strtoGENstr(" - ");
-  else
-    p4 = strtoGENstr(" + ");
-  p5 = Str(mkvec3(p4, mpabs(n), strtoGENstr(s)));
-  p5 = gerepileupto(ltop, p5);
-  return p5;
 }
 
 
