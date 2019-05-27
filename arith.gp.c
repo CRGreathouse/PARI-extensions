@@ -1,4 +1,16 @@
 #include "ext.h"
+#include "extprv.h"
+
+static long ispow3_tiny(ulong n) __attribute__ ((const));
+static void lucasmod(ulong n, GEN m, GEN* a, GEN* b);
+static GEN fibomod(long n, GEN m);
+static ulong fibomod_tiny(long n, ulong m);
+static void lucasmod_tiny(ulong n, ulong m, ulong* a, ulong* b);
+static long Pisano(long p, long e);
+static long sways3s(ulong n);
+static void fusc_word(ulong u, ulong* a, ulong* b);
+static ulong fusc_small(GEN n) __attribute__ ((pure));
+static GEN fusc_large(GEN n);
 
 /******************************************************************************/
 /* Other arithmetic functions */
@@ -121,7 +133,7 @@ issm3(long n)
 }
 
 
-long
+static long
 ispow3_tiny(ulong n)
 {
   static const ulong pow3table[] = {
@@ -274,7 +286,7 @@ lucasmod(ulong n, GEN m, GEN* a, GEN* b)
 }
 
 
-GEN
+static GEN
 fibomod(long n, GEN m)
 {
   if (typ(m) != t_INT) pari_err_TYPE("fibomod", m);
@@ -322,7 +334,7 @@ lucasmod_tiny(ulong n, ulong m, ulong* a, ulong* b)
 }
 
 
-ulong
+static ulong
 fibomod_tiny(long n, ulong m)
 {
   ulong a, b;
@@ -451,7 +463,7 @@ static const long PisanoArr[] = {
 /* Helper function for fibmod; returns a multiple of the period of Fibonacci
  * numbers mod p^e. */
 /* Assumes p is prime and e > 0. */
-long
+static long
 Pisano(long p, long e)
 {
   long p1;
@@ -822,7 +834,7 @@ fusc_word(ulong u, ulong* a, ulong* b)
 }
 
 
-ulong
+static ulong
 fusc_small(GEN n)
 {
   ulong a = 1, b = 0;
@@ -849,7 +861,7 @@ fusc_small(GEN n)
 }
 
 
-GEN
+static GEN
 fusc_large(GEN n)
 {
   pari_sp ltop = avma;

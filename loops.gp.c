@@ -1,10 +1,12 @@
 #include "ext.h"
+#include "extprv.h"
+
+static int palhelper(long digits, GEN a, GEN b, GEN code);
 
 /******************************************************************************/
 /* Looping constructs */
 /******************************************************************************/
 
-// Digit reversal
 GEN
 rev(GEN n, long B)
 {
@@ -27,7 +29,7 @@ rev(GEN n, long B)
 
 // Return value: Did the user break out of the loop?
 // Not stack clean.
-int
+static int
 palhelper(long digits, GEN a, GEN b, GEN code)
 {
   GEN p10 = powuu(10, (digits + 1) >> 1);

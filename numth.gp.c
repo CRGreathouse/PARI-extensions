@@ -1,4 +1,16 @@
 #include "ext.h"
+#include "extprv.h"
+
+static long Collatz_tiny(ulong n);
+static long issquarefree_small(ulong n);
+static ulong ucountPowerfulu(ulong lim);
+static ulong ucountPowerfuli(GEN n);
+static ulong ucountSquarefree(ulong lim);
+static GEN HurwitzClassNumber_small(ulong n);
+INLINE GEN classno_fast(GEN n);
+static GEN taup_small(ulong p);
+static GEN taup_big(GEN p);
+static GEN taup(GEN p, long e);
 
 /******************************************************************************/
 /* Other number theory */
@@ -51,7 +63,7 @@ Collatz(GEN n)
 }
 
 
-long
+static long
 Collatz_tiny(ulong n)
 {
   assume(n&1); /* It is the caller's responsibility to pass an odd number */
@@ -216,6 +228,16 @@ cuberoot(ulong n)
 }
 
 
+/*
+GP;install("cuberootint","G","cuberootint","./auto.gp.so");
+GP;addhelp(cuberootint, "cuberootint(x): integer cube root of x, where x is a non-negative integer. Same as sqrtnint(x,3) but faster.")
+*/
+/**
+ * @brief Integer cube root of the nuumber.
+ * 
+ * @param x Integer to take cube root
+ * @return GEN Cube root
+ */
 GEN
 cuberootint(GEN x)
 {
@@ -254,7 +276,7 @@ cuberootint(GEN x)
 }
 
 
-long
+static long
 issquarefree_small(ulong n)
 {
 #define CUTOFF 1627UL
@@ -394,7 +416,7 @@ issquarefree_small(ulong n)
 }
 
 
-ulong
+static ulong
 ucountPowerfulu(ulong n)
 {
   if (n < 4) /* avoid log(0) */
@@ -420,11 +442,7 @@ ucountPowerfulu(ulong n)
 // n.  If there is overflow, let the calling function handle it if the actual
 // number (not mod 2^32 or 2^64) is desired.
 // TODO: Use a sieve to determine if k is squarefree.
-
-/*
-GP;install("ucountPowerfuli","lD0,G,","cP","./auto.gp.so");
-*/
-ulong
+static ulong
 ucountPowerfuli(GEN n)
 {
 #define uCBRTis(n, k) itou(cuberootint(divii(n, sqrs(k))))
@@ -542,10 +560,7 @@ countPowerful(GEN n)
 
 // TODO: Doesn't really save much time vs. the original.  To improve, a sieve
 // would be needed (to calculate the values of moebius faster).
-/*
-GP;install("ucountSquarefree","lL","cS","./auto.gp.so");
-*/
-ulong
+static ulong
 ucountSquarefree(ulong lim)
 {
   ulong b = usqrt(lim >> 1);
@@ -1011,7 +1026,7 @@ checkdiv(GEN v, long verbose /*=1*/)
 }
 
 
-GEN
+static GEN
 HurwitzClassNumber_small(ulong n)
 {
   pari_sp ltop = avma;
@@ -1109,7 +1124,7 @@ HurwitzClassNumber(GEN n)
 
 
 // Computes tau(p) assuming p is prime.
-GEN
+static GEN
 taup_small(ulong p)
 {
   ulong k;
@@ -1132,7 +1147,7 @@ taup_small(ulong p)
 // Algorithm based on the Selberg trace formula, as analyzed by
 // Denis Xavier Charles, Computing the Ramanujan tau function, The Ramanujan
 // Journal 11:2 (April 2006), pp. 221-224.
-GEN
+static GEN
 taup_big(GEN p)
 {
   pari_sp ltop = avma;
@@ -1162,7 +1177,7 @@ taup_big(GEN p)
 }
 
 
-GEN
+static GEN
 taup(GEN p, long e)
 {
   if (typ(p) != t_INT) pari_err_TYPE("taup", p);

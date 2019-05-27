@@ -1,4 +1,7 @@
 #include "ext.h"
+#include "extprv.h"
+
+static const char* toC(GEN n);
 
 /******************************************************************************/
 /* Convenience */
@@ -60,7 +63,7 @@ gToC(GEN n)
  * Note: The functions mkoo(), mkmoo(), and gen_I(), though related,
  * are not produced by this function.
  */
-const char*
+static const char*
 toC(GEN n)
 {
   long t = typ(n);

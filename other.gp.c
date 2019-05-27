@@ -1,6 +1,14 @@
 #include "ext.h"
+#include "extprv.h"
 
+static GEN sumset_self(GEN a);
+static GEN Eng_small(long n);
+static GEN Eng_tiny(long n);
+static GEN Edigit(long n);
+
+/******************************************************************************/
 /* General stuff */
+/******************************************************************************/
 
 void
 init_auto(void)
@@ -24,8 +32,6 @@ assume(int expr)
 /* Set stuff */
 /******************************************************************************/
 
-GEN
-vecsum_zv(GEN x);
 GEN
 vecsum_zv(GEN x)
 {
@@ -52,9 +58,7 @@ vecsum_zv(GEN x)
 }
 
 
-GEN
-sumset_self(GEN a);
-GEN
+static GEN
 sumset_self(GEN a)
 {
   pari_sp av = avma;
@@ -612,7 +616,7 @@ Eng(GEN n)
 }
 
 
-GEN
+static GEN
 Eng_small(long n)
 {
   pari_sp av = avma;
@@ -642,7 +646,7 @@ Eng_small(long n)
 }
 
 
-GEN
+static GEN
 Eng_tiny(long n)
 {
   GEN s;
@@ -689,7 +693,7 @@ Eng_tiny(long n)
 }
 
 
-GEN
+static GEN
 Edigit(long n)
 {
   static const char* lookup[] = { "",     "one", "two",   "three", "four",

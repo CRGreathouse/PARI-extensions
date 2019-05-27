@@ -1,7 +1,9 @@
 #include "ext.h"
+#include "extprv.h"
 #include <float.h>
 
 static GEN primezeta_complex_helper(void * _cargs, GEN k);
+GEN deBruijnXi(GEN x);
 
 /******************************************************************************/
 /* Real and complex functions */

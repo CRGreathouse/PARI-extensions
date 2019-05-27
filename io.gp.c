@@ -1,4 +1,12 @@
 #include "ext.h"
+#include "extprv.h"
+
+static char* getBValue(char*);
+static GEN bfilein(char* name);
+static void bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset);
+static GEN initial(GEN n, char *s);
+static GEN medial(GEN n, char *s);
+static GEN monomialnice(GEN coeff, GEN degree, GEN v);
 
 /******************************************************************************/
 /* I/O */
@@ -22,7 +30,7 @@ listtovec_shallow(GEN v)
 // TODO: Should check values more carefully -- does end-of-line happen when
 // expected?
 // TODO: Should check that the numbers are sequential
-char*
+static char*
 getBValue(char* line)
 {
   int start = 0;
@@ -50,7 +58,7 @@ getBValue(char* line)
 // Returns at most 18,000 values (warning the user if there are more left)
 // Throws an error if it encounters an extremely long line -- b-files shouldn't
 // have lines this long.
-GEN
+static GEN
 bfilein(char* name)
 {
   FILE* f = fopen(name, "r");
@@ -190,7 +198,7 @@ bfile(GEN name, GEN v, GEN offset)
 }
 
 
-void
+static void
 bfileout(char* filename, GEN name, GEN v, GEN Anum, long offset)
 {
   FILE* f = fopen(filename, "r");
@@ -354,7 +362,7 @@ tonice(GEN o, long prec)
 }
 
 
-GEN
+static GEN
 initial(GEN n, char* s)
 {
   pari_sp ltop = avma;
@@ -382,7 +390,7 @@ initial(GEN n, char* s)
 }
 
 
-GEN
+static GEN
 medial(GEN n, char* s)
 {
   pari_sp ltop = avma;
@@ -416,7 +424,7 @@ medial(GEN n, char* s)
 
 
 /* Degree assumed to be positive */
-GEN
+static GEN
 monomialnice(GEN coeff, GEN degree, GEN v)
 {
   pari_sp ltop = avma;

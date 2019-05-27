@@ -1,4 +1,11 @@
 #include "ext.h"
+#include "extprv.h"
+
+static GEN mulNii(void* a, GEN x, GEN y);
+INLINE long valu(ulong n) __attribute__ ((const));
+static GEN prodtree(GEN A, long start, long stop);
+static GEN prodtree_small(GEN A, long start, long stop);
+static ulong ucomposite(long n);
 
 /******************************************************************************/
 /**                     Prime-related arithmetic functions                   **/
@@ -264,7 +271,7 @@ rad(GEN n)
 
 
 // 2-adic valuation of n
-long
+INLINE long
 valu(ulong n)
 {
 #if 1
@@ -443,7 +450,7 @@ gpf(GEN n)
 }
 
 
-GEN
+static GEN
 prodtree(GEN A, long start, long stop)
 {
   pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
@@ -503,7 +510,7 @@ prodtree(GEN A, long start, long stop)
 }
 
 
-GEN
+static GEN
 prodtree_small(GEN A, long start, long stop)
 {
   pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
@@ -806,7 +813,7 @@ lpf(GEN n)
 
 
 // TODO: Would be much more efficient to just walk through the primelist...
-ulong
+static ulong
 ucomposite(long n)
 {
   if (n < 2)
