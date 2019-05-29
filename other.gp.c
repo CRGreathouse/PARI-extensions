@@ -351,7 +351,7 @@ checkVDW(GEN vv, GEN verbose)
     set_avma(ltop);
     return gen_0;
   }
-  k = gaddgs(longestProgression(gel(vv, 1)), 1);
+  k = addis(longestProgression(gel(vv, 1)), 1);
   {
     pari_sp btop = avma, st_lim = stack_lim(btop, 1);
     GEN i = gen_0;
@@ -362,8 +362,7 @@ checkVDW(GEN vv, GEN verbose)
     }
   }
   if (!gequal0(verbose)) pari_printf("W(%Ps, %Ps) > %ld\n", r, k, glength(c));
-  k = gerepileupto(ltop, k);
-  return k;
+  return gerepileuptoint(ltop, k);
 }
 
 
@@ -406,8 +405,8 @@ longestProgression(GEN v)
         pari_sp dtop = avma;
         while (setsearch(s, gadd(gel(v, gtos(i)), gmul(d, t)), 0))
         {
-          t = gaddgs(t, 1);
-          t = gerepileupto(dtop, t);
+          t = addis(t, 1);
+          t = gerepileuptoint(dtop, t);
         }
         r = gmax(r, t);
         if (low_stack(c_lim, stack_lim(ctop, 1)))
