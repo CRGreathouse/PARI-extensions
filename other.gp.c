@@ -296,7 +296,7 @@ pBounds(GEN n, GEN verbose, long prec)
 /******************************************************************************/
 
 /*
-GP;install("checkVDW","D0,G,DG","checkVDW","./auto.gp.so");
+GP;install("checkVDW","lD0,G,DG","checkVDW","./auto.gp.so");
 GP;addhelp(checkVDW, "checkVDW(vv): Given a partition vv = [p1, p2, ...] with union(p1, p2, ...) = [1, 2, ..., n], finds a lower-bound proof for van der Waerden numbers based on the partition. Returns 0 if vv is not a partition of any initial segment, and k if vv proves that W(#vv, k) > n.");
 */
 /**
@@ -306,11 +306,12 @@ GP;addhelp(checkVDW, "checkVDW(vv): Given a partition vv = [p1, p2, ...] with un
  * @param verbose 1 to print additional details or 0 to omit
  * @return GEN Returns 0 if vv is not a partition of any initial segment, and k if vv proves that W(#vv, k) > n.
  */
-GEN
+long
 checkVDW(GEN vv, GEN verbose)
 {
   pari_sp ltop = avma;
-  GEN r, k = gen_0, s = gen_0, c;
+  GEN r, s = gen_0, c;
+  long k = 0;
   if (!verbose) verbose = gen_1;
   r = stoi(glength(vv));
   c = cgetg(1, t_VEC);
@@ -324,7 +325,7 @@ checkVDW(GEN vv, GEN verbose)
         if (!gequal0(verbose))
           pari_printf("Not a partition: numbers repeated in color %Ps.\n", i);
         set_avma(ltop);
-        return gen_0;
+        return 0;
       }
       s = gaddgs(s, glength(gel(vv, gtos(i))));
       c = concat(c, gel(vv, gtos(i)));
@@ -338,8 +339,7 @@ checkVDW(GEN vv, GEN verbose)
     if (!gequal0(verbose))
       pari_printf(
         "Not a natural number partition: negative numbers in a member array.\n");
-    set_avma(ltop);
-    return gen_0;
+    return gc_long(ltop, 0);
   }
   if ((gcmpgs(gel(c, 1), 1) > 0) ||
       (gcmpgs(gel(c, glength(c)), glength(c)) > 0))
@@ -348,81 +348,68 @@ checkVDW(GEN vv, GEN verbose)
       pari_printf(
         "Not a partition of an initial segment: not all numbers {1, 2, ..., %Ps} appear.\n",
         gel(c, glength(c)));
-    set_avma(ltop);
-    return gen_0;
+    return gc_long(ltop, 0);
   }
-  k = addis(longestProgression(gel(vv, 1)), 1);
+  k = longestProgression(gel(vv, 1)) + 1;
   {
     pari_sp btop = avma, st_lim = stack_lim(btop, 1);
     GEN i = gen_0;
     for (i = gen_2; gcmp(i, r) <= 0; i = gaddgs(i, 1))
     {
-      k = gmax(k, gaddgs(longestProgression(gel(vv, gtos(i))), 1));
-      if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 2, &i, &k);
+      k = maxss(k, longestProgression(gel(vv, gtos(i))) + 1);
+      if (low_stack(st_lim, stack_lim(btop, 1))) i = gerepileuptoint(btop, i);
     }
   }
-  if (!gequal0(verbose)) pari_printf("W(%Ps, %Ps) > %ld\n", r, k, glength(c));
-  return gerepileuptoint(ltop, k);
+  if (!gequal0(verbose)) pari_printf("W(%Ps, %d) > %ld\n", r, k, glength(c));
+  return k;
 }
 
 
 /*
-GP;install("longestProgression","D0,G,","longestProgression","./auto.gp.so");
-GP;addhelp(longestProgression, "longestProgression(v): Finds the length of the longest arithmetic progression in v. Assumes that v is a vector of integers sorted from smallest to largest. Uses a space-efficient naive algorithm.");
+GP;install("longestProgression","lD0,G,","longestProgression","./auto.gp.so");
+GP;addhelp(longestProgression, "longestProgression(s): Finds the length of the longest arithmetic progression in s. Assumes that s is a set of integers, that is, is sorted from smallest to largest. Uses a space-efficient naive algorithm.");
 */
 /**
- * @brief Finds the length of the longest arithmetic progression in the given vector.
+ * @brief Finds the length of the longest arithmetic progression in the given set s of integers.
  * 
  * @param v A vector
  * @return GEN Length of the longest arithmetic progression
  */
-GEN
+long
 longestProgression(GEN v)
 {
+  if(!is_vec_t(typ(v))) pari_err_TYPE("longestProgression", v);
   pari_sp ltop = avma;
-  GEN r = gen_0, s, t = gen_0, d = gen_0;
-  long l2;
-  if (glength(v) < 3)
+  if (!setisset(v)) v = gtoset(v);
+  long len = glength(v), i, r = 0;
+  if (len < 3)
   {
-    return stoi(gc_long(ltop, glength(v)));
+    return gc_long(ltop, len);
   }
-  s = gtoset(v);
-  l2 = glength(v) - 1;
+
+  for (i = 1; i < len; ++i)
   {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    GEN i = gen_0, p3 = gen_0;
-    long l4;
-    for (i = gen_1; gcmpgs(i, l2) <= 0; i = gaddgs(i, 1))
+    long j;
+    pari_sp btop = avma;
+    for (j = i+1; j <= len; ++j)
     {
-      p3 = gaddgs(i, 1);
-      l4 = glength(v);
-      pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
-      GEN j = gen_0;
-      for (j = p3; gcmpgs(j, l4) <= 0; j = gaddgs(j, 1))
+      long t = 2;
+      GEN d = subii(gel(v, j), gel(v, i));
+      pari_sp ctop = avma;
+      while (setsearch(v, addii(gel(v, i), mulis(d, t)), 0))
       {
-        t = gen_2;
-        d = gsub(gel(v, gtos(j)), gel(v, gtos(i)));
-        pari_sp dtop = avma;
-        while (setsearch(s, gadd(gel(v, gtos(i)), gmul(d, t)), 0))
-        {
-          t = addis(t, 1);
-          t = gerepileuptoint(dtop, t);
-        }
-        r = gmax(r, t);
-        if (low_stack(c_lim, stack_lim(ctop, 1)))
-          gerepileall(ctop, 4, &j, &t, &d, &r);
+        ++t;
       }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepileall(btop, 5, &i, &p3, &t, &d, &r);
+      r = maxss(r, t);
+      set_avma(ctop);
     }
+    set_avma(btop);
   }
-  r = gerepileupto(ltop, r);
-  return r;
+  return gc_long(ltop, r);
 }
 
-
 /*
-GP;install("longestProgression1","D0,G,","longestProgression1","./auto.gp.so");
+GP;install("longestProgression1","lD0,G,","longestProgression1","./auto.gp.so");
 GP;addhelp(longestProgression1, "longestProgression1(v): Uses a quadratic algorithm of Jeff Erickson, which is worst-case optimal; better algorithms are available when there are long progressions (> lg #v lg lg #v).");
 */
 /**
@@ -431,82 +418,58 @@ GP;addhelp(longestProgression1, "longestProgression1(v): Uses a quadratic algori
  * @param v A vector
  * @return GEN Length of the longest arithmetic progression
  */
-GEN
+long
 longestProgression1(GEN v)
 {
+  if(!is_vec_t(typ(v))) pari_err_TYPE("longestProgression1", v);
   pari_sp ltop = avma;
-  GEN Lstar = gen_2, L = gen_0, i = gen_0, k = gen_0, tmp = gen_0;
-  long l1, l2;
-  GEN p3; /* vec */
-  long l4, l5;
-  l1 = glength(v);
-  l2 = glength(v);
+  GEN L;
+  long Lstar = 2, len = glength(v), len1 = len + 1, l6, l7;
+  L = cgetg(len1, t_MAT);
+  for (l7 = 1; l7 <= len; ++l7)
   {
-    long l6, l7;
-    p3 = cgetg(l1 + 1, t_MAT);
-    for (l7 = 1; l7 <= l1; ++l7)
+    gel(L, l7) = cgetg(len1, t_COL);
+    for (l6 = 1; l6 <= len; ++l6)
+      gcoeff(L, l6, l7) = gen_0;
+  }
+  if (len < 3)
+  {
+    return gc_long(ltop, len);
+  }
+  pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+  long j;
+  for (j = len - 1; j >= 1; --j)
+  {
+    long i = j - 1, k = j + 1;
+    pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
+    while (i > 0 && k <= len)
     {
-      gel(p3, l7) = cgetg(l2 + 1, t_COL);
-      for (l6 = 1; l6 <= l2; ++l6)
-        gcoeff(p3, l6, l7) = gen_0;
+      GEN tmp = subii(addii(gel(v, i), gel(v, k)), mulis(gel(v, j), 2));
+      if (signe(tmp) < 0)
+      {
+        ++k;
+      }
+      else if (signe(tmp) > 0)
+      {
+        gcoeff(L, i, j) = gen_2;
+        --i;
+      }
+      else
+      {
+        gcoeff(L, i, j) = addis(gcoeff(L, j, k), 1);
+        Lstar = maxss(Lstar, itos(gcoeff(L, i, j)));
+        --i;
+        ++k;
+      }
+      if (low_stack(c_lim, stack_lim(ctop, 1))) L = gerepileupto(ctop, L);
     }
-  }
-  L = p3;
-  if (glength(v) < 3)
-  {
-    return stoi(gc_long(ltop, glength(v)));
-    avma = ltop;
-    return stoi(l4);
-  }
-  l5 = glength(v) - 1;
-  {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    GEN j = gen_0;
-    long l8 = -1 > 0; /* bool */
-    for (j = stoi(l5); l8 ? gcmpgs(j, 1) <= 0 : gcmpgs(j, 1) >= 0;
-         j = gaddgs(j, -1))
+    while (i-- > 0)
     {
-      i = gsubgs(j, 1);
-      k = gaddgs(j, 1);
-      pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
-      while ((gcmpgs(i, 0) > 0) && (gcmpgs(k, glength(v)) <= 0))
-      {
-        tmp = gsub(gadd(gel(v, gtos(i)), gel(v, gtos(k))),
-                   gmulsg(2, gel(v, gtos(j))));
-        if (gcmpgs(tmp, 0) < 0)
-          k = gaddgs(k, 1);
-        else
-        {
-          if (gcmpgs(tmp, 0) > 0)
-          {
-            gcoeff(L, gtos(i), gtos(j)) = gen_2;
-            i = gsubgs(i, 1);
-          }
-          else
-          {
-            gcoeff(L, gtos(i), gtos(j)) =
-              gaddgs(gcoeff(L, gtos(j), gtos(k)), 1);
-            Lstar = gmax(Lstar, gcoeff(L, gtos(i), gtos(j)));
-            i = gsubgs(i, 1);
-            k = gaddgs(k, 1);
-          }
-        }
-        if (low_stack(c_lim, stack_lim(ctop, 1)))
-          gerepileall(ctop, 5, &tmp, &k, &L, &i, &Lstar);
-      }
-      ctop = avma;
-      c_lim = stack_lim(ctop, 1);
-      while (gcmpgs(i, 0) > 0)
-      {
-        gcoeff(L, gtos(i), gtos(j)) = gen_2;
-        i = gsubgs(i, 1);
-        if (low_stack(c_lim, stack_lim(ctop, 1))) gerepileall(ctop, 2, &L, &i);
-      }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepileall(btop, 6, &j, &i, &k, &tmp, &L, &Lstar);
+      gcoeff(L, i, j) = gen_2;
     }
+    if (low_stack(st_lim, stack_lim(btop, 1))) L = gerepileupto(btop, L);
   }
-  Lstar = gerepileupto(ltop, Lstar);
+  set_avma(ltop);
   return Lstar;
 }
 
