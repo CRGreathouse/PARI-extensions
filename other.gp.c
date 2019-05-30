@@ -181,42 +181,23 @@ GP;addhelp(diffset, "diffset(A, B): Set of all numbers of the form a-b, a in A, 
  * @return GEN Difference set of a and b
  */
 GEN
-diffset(GEN a, GEN b) /* vecsmall */
+diffset(GEN a, GEN b)
 {
   pari_sp ltop = avma;
-  GEN c;
-  long l1;
-  GEN p2; /* vec */
-  long l3;
-  GEN p4; /* vecsmall */
-  l1 = glength(a) * glength(b);
+  long lenA = glength(a), lenB = glength(b);
+  GEN c = cgetg(lenA * lenB + 1, t_VEC);
+  pari_sp btop = avma, st_lim = stack_lim(btop, 1);
+  long i, k = 0;
+  for (i = 1; i <= lenA; ++i)
   {
-    long l5;
-    p2 = cgetg(l1 + 1, t_VEC);
-    for (l5 = 1; l5 <= l1; ++l5)
-      gel(p2, l5) = gen_0;
-  }
-  c = p2;
-  l3 = glength(a);
-  {
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    long i, l6;
-    for (i = 1; i <= l3; ++i)
+    long j;
+    for (j = 1; j <= lenB; ++j)
     {
-      l6 = glength(b);
-      pari_sp ctop = avma, c_lim = stack_lim(ctop, 1);
-      long j;
-      for (j = 1; j <= l6; ++j)
-      {
-        gel(c, ((i - 1) * glength(b)) + j) = gsub(gel(a, i), gel(b, j));
-        if (low_stack(c_lim, stack_lim(ctop, 1))) c = gerepilecopy(ctop, c);
-      }
-      if (low_stack(st_lim, stack_lim(btop, 1))) c = gerepilecopy(btop, c);
+      gel(c, ++k) = gsub(gel(a, i), gel(b, j));
     }
+    if (low_stack(st_lim, stack_lim(btop, 1))) c = gerepileupto(btop, c);
   }
-  p4 = vecsort0(geval(gtoset(c)), NULL, 0);
-  p4 = gerepileuptoleaf(ltop, p4);
-  return p4;
+  return gerepileupto(ltop, gtoset(c));
 }
 
 
