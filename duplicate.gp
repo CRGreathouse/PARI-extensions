@@ -967,15 +967,14 @@ addhelp(diffset,"diffset(A, B) is the set of all numbers of the form a-b, a in A
 
 normd(a,b)=
 {
-	\\ Infinities
-	if(a==[-1],
-		return(if (b==[+1], 1, -erfc(b/sqrt(2))/2))
+	if(a==-oo,
+		return(if (b==oo, 1, 1-erfc(b/sqrt(2))/2))
 	);
-	if(b==[1], return(erfc(a/sqrt(2))/2));
+	if(b==oo, return(erfc(a/sqrt(2))/2));
 	
 	(erfc(a/sqrt(2))-erfc(b/sqrt(2)))/2;
 }
-addhelp(normd, "normd(a,b): Amount of the normal distribution between a and b standard deviations. Plus/minus infinity coded as [+1]/[-1].");
+addhelp(normd, "normd(a,b): Amount of the normal distribution between a and b standard deviations. a and b can be numeric or plus/minus infinity {-oo, +oo}.");
 
 
 rnormal()=
