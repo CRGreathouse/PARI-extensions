@@ -6,6 +6,47 @@ default(timer, 0);
 \\ *					Working space
 \\ ***************************************************************************************************
 
+/*
+time(ff,lim,sz=0)={
+	my(tEmpty,tNull,tFunc,timeRange,appx,gg);
+	sz=floor(sz)+1;
+	(gg=n->0);
+	gettime();
+	for(n=sz,lim+sz,gg(n));
+	tEmpty=gettime();
+	for(n=sz,lim+sz,ff(n));
+	tFunc=gettime();
+	for(n=sz,lim+sz,);
+	tNull=gettime();
+	timeRange=[tFunc - tEmpty, tFunc - tNull] / lim;
+	appx = (timeRange[1] + timeRange[2])/2;
+	if (appx < .001, print("About "round(appx*1000000)" ns"),
+	if (appx < 1, print("About "round(appx*1000)" µs"),
+	if (appx < 1000, print("About "round(appx)" ms"),
+	print("About "round(appx/1000)" s")
+	)));
+	precision(timeRange/1000,9)	\\ Convert to seconds
+};
+
+
+vdiff(v1,v2)={
+	my(i=1,j=1);
+	while(i<=#v1 && j<=#v2,
+		if (v1[i] == v2[j],
+			i++;
+			j++
+		,
+			if (v1[i] < v2[j],
+				print("Second vector missing "v1[i]);
+				i++
+			,
+				print("First vector missing "v2[j]);
+				j++
+			)
+		)
+	);
+};
+*/
 
 
 \\ ***************************************************************************************************
@@ -62,27 +103,6 @@ ploth(x=1,2,sin(x));
 addhelp(plt, "plt(mn, mx, ff, flags, n): Make a high-resolution plot of the int");
 
 
-shortestPath(G, startAt)={
-	my(n=#G[,1],dist=vector(n,i,9e99),prev=dist,Q=2^n-1);
-	dist[startAt]=0;
-	while(Q,
-		my(t=vecmin(vecextract(dist,Q)),u);
-		if(t==9e99, break);
-		for(i=1,#v,if(dist[i]==t && bittest(Q,i-1), u=i; break));
-		Q-=1<<(u-1);
-		for(i=1,n,
-			if(!G[u,i],next);
-			my(alt=dist[u]+G[u,i]);
-			if (alt < dist[i],
-				dist[i]=alt;
-				prev[i]=u;
-			)
-		)
-	);
-	dist
-};
-
-
 \\ Characteristic function of A
 \\ output sequence b_n = 1 if n if exist k : a_k == n
 \\ otherwise b_n = 0
@@ -126,125 +146,6 @@ ways(v, n)={
 	w
 };
 addhelp(ways, "ways(v, n): Given an increasing vector v of positive integers, return an n-element vector w so that w[i] is the number of ways (with ordering) to sum elements of v to get i.");
-
-
-/*
-
-time(ff,lim,sz=0)={
-	my(tEmpty,tNull,tFunc,timeRange,appx,gg);
-	sz=floor(sz)+1;
-	(gg=n->0);
-	gettime();
-	for(n=sz,lim+sz,gg(n));
-	tEmpty=gettime();
-	for(n=sz,lim+sz,ff(n));
-	tFunc=gettime();
-	for(n=sz,lim+sz,);
-	tNull=gettime();
-	timeRange=[tFunc - tEmpty, tFunc - tNull] / lim;
-	appx = (timeRange[1] + timeRange[2])/2;
-	if (appx < .001, print("About "round(appx*1000000)" ns"),
-	if (appx < 1, print("About "round(appx*1000)" µs"),
-	if (appx < 1000, print("About "round(appx)" ms"),
-	print("About "round(appx/1000)" s")
-	)));
-	precision(timeRange/1000,9)	\\ Convert to seconds
-};
-
-
-find(m,mn,startAt)={
-	my(w,startAt);
-	if(startAt==0,
-		startAt = m
-	,
-		startAt = (startAt \ (m + m)) * (m + m) + m
-	);
-	forstep(n=startAt,9e999,m+m,
-		w=ways2(n);
-		if(w>mn,
-			print(w" "n" = "fnice(n));
-			return([w,n])
-		)
-	)
-};
-
-intersect(v1,v2)={
-	my(i=1,j=1,v=[]);
-	while(i<=#v1&&j<=#v2,
-		if(v1[i]==v2[j],
-			v=concat(v,v1[i]);
-			i++;
-			j++
-		,
-			if(v1[i]>v2[j],j++,i++)
-		)
-	);
-	v
-};
-addhelp(intersect, "intersect(v1,v2): Intersection of the sorted sets v1 and v2.");
-
-
-doesintersect(v1,v2)={
-	my(i=1,j=1,v=[]);
-	while(i<=#v1&&j<=#v2,
-		if(v1[i]==v2[j],
-			return(1)
-		,
-			if(v1[i]>v2[j],j++,i++)
-		)
-	);
-	0
-};
-
-
-ord(a,p)={
-	my(f=factor(p-1),T=1,q,b);
-	for(i=1,#f[,1],
-		q=f[i,1];
-		b=Mod(a,p)^((p-1)/q^f[i,2]);
-		while(b!=1,
-			T*=q;
-			b=b^q
-		)
-	);
-	T
-};
-
-
-isperf(n)={
-	my(f=factor(n),spf,nd,sig);
-\\print([spf,nd,sig]);
-	sig=prod(i=1,#f[,1],
-		if(f[i,2]==1,f[i,1]+1,(f[i,1]^(f[i,2]+1)-1)/(f[i,1]^f[i,2]-1))
-	);
-	if(issquare(sig,&sig),
-		nd=prod(i=1,#f[,1],f[i,2]+1);
-		spf=sum(i=1,#f[,1],f[i,1]);
-		sig==nd*spf
-	,
-		0
-	)
-};
-
-
-vdiff(v1,v2)={
-	my(i=1,j=1);
-	while(i<=#v1 && j<=#v2,
-		if (v1[i] == v2[j],
-			i++;
-			j++
-		,
-			if (v1[i] < v2[j],
-				print("Second vector missing "v1[i]);
-				i++
-			,
-				print("First vector missing "v2[j]);
-				j++
-			)
-		)
-	);
-};
-*/
 
 
 \\ ***************************************************************************************************
@@ -385,6 +286,19 @@ addhelp(Eisenstein, "Eisenstein(P): Given an irreducible polynomial P, searches 
 \\ ***************************************************************************************************
 \\ *	                                  Number theory                                              *
 \\ ***************************************************************************************************
+
+smooth(P:vec,lim)={
+	my(v=List([1]),nxt=vector(#P,i,1),indx,t);
+	while(1,
+		t=vecmin(vector(#P,i,v[nxt[i]]*P[i]),&indx);
+		if(t>lim,break);
+		if(t>v[#v],listput(v,t));
+		nxt[indx]++
+	);
+	Vec(v)
+};
+addhelp(smooth, "smooth(P, lim): Returns a list of the P-smooth numbers up to lim, where P is a vector of positive integers.");
+
 
 chVec(u:vec,v:vec,umod:int=0,vmod:int=0)={
 	if(umod,u=apply(n->Mod(n,umod),u));

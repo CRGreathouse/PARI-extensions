@@ -3,7 +3,58 @@
 \\ ***************************************************************************************************
 
 
-A024916(z) = 
+shortestPath(G, startAt)={
+	my(n=#G[,1],dist=vector(n,i,9e99),prev=dist,Q=2^n-1);
+	dist[startAt]=0;
+	while(Q,
+		my(t=vecmin(vecextract(dist,Q)),u);
+		if(t==9e99, break);
+		for(i=1,#v,if(dist[i]==t && bittest(Q,i-1), u=i; break));
+		Q-=1<<(u-1);
+		for(i=1,n,
+			if(!G[u,i],next);
+			my(alt=dist[u]+G[u,i]);
+			if (alt < dist[i],
+				dist[i]=alt;
+				prev[i]=u;
+			)
+		)
+	);
+	dist
+};
+
+
+ord(a,p)={
+	my(f=factor(p-1),T=1,q,b);
+	for(i=1,#f[,1],
+		q=f[i,1];
+		b=Mod(a,p)^((p-1)/q^f[i,2]);
+		while(b!=1,
+			T*=q;
+			b=b^q
+		)
+	);
+	T
+};
+
+
+isperf(n)={
+	my(f=factor(n),spf,nd,sig);
+\\print([spf,nd,sig]);
+	sig=prod(i=1,#f[,1],
+		if(f[i,2]==1,f[i,1]+1,(f[i,1]^(f[i,2]+1)-1)/(f[i,1]^f[i,2]-1))
+	);
+	if(issquare(sig,&sig),
+		nd=prod(i=1,#f[,1],f[i,2]+1);
+		spf=sum(i=1,#f[,1],f[i,1]);
+		sig==nd*spf
+	,
+		0
+	)
+};
+
+
+A024916(z)=
 {
 	my(s=z^2,p,n);
 	for(d=1, sqrtint(z),

@@ -251,17 +251,18 @@ addhelp(pan9, "pan9(n): Is the number a 1-to-9 pandigital (exactly 9 distinct di
 \\ *                          Obscure (but otherwise reusable) functions                             *
 \\ ***************************************************************************************************
 
-smooth(P:vec,lim)={
-	my(v=List([1]),nxt=vector(#P,i,1),indx,t);
-	while(1,
-		t=vecmin(vector(#P,i,v[nxt[i]]*P[i]),&indx);
-		if(t>lim,break);
-		if(t>v[#v],listput(v,t));
-		nxt[indx]++
+
+doesintersect(v1,v2)={
+	my(i=1,j=1,v=[]);
+	while(i<=#v1&&j<=#v2,
+		if(v1[i]==v2[j],
+			return(1)
+		,
+			if(v1[i]>v2[j],j++,i++)
+		)
 	);
-	Vec(v)
+	0
 };
-addhelp(smooth, "smooth(P, lim): Returns a list of the P-smooth numbers up to lim, where P is a vector of positive integers.");
 
 
 tMod(a:int,b:int,M:int)={

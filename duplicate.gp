@@ -7,6 +7,24 @@ default(timer, 0);
 \\ load the .run files.
 
 
+\\ Replaced by setintersect
+intersect(v1,v2)={
+	my(i=1,j=1,v=[]);
+	while(i<=#v1&&j<=#v2,
+		if(v1[i]==v2[j],
+			v=concat(v,v1[i]);
+			i++;
+			j++
+		,
+			if(v1[i]>v2[j],j++,i++)
+		)
+	);
+	v
+};
+addhelp(intersect, "intersect(v1,v2): Intersection of the sorted sets v1 and v2.");
+
+
+\\ Replaced by matpermanent
 matperm(M:mat)=
 {
 	my(n:small=matsize(M)[1],innerSums=vectorv(n));
