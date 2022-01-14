@@ -6,43 +6,11 @@ default(timer, 0);
 \\ *					Working space
 \\ ***************************************************************************************************
 
-isRicePoly(P:pol, verbose:bool=1)={
-	if(type(P)!="t_POL", error("Must be a polynomial"));
-	if(poldegree(P)<2, error("Degree must be >= 2"));
-	for(i=0,poldegree(P),
-		if(type(polcoeff(P,i))!="t_INT",error("Must be an integer polynomial"))
-	);
-	if(pollead(P)!=1, return(0));	\\ Must be monic
-	if(polcoeff(P,1), return(0));	\\ Linear coefficient must be 0
-	my(c=polcoeff(P,0));
-	if(abs(c)>=2, return(1));
-	if(c==0, return(0));		\\ P(0) cannot be 0
-	if(subst(P,variable(P),c)==0, return(0));	\\ P(P(0)) cannot be 0
-	if(verbose,
-		print("The sequence starting with "c" and iterating");
-		print(variable(P)," |--> ",nice(P));
-		print("is a superrigid divisibility sequence.")
-	);
-	1
-};
-addhelp(isRicePoly, "isRicePoly(P): Checks if a polynomial P fits the conditions for Proposition 3.2 in Brian Rice, 'Primitive Prime Divisors in Polynomial Arithmetic Dynamics', Integers 7:1 (2007).");
+
 
 \\ ***************************************************************************************************
 \\ *					Uncategorized
 \\ ***************************************************************************************************
-
-ries(x)={
-	if(type(x) != "t_REAL", error("Bad type in ries."));
-	system(Str("~/mth/ries ",x))
-};
-addhelp(ries, "ries(x): Feed a number to RIES.");
-
-
-yafu(n)={
-	if(type(n) != "t_INT", error("Bad type in yafu."));
-	system(Str("~/mth/yafu-1.34.3/yafu 'factor(",n,")'"))
-};
-addhelp(yafu, "yafu(n): Factor a number with yafu.");
 
 
 src(funcName:genstr)={
@@ -59,25 +27,9 @@ src(funcName:genstr)={
 addhelp(src, "src(funcName): Search the PARI source for a function (or #define) called funcName and display with context.");
 
 
-polygonArea(v:vec)={
-       if(type(v)!="t_VEC", error("Not a vector!"));
-       if(#v<6 || #v%2, error("Need an even number of coordinates representing at least 3 points."));
-       abs(sum(i=1,#v/2-1,v[2*i+2]*v[2*i-1]-v[2*i]*v[2*i+1],v[#v-1]*v[2]-v[#v]*v[1]))/2
-};
-addhelp(polygonArea, "polygonArea(v): Find the area of the polygon with points (v[1], v[2]), (v[3], v[4]), ..., (v[#v-1], v[#v]).");
-
-
-chVec(u:vec,v:vec,umod:int=0,vmod:int=0)={
-	if(umod,u=apply(n->Mod(n,umod),u));
-	if(vmod,v=apply(n->Mod(n,vmod),v));
-	vector(#u*#v,i,chinese(u[(i-1)%#u+1],v[(i-1)\#u+1]))
-};
-addhelp(chVec, "chVec(v, u, umod, vmod): Given a vector v mod vmod and a vector u mod umod, return a vector with one representative mod lcm(umod, vmod) which is u[i] mod umod and v[j] mod vmod.");
-
-
 isWardC(v:vec)={
 	my(aux=vector(#v),t);
-	if(#v==0,return(1));
+		if(#v==0,return(1));
 	aux[1]=v[1];
 	for(n=2,#v,
 		t=v[n];
@@ -129,306 +81,6 @@ shortestPath(G, startAt)={
 	);
 	dist
 };
-
-
-gammainv(x:real)={
-	if(x<5040,return(solve(y=1,8,gamma(y)-x)));
-	my(L=log(x));
-	solve(y=L/log(L),L,lngamma(y)-L)
-};
-addhelp(gammainv, "gammainv(x): Inverse gamma function.");
-
-
-rand(b:small)={
-	if(b<30,b--;return(factor(random(1<<b)+1<<b)));
-	while(1,
-		my(t=1,v=List());
-		forprime(p=2,127,	\\ prime factors with up to 7 bits
-			while(!random(p),t*=p; listput(v,p))
-		);
-		if (#binary(t)>b, next);
-		if(#binary(t)==b,return(list2fac(v)));
-		for(n=8,b,
-			my(lambda=log(n/(n-1)),x=random(1.)/exp(-lambda),k=0);
-			while(1,
-				x-=lambda^k/k!;
-				if(x<0,break);
-				listput(v,rp(n));
-				t*=v[#v];
-				if(#binary(t)>b,next(3));
-				if(#binary(t)==b,return(list2fac(v)));
-			)
-		);
-
-	)
-};
-addhelp(rand, "rand(b): Gives a random factored n-bit integer.");
-
-
-coin(v:vec)={
-	if(type(v)!="t_VEC", error("Must be a vector"));
-	for(i=1,#v,
-		if(type(v[i])!="t_INT" || v[i]<1,error("Must be a vector of positive integers"))
-	);
-	v=vecsort(v,,8);
-	my(g=vecgcd(v));
-	if(g>1,
-		print("All coins are a multiple of "g"; returning largest nonrepresentable multiple.");
-		return(g*coin(v/g))
-	);
-	if(#v==1,return(0));
-	if(#v==2,return(v[1]*v[2]-v[1]-v[2]));
-	if(#v==3,
-		my(a:int=v[1],b:int=v[2],c:int=v[3],A=gcd(b,c),B=gcd(a,c),C=gcd(a,b));
-		if(A>1||B>1||C>1,
-			\\ Johnson reduction
-			\\ not quite right -- G(a,a,c) != G(a,c)
-			error("fail");
-			my(a1=a/B/C,b1=b/A/C,c1=c/A/B);
-			return(A*B*C*(coin([a1,b1,c1])+a1+b1+c1)-a-b-c)
-		);
-		error("not quite implemented")
-	);
-	error("not implemented")
-};
-addhelp(coin, "coin(v): What is the largest number such that change cannot be made with zero or more coins of denomination v[1], v[2], .., v[#v]?  Usually called the coin problem or the Frobenius problem.");
-
-
-cons(x:real)={
-	my(t=precision(x),s=log(x)\log(10),v=vector(t));
-	x /= 10^s;
-	for(i=1,t,
-		v[i]=floor(x);
-		x = (x - floor(x)) * 10
-	);
-	v
-};
-addhelp(cons, "cons(x): Converts a constant into a sequence of decimal digits.");
-
-
-\\ Output format (work-in-progress):
-\\ [x1, y1, x2, y2, ..., xk, yk, c]: represents density c * x^x1 / log(x)^y1 * x^x2 / log(x)^y2 * ... * x^xk / log(x)^yk
-\\ [x1, y1, x2, y2, ..., xk, yk]: same, but with unknown constant.
-\\ Examples:
-\\ [k]			Exactly k primes
-\\ []			O(1) primes
-\\ [1, 1, 1]	(1 + o(1)) x/log(x) primes (the maximum)
-\\ [1/2, 1]		Theta(sqrt(x)/log(x)) primes -- not sure about which symbol to use, maybe O is better
-primesin(P:pol)={
-	my(t=type(P));
-	if (t=="t_INT",
-		return(if (isprime(P),
-			print("Contains 1 prime.");
-			[1]
-		,
-			print("Contains 0 primes.");
-			[0]
-		));
-	);
-	if (t=="t_FRAC" || t=="t_REAL",
-		print("Contains 0 primes.");
-		return([0])
-	);
-	if (t!="t_POL", error("bad type"));
-
-	if (poldegree(P) == 1,
-		my(a=polcoeff(P,1),b=polcoeff(P,0),g,t);
-		if (type(a) == "t_INT" && type(b) == "t_INT",
-			g=gcd(a,b);
-			if (g == 1,
-				t=eulerphi(a);
-				print("Infinitely many primes (Dirichlet), density n/log n * ",1/t);
-				return([1,1,1/t])
-			);
-			return(if (isprime(g) && (1 - b/g) % (a/g) == 0,
-				print("Contains 1 prime.");
-				[1]
-			,
-				print("Contains 0 primes.");
-				[0]
-			));
-		);
-	);
-	if (poldegree(P) > 2, error("Cannot be determined"));
-};
-addhelp(primesin, "primesin(P): Attempts to give the asymptotic number of primes in the polynomial P, either unconditionally or under standard conjectures. The output format is a vector, which represents:\n[x1, y1, x2, y2, ..., xk, yk, c]: density c * x^x1 / log(x)^y1 * x^x2 / log(x)^y2 * ... * x^xk / log(x)^yk\n[x1, y1, x2, y2, ..., xk, yk]: same, but with unknown leading term.");
-
-
-ConjectureFEmp(a:int,b:int,c:int,lim=1e6)={
-	my(s=0,n=0,k);
-	for(n=1,lim,
-		k=(a*n+b)*n+c;
-		if(k>lim,break);
-		s+=isprime(k)
-	);
-	2*s/Li(sqrt(lim))
-};
-addhelp(ConjectureFEmp, "ConjectureFEmp(a,b,c,{lim}): Helper function for ConjectureF, given integers a, b, and c as coefficients of ax^2 + bx + c.");
-
-
-ConjectureF(a:int,b:int,c:int,lim=1e6)={
-	my(D=b^2-4*a*c,g=gcd(a,b),f);
-print("Delta = "D);
-	if (a <= 0 || issquare(D) || gcd(g,c) > 1, return(0));
-	if ((a+b)%2 ==0 & c%2 == 0, return(0));
-
-	f=factor(g)[,1];
-	if(a+b%2, 1, 2)/sqrt(a) * prod(i=1,#f,f[i]/(f[i]-1)) * ConjectureF_C(D,lim)
-};
-addhelp(ConjectureF, "ConjectureF(a,b,c): Returns a number C such that there are ~ C*sqrt(x)/log(x) primes of the form an^2 + bn + c up to x, or 0 if there are o(sqrt(x)/log(x)) or Omega(sqrt(x)) such primes. Relies on the Hardy-Littlewood Conjecture F and possibly the ERH.");
-
-
-\\ prodinf(i=1,p=prime(i);1-kronecker(D,p)/(p-1))
-ConjectureF_C(D,lim=1e6)={
-	my(cf, pr=1., l=log(lim));
-	if (D < -4,
-		print("Fung & Williams 1990");
-		my(f=factor(oddres(-D))[,1], c = if(delta%8 == 1, 5/2, if (delta%8 == 5, 1/2, 15/16)));
-		\\ Corrects for the 1 - 1/p^3 (since kronecker(D,q) == 1 about half the time)
-		forprime(q=3,lim,if(kronecker(D,q)==1,pr*=1-2/q/(q-1)^2));
-		cf = -2*eint1(2*l) - (1-2*l)/2/lim^2/l^2;
-		pr *= 1 - cf;
-print("Correction: ", cf);
-		return(c * Pi^3 * sqrt(-D) / 90 / qfbclassno(D) / Lquad(D, 2) * prod(i=1,#f,1-1/f[i]^4) * pr)
-	);
-	if (D > 0,
-		print("Jacobson 1995");
-		\\ Possibly needed:
-		\\ QFBclassno(D) = qfbclassno(D) * if (D < 0 || norm(quadunit(D)) < 0, 1, 2)
-		my(f=factor(oddres(D))[,1], c = if(delta%8 == 1, 5/2, if (delta%8 == 5, 1/2, 15/16)));
-		forprime(q=3,lim,if(kronecker(D,q)==1,pr*=1-2/q/(q-1)^2));
-		\\ Corrects for the 1 - 1/p^3 (since kronecker(D,q) == 1 about half the time)
-		cf = -2*eint1(2*l) - (1-2*l)/2/lim^2/l^2;
-		pr *= 1 - cf;
-print("Correction: ", cf);
-		return(c * Pi^4 * sqrt(D) / 180 / quadregulator(D) / qfbclassno(D) / Lquad(D, 2) * prod(i=1,#f,1-1/f[i]^4) * pr)
-	);
-	if(1,
-		print("Keith Conrad"); \\ http://mathoverflow.net/questions/31150/calculating-the-infinite-product-from-the-hardy-littlewood-conjecture-f
-		my(t);
-		\\ Corrects for the 1 - 2/p^3
-		forprime(p=3,lim,t=kronecker(D,p);pr*=(1-t/(p-1))/(1-t/p));
-		cf = -4*eint1(2*l) - (1-2*l)/lim^2/l^2;
-		pr *= 1 - cf;
-print("Correction: ", cf);
-		return(pr/Lquad(D, 1));
-	);
-	print("Naive method");
-	\\ cf: the correction factor that estimates suminf(p=lim,-1/p^2) over the primes
-	\\ Corrects for the average of (1 - 1/p) and (1 + 1/p); not very useful.
-	cf=1/lim/l-eint1(l);
-	forprime(p=3,lim,pr*=1-kronecker(D,p)/(p-1));
-print("Correction: ", cf);
-	pr * (1 - cf)
-};
-addhelp(ConjectureF_C, "ConjectureF_C(D,{lim}): Helper function for ConjectureF, finding the infinite product in the Hardy-Littlewood Conjecture F.");
-
-
-hurwitz(s,x)={
-	my(a,res,tes,in,sig,t,m,pr,lim,nn,in2,s1,s2);
-	sig=real(x);
-	if (sig>1.5,
-		m=floor(sig-0.5);
-		return (hurwitz(s,x-m)-sum(i=1,m,(x-i)^(-s)))
-	);
-	if (sig<=0,
-		m=ceil(-sig+0.5);
-		return (hurwitz(s,x+m)+sum(i=0,m-1,(x+i)^(-s)))
-	);
-	pr=precision(1.);
-	sig=real(s);
-	t=imag(s);
-	default(realprecision,9);
-	res=s-1.;
-	res=if(abs(res)<0.1,-1,log(res));
-	lim=(pr*log(10)-real((s-.5)*res)+(1.*sig)*log(2.*Pi))/2;
-	lim=max(2,ceil(max(lim,abs(s*1.)/2)));
-	nn=ceil(sqrt((lim+sig/2-.25)^2+(t*1.)^2/4)/Pi);
-	default(realprecision,pr+5);
-	a=(x+nn+0.)^(-s);
-	res=sum(n=0,nn-1,(x+n)^(-s),a/2);
-	in=x+nn;
-	in2=1./(in*in);
-	s1=2*s-1;
-	s2=s*(s-1);
-	tes=bernreal(2*lim);
-	forstep (k=2*lim-2,2,-2,
-		tes=bernreal(k)+in2*(k*k+s1*k+s2)*tes/((k+1)*(k+2))
-	);
-	tes=in*(1+in2*s2*tes/2);
-	res+=tes*a/(s-1);
-	res=precision(res,pr);
-	default(realprecision,pr);
-	res
-};
-
-
-\\ (VIII.2) Complex L function, vector form. Chivec is a vector of complex
-\\ values, assumed to be the values from 1 to m of a periodic function. In
-\\ addition, with zero sum, such as a nontrivial character, if s=1.
-\\ simple implementation, for small m.
-Lsimp(chivec,s)={
-	my(m=#chivec);
-	if (s==1,
-		-sum(r=1,m,chivec[r]*psi(r/m))/m
-	,
-		sum(r=1,m,chivec[r]*hurwitz(s,r/m))/m^s
-	)
-};
-
-
-\\ (VIII.3) Complex L function of quadratic character, simple implementation
-\\ for small |D|.
-Lquad(D, s)={
-	my(v=vector(abs(D),i,kronecker(D,i)));
-	Lsimp(v,s)
-};
-
-
-forgap(ff)={
-	if(default(parisize) < 1e8,
-		print("Not enough memory!  Resizing, please rerun command.");
-		allocatemem(100<<20)	\\ Need ~200 MB of stack space!
-	);
-	for(i=0,13,
-		read(Str("gap200-chunk", if(i<10,"0",""), i));
-		trap(e_USER,
-			print("User error, ending loop...");
-			pg=0;
-			return()
-		,
-			for(j=1,#pg,
-				ff(pg[j])
-			)
-		);
-		pg=0
-	)
-};
-addhelp(forgap, "forgap(ff): Runs the command (closure) ff on each prime 2 < p < 10^12 starting a prime gap of length 200 or greater.");
-
-
-forpseudo(ff)={
-	if(default(parisize) < 2e8 && default(parisizemax) < 2e8,
-		print("Not enough memory!  Resizing, please rerun command.");
-		allocatemem(200<<20)	\\ Need ~200 MB of stack space!
-	);
-	for(i=0,89,
-		if(default(debug), print("Reading chunk ",i+1," of 90"));
-		read(concat("psp/psp-chunk", i));
-		trap(e_USER,
-			print("User error, ending loop...");
-			pspChunk=0;
-			return()
-		,
-			for(j=1,#pspChunk,
-				my(t=ff(pspChunk[j]));
-				if(t,pspChunk=0; return(t))
-			)
-		);
-		pspChunk=0
-	)
-};
-addhelp(forpseudo, "forpseudo(ff): Runs the command (closure) ff on each 2-pseudoprime up to 2^64.");
 
 
 \\ Characteristic function of A
@@ -595,6 +247,31 @@ vdiff(v1,v2)={
 */
 
 
+\\ ***************************************************************************************************
+\\ *	                                Real and complex functions
+\\ ***************************************************************************************************
+
+
+polygonArea(v:vec)={
+       if(type(v)!="t_VEC", error("Not a vector!"));
+       if(#v<6 || #v%2, error("Need an even number of coordinates representing at least 3 points."));
+       abs(sum(i=1,#v/2-1,v[2*i+2]*v[2*i-1]-v[2*i]*v[2*i+1],v[#v-1]*v[2]-v[#v]*v[1]))/2
+};
+addhelp(polygonArea, "polygonArea(v): Find the area of the polygon with points (v[1], v[2]), (v[3], v[4]), ..., (v[#v-1], v[#v]).");
+
+
+cons(x:real)={
+	my(t=precision(x),s=log(x)\log(10),v=vector(t));
+	x /= 10^s;
+	for(i=1,t,
+		v[i]=floor(x);
+		x = (x - floor(x)) * 10
+	);
+	v
+};
+addhelp(cons, "cons(x): Converts a constant into a sequence of decimal digits.");
+
+
 dotproduct(a:vec, b:vec)={
 	if(#a != #b,
 		error("dotproduct: vectors are not the same size")
@@ -604,57 +281,38 @@ dotproduct(a:vec, b:vec)={
 addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and b.");
 
 
+gammainv(x:real)={
+	if(x<5040,return(solve(y=1,8,gamma(y)-x)));
+	my(L=log(x));
+	solve(y=L/log(L),L,lngamma(y)-L)
+};
+addhelp(gammainv, "gammainv(x): Inverse gamma function.");
+
+
 \\ ***************************************************************************************************
 \\ *	                                    Polynomials                                              *
 \\ ***************************************************************************************************
 
-testPQ(P:pol,verbose:bool=0)={
-	my(disc=poldisc(P),lead=pollead(P),lin,quad);
-	forprime(p=2,,
-		if(lead%p==0, next);
-		my(f=lift(factor(Mod(P,p))[,1]),d=Set(apply(poldegree,f)));
-		if (d==[1],
-			lin++
-		, d==[2],
-			quad++
-		, d==[1,2] && disc%p==0,
-			\\ Ignore primes dividing the discriminant, they can factor into
-			\\ linear and quadratic factors.
-		,
-			if(verbose,
-				print("Fails at p = "p": "d" with factors "f)
-			);
-			return(0)
-		);
-		if(lin + quad > 1000, break)
+isRicePoly(P:pol, verbose:bool=1)={
+	if(type(P)!="t_POL", error("Must be a polynomial"));
+	if(poldegree(P)<2, error("Degree must be >= 2"));
+	for(i=0,poldegree(P),
+		if(type(polcoeff(P,i))!="t_INT",error("Must be an integer polynomial"))
 	);
+	if(pollead(P)!=1, return(0));	\\ Must be monic
+	if(polcoeff(P,1), return(0));	\\ Linear coefficient must be 0
+	my(c=polcoeff(P,0));
+	if(abs(c)>=2, return(1));
+	if(c==0, return(0));		\\ P(0) cannot be 0
+	if(subst(P,variable(P),c)==0, return(0));	\\ P(P(0)) cannot be 0
 	if(verbose,
-		print("Appears to be polyquadratic");
+		print("The sequence starting with "c" and iterating");
+		print(variable(P)," |--> ",nice(P));
+		print("is a superrigid divisibility sequence.")
 	);
-	[lin,quad]
+	1
 };
-
-
-isPolyquadratic(P:pol)={
-	if(type(P) != "t_POL", error("Not a polynomial in isPolyquadratic"));
-	if(!isZX(P), error("Not an integer polynomial in isPolyquadratic"));
-	if(!polisirreducible(P),
-		my(f=factor(P)[,1]);
-		for(i=1,#f,
-			if(!isPolyquadratic(f[i]), return(0))
-		);
-		return(1)
-	);
-	my(d=poldegree(P));
-	if (d < 3, return(1));
-	if (d>>valuation(d,2) != 1, return(0));
-	if (d < 16,
-		my(g=polgalois(P));
-		return(g == [4, 1, 1, "E(4) = 2[x]2"] || g == [8, 1, 3, "E(8)=2[x]2[x]2"])
-	);
-	if(testPQ(P,0), "probably polyquadratic", 0)
-};
-addhelp(isPolyquadratic, "isPolyquadratic(P): Are the roots of the integer polynomial P polyquadratic, i.e., the sum of rational multiples of square roots of integers?");
+addhelp(isRicePoly, "isRicePoly(P): Checks if a polynomial P fits the conditions for Proposition 3.2 in Brian Rice, 'Primitive Prime Divisors in Polynomial Arithmetic Dynamics', Integers 7:1 (2007).");
 
 
 finiteOrbit(f:pol, x:mp)={
@@ -728,11 +386,166 @@ addhelp(Eisenstein, "Eisenstein(P): Given an irreducible polynomial P, searches 
 \\ *	                                  Number theory                                              *
 \\ ***************************************************************************************************
 
+chVec(u:vec,v:vec,umod:int=0,vmod:int=0)={
+	if(umod,u=apply(n->Mod(n,umod),u));
+	if(vmod,v=apply(n->Mod(n,vmod),v));
+	vector(#u*#v,i,chinese(u[(i-1)%#u+1],v[(i-1)\#u+1]))
+};
+addhelp(chVec, "chVec(v, u, umod, vmod): Given a vector v mod vmod and a vector u mod umod, return a vector with one representative mod lcm(umod, vmod) which is u[i] mod umod and v[j] mod vmod.");
+
+
+rand(b:small)={
+	if(b<30,b--;return(factor(random(1<<b)+1<<b)));
+	while(1,
+		my(t=1,v=List());
+		forprime(p=2,127,	\\ prime factors with up to 7 bits
+			while(!random(p),t*=p; listput(v,p))
+		);
+		if (#binary(t)>b, next);
+		if(#binary(t)==b,return(list2fac(v)));
+		for(n=8,b,
+			my(lambda=log(n/(n-1)),x=random(1.)/exp(-lambda),k=0);
+			while(1,
+				x-=lambda^k/k!;
+				if(x<0,break);
+				listput(v,rp(n));
+				t*=v[#v];
+				if(#binary(t)>b,next(3));
+				if(#binary(t)==b,return(list2fac(v)));
+			)
+		);
+
+	)
+};
+addhelp(rand, "rand(b): Gives a random factored n-bit integer.");
+
+
+hurwitz(s,x)={
+	my(a,res,tes,in,sig,t,m,pr,lim,nn,in2,s1,s2);
+	sig=real(x);
+	if (sig>1.5,
+		m=floor(sig-0.5);
+		return (hurwitz(s,x-m)-sum(i=1,m,(x-i)^(-s)))
+	);
+	if (sig<=0,
+		m=ceil(-sig+0.5);
+		return (hurwitz(s,x+m)+sum(i=0,m-1,(x+i)^(-s)))
+	);
+	pr=precision(1.);
+	sig=real(s);
+	t=imag(s);
+	default(realprecision,9);
+	res=s-1.;
+	res=if(abs(res)<0.1,-1,log(res));
+	lim=(pr*log(10)-real((s-.5)*res)+(1.*sig)*log(2.*Pi))/2;
+	lim=max(2,ceil(max(lim,abs(s*1.)/2)));
+	nn=ceil(sqrt((lim+sig/2-.25)^2+(t*1.)^2/4)/Pi);
+	default(realprecision,pr+5);
+	a=(x+nn+0.)^(-s);
+	res=sum(n=0,nn-1,(x+n)^(-s),a/2);
+	in=x+nn;
+	in2=1./(in*in);
+	s1=2*s-1;
+	s2=s*(s-1);
+	tes=bernreal(2*lim);
+	forstep (k=2*lim-2,2,-2,
+		tes=bernreal(k)+in2*(k*k+s1*k+s2)*tes/((k+1)*(k+2))
+	);
+	tes=in*(1+in2*s2*tes/2);
+	res+=tes*a/(s-1);
+	res=precision(res,pr);
+	default(realprecision,pr);
+	res
+};
+
+
+\\ (VIII.2) Complex L function, vector form. Chivec is a vector of complex
+\\ values, assumed to be the values from 1 to m of a periodic function. In
+\\ addition, with zero sum, such as a nontrivial character, if s=1.
+\\ simple implementation, for small m.
+Lsimp(chivec,s)={
+	my(m=#chivec);
+	if (s==1,
+		-sum(r=1,m,chivec[r]*psi(r/m))/m
+	,
+		sum(r=1,m,chivec[r]*hurwitz(s,r/m))/m^s
+	)
+};
+
+
+\\ (VIII.3) Complex L function of quadratic character, simple implementation
+\\ for small |D|.
+Lquad(D, s)={
+	my(v=vector(abs(D),i,kronecker(D,i)));
+	Lsimp(v,s)
+};
+
+
+forgap(ff)={
+	if(default(parisize) < 1e8,
+		print("Not enough memory!  Resizing, please rerun command.");
+		allocatemem(100<<20)	\\ Need ~200 MB of stack space!
+	);
+	for(i=0,13,
+		read(Str("gap200-chunk", if(i<10,"0",""), i));
+		trap(e_USER,
+			print("User error, ending loop...");
+			pg=0;
+			return()
+		,
+			for(j=1,#pg,
+				ff(pg[j])
+			)
+		);
+		pg=0
+	)
+};
+addhelp(forgap, "forgap(ff): Runs the command (closure) ff on each prime 2 < p < 10^12 starting a prime gap of length 200 or greater.");
+
+
+forpseudo(ff)={
+	if(default(parisize) < 2e8 && default(parisizemax) < 2e8,
+		print("Not enough memory!  Resizing, please rerun command.");
+		allocatemem(200<<20)	\\ Need ~200 MB of stack space!
+	);
+	for(i=0,89,
+		if(default(debug), print("Reading chunk ",i+1," of 90"));
+		read(concat("psp/psp-chunk", i));
+		trap(e_USER,
+			print("User error, ending loop...");
+			pspChunk=0;
+			return()
+		,
+			for(j=1,#pspChunk,
+				my(t=ff(pspChunk[j]));
+				if(t,pspChunk=0; return(t))
+			)
+		);
+		pspChunk=0
+	)
+};
+addhelp(forpseudo, "forpseudo(ff): Runs the command (closure) ff on each 2-pseudoprime up to 2^64.");
+
+
 sqrtformal(n:int)={
 	my([d,f]=core(n,1));
 	if(d>1,quadgen(4*d),1)*f
 };
 addhelp(sqrtformal, "sqrtformal(n): Returns a number (t_QUAD or t_INT) representing the square root of n.");
+
+
+ries(x)={
+	if(type(x) != "t_REAL", error("Bad type in ries."));
+	system(Str("~/mth/ries ",x))
+};
+addhelp(ries, "ries(x): Feed a number to RIES.");
+
+
+yafu(n)={
+	if(type(n) != "t_INT", error("Bad type in yafu."));
+	system(Str("~/mth/yafu-1.34.3/yafu 'factor(",n,")'"))
+};
+addhelp(yafu, "yafu(n): Factor a number with yafu.");
 
 
 factordb(n)={
@@ -872,16 +685,6 @@ rsp(b:small,flag:small=0)={
 	)
 };
 addhelp(rsp, "rsp(b, {flag=0}): Generates a random b-bit semiprime. The bits of flag mean: 1: returns the factorization of the number instead of the number, 2: return worst-case semiprimes rather than average semiprimes.");
-
-
-/*
-bestappr2(x, n)={
-	my(b=bestappr(x, n), cf=contfrac(x, #contfrac(b)+1), lower=ceil(cf[#cf]/2), upper=cf[#cf]);
-	cf[#cf] = lower;
-	contfracback(cf)
-};
-addhelp(bestappr2, "bestappr2(x, n): Work-in-progress.  Should determine the best rational approximation of x with denominator up to n.");
-*/
 
 
 \\ ***************************************************************************************************
@@ -1522,6 +1325,211 @@ addhelp(pBounds, "pBounds(n, verbose=0): Estimates the nth prime. Set verbose=1 
 \\ ***************************************************************************************************
 \\ *					Works-in-progress						*
 \\ ***************************************************************************************************
+
+/*
+bestappr2(x, n)={
+	my(b=bestappr(x, n), cf=contfrac(x, #contfrac(b)+1), lower=ceil(cf[#cf]/2), upper=cf[#cf]);
+	cf[#cf] = lower;
+	contfracback(cf)
+};
+addhelp(bestappr2, "bestappr2(x, n): Work-in-progress.  Should determine the best rational approximation of x with denominator up to n.");
+*/
+
+testPQ(P:pol,verbose:bool=0)={
+	my(disc=poldisc(P),lead=pollead(P),lin,quad);
+	forprime(p=2,,
+		if(lead%p==0, next);
+		my(f=lift(factor(Mod(P,p))[,1]),d=Set(apply(poldegree,f)));
+		if (d==[1],
+			lin++
+		, d==[2],
+			quad++
+		, d==[1,2] && disc%p==0,
+			\\ Ignore primes dividing the discriminant, they can factor into
+			\\ linear and quadratic factors.
+		,
+			if(verbose,
+				print("Fails at p = "p": "d" with factors "f)
+			);
+			return(0)
+		);
+		if(lin + quad > 1000, break)
+	);
+	if(verbose,
+		print("Appears to be polyquadratic");
+	);
+	[lin,quad]
+};
+
+
+isPolyquadratic(P:pol)={
+	if(type(P) != "t_POL", error("Not a polynomial in isPolyquadratic"));
+	if(!isZX(P), error("Not an integer polynomial in isPolyquadratic"));
+	if(!polisirreducible(P),
+		my(f=factor(P)[,1]);
+		for(i=1,#f,
+			if(!isPolyquadratic(f[i]), return(0))
+		);
+		return(1)
+	);
+	my(d=poldegree(P));
+	if (d < 3, return(1));
+	if (d>>valuation(d,2) != 1, return(0));
+	if (d < 16,
+		my(g=polgalois(P));
+		return(g == [4, 1, 1, "E(4) = 2[x]2"] || g == [8, 1, 3, "E(8)=2[x]2[x]2"])
+	);
+	if(testPQ(P,0), "probably polyquadratic", 0)
+};
+addhelp(isPolyquadratic, "isPolyquadratic(P): Are the roots of the integer polynomial P polyquadratic, i.e., the sum of rational multiples of square roots of integers?");
+
+
+coin(v:vec)={
+	if(type(v)!="t_VEC", error("Must be a vector"));
+	for(i=1,#v,
+		if(type(v[i])!="t_INT" || v[i]<1,error("Must be a vector of positive integers"))
+	);
+	v=vecsort(v,,8);
+	my(g=vecgcd(v));
+	if(g>1,
+		print("All coins are a multiple of "g"; returning largest nonrepresentable multiple.");
+		return(g*coin(v/g))
+	);
+	if(#v==1,return(0));
+	if(#v==2,return(v[1]*v[2]-v[1]-v[2]));
+	if(#v==3,
+		my(a:int=v[1],b:int=v[2],c:int=v[3],A=gcd(b,c),B=gcd(a,c),C=gcd(a,b));
+		if(A>1||B>1||C>1,
+			\\ Johnson reduction
+			\\ not quite right -- G(a,a,c) != G(a,c)
+			error("fail");
+			my(a1=a/B/C,b1=b/A/C,c1=c/A/B);
+			return(A*B*C*(coin([a1,b1,c1])+a1+b1+c1)-a-b-c)
+		);
+		error("not quite implemented")
+	);
+	error("not implemented")
+};
+addhelp(coin, "coin(v): What is the largest number such that change cannot be made with zero or more coins of denomination v[1], v[2], .., v[#v]?  Usually called the coin problem or the Frobenius problem.");
+
+
+\\ Output format (work-in-progress):
+\\ [x1, y1, x2, y2, ..., xk, yk, c]: represents density c * x^x1 / log(x)^y1 * x^x2 / log(x)^y2 * ... * x^xk / log(x)^yk
+\\ [x1, y1, x2, y2, ..., xk, yk]: same, but with unknown constant.
+\\ Examples:
+\\ [k]			Exactly k primes
+\\ []			O(1) primes
+\\ [1, 1, 1]	(1 + o(1)) x/log(x) primes (the maximum)
+\\ [1/2, 1]		Theta(sqrt(x)/log(x)) primes -- not sure about which symbol to use, maybe O is better
+primesin(P:pol)={
+	my(t=type(P));
+	if (t=="t_INT",
+		return(if (isprime(P),
+			print("Contains 1 prime.");
+			[1]
+		,
+			print("Contains 0 primes.");
+			[0]
+		));
+	);
+	if (t=="t_FRAC" || t=="t_REAL",
+		print("Contains 0 primes.");
+		return([0])
+	);
+	if (t!="t_POL", error("bad type"));
+
+	if (poldegree(P) == 1,
+		my(a=polcoeff(P,1),b=polcoeff(P,0),g,t);
+		if (type(a) == "t_INT" && type(b) == "t_INT",
+			g=gcd(a,b);
+			if (g == 1,
+				t=eulerphi(a);
+				print("Infinitely many primes (Dirichlet), density n/log n * ",1/t);
+				return([1,1,1/t])
+			);
+			return(if (isprime(g) && (1 - b/g) % (a/g) == 0,
+				print("Contains 1 prime.");
+				[1]
+			,
+				print("Contains 0 primes.");
+				[0]
+			));
+		);
+	);
+	if (poldegree(P) > 2, error("Cannot be determined"));
+};
+addhelp(primesin, "primesin(P): Attempts to give the asymptotic number of primes in the polynomial P, either unconditionally or under standard conjectures. The output format is a vector, which represents:\n[x1, y1, x2, y2, ..., xk, yk, c]: density c * x^x1 / log(x)^y1 * x^x2 / log(x)^y2 * ... * x^xk / log(x)^yk\n[x1, y1, x2, y2, ..., xk, yk]: same, but with unknown leading term.");
+
+
+ConjectureFEmp(a:int,b:int,c:int,lim=1e6)={
+	my(s=0,n=0,k);
+	for(n=1,lim,
+		k=(a*n+b)*n+c;
+		if(k>lim,break);
+		s+=isprime(k)
+	);
+	2*s/Li(sqrt(lim))
+};
+addhelp(ConjectureFEmp, "ConjectureFEmp(a,b,c,{lim}): Helper function for ConjectureF, given integers a, b, and c as coefficients of ax^2 + bx + c.");
+
+
+ConjectureF(a:int,b:int,c:int,lim=1e6)={
+	my(D=b^2-4*a*c,g=gcd(a,b),f);
+print("Delta = "D);
+	if (a <= 0 || issquare(D) || gcd(g,c) > 1, return(0));
+	if ((a+b)%2 ==0 & c%2 == 0, return(0));
+
+	f=factor(g)[,1];
+	if(a+b%2, 1, 2)/sqrt(a) * prod(i=1,#f,f[i]/(f[i]-1)) * ConjectureF_C(D,lim)
+};
+addhelp(ConjectureF, "ConjectureF(a,b,c): Returns a number C such that there are ~ C*sqrt(x)/log(x) primes of the form an^2 + bn + c up to x, or 0 if there are o(sqrt(x)/log(x)) or Omega(sqrt(x)) such primes. Relies on the Hardy-Littlewood Conjecture F and possibly the ERH.");
+
+
+\\ prodinf(i=1,p=prime(i);1-kronecker(D,p)/(p-1))
+ConjectureF_C(D,lim=1e6)={
+	my(cf, pr=1., l=log(lim));
+	if (D < -4,
+		print("Fung & Williams 1990");
+		my(f=factor(oddres(-D))[,1], c = if(delta%8 == 1, 5/2, if (delta%8 == 5, 1/2, 15/16)));
+		\\ Corrects for the 1 - 1/p^3 (since kronecker(D,q) == 1 about half the time)
+		forprime(q=3,lim,if(kronecker(D,q)==1,pr*=1-2/q/(q-1)^2));
+		cf = -2*eint1(2*l) - (1-2*l)/2/lim^2/l^2;
+		pr *= 1 - cf;
+print("Correction: ", cf);
+		return(c * Pi^3 * sqrt(-D) / 90 / qfbclassno(D) / Lquad(D, 2) * prod(i=1,#f,1-1/f[i]^4) * pr)
+	);
+	if (D > 0,
+		print("Jacobson 1995");
+		\\ Possibly needed:
+		\\ QFBclassno(D) = qfbclassno(D) * if (D < 0 || norm(quadunit(D)) < 0, 1, 2)
+		my(f=factor(oddres(D))[,1], c = if(delta%8 == 1, 5/2, if (delta%8 == 5, 1/2, 15/16)));
+		forprime(q=3,lim,if(kronecker(D,q)==1,pr*=1-2/q/(q-1)^2));
+		\\ Corrects for the 1 - 1/p^3 (since kronecker(D,q) == 1 about half the time)
+		cf = -2*eint1(2*l) - (1-2*l)/2/lim^2/l^2;
+		pr *= 1 - cf;
+print("Correction: ", cf);
+		return(c * Pi^4 * sqrt(D) / 180 / quadregulator(D) / qfbclassno(D) / Lquad(D, 2) * prod(i=1,#f,1-1/f[i]^4) * pr)
+	);
+	if(1,
+		print("Keith Conrad"); \\ http://mathoverflow.net/questions/31150/calculating-the-infinite-product-from-the-hardy-littlewood-conjecture-f
+		my(t);
+		\\ Corrects for the 1 - 2/p^3
+		forprime(p=3,lim,t=kronecker(D,p);pr*=(1-t/(p-1))/(1-t/p));
+		cf = -4*eint1(2*l) - (1-2*l)/lim^2/l^2;
+		pr *= 1 - cf;
+print("Correction: ", cf);
+		return(pr/Lquad(D, 1));
+	);
+	print("Naive method");
+	\\ cf: the correction factor that estimates suminf(p=lim,-1/p^2) over the primes
+	\\ Corrects for the average of (1 - 1/p) and (1 + 1/p); not very useful.
+	cf=1/lim/l-eint1(l);
+	forprime(p=3,lim,pr*=1-kronecker(D,p)/(p-1));
+print("Correction: ", cf);
+	pr * (1 - cf)
+};
+addhelp(ConjectureF_C, "ConjectureF_C(D,{lim}): Helper function for ConjectureF, finding the infinite product in the Hardy-Littlewood Conjecture F.");
+
 
 Psi(x, B)={
 	local(log3x, log2, tmp, u, result);
