@@ -7,8 +7,39 @@ default(timer, 0);
 \\ load the .run files.
 
 
-\\ Replaced by setintersect
-intersect(v1,v2)={
+\\ Use polyinterpolate
+LIP(X=0,Y)={
+	my(n=#Y);
+	if(type(X)!="t_VEC",X=vector(n,i,i));	\\ Default to X = [1,2,3,...]
+	if (#X!=n, error("Vectors must be the same size!"));
+	sum(j=1,n,
+		Y[j]*prod(k=1,n,if(j==k,1,(x-X[k])/(X[j]-X[k])))
+	)
+};
+addhelp(LIP, "LIP(X,Y): Gives the Lagrange interpolating polynomial for X=[x1,x2,...] and Y=[y1,y2,...]. If X is omitted, use [1,2,...].");
+
+
+\\ Use a*b~
+dotproduct(a:vec, b:vec)={
+	if(#a != #b,
+		error("dotproduct: vectors are not the same size")
+	);
+	sum(i=1,#a,a[i]*b[i])
+};
+addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and b.");
+
+
+\\ Use vecextract or v[1..n]
+chop(v:vec,n:int)=
+{
+	if(#v<n,v,vector(n,i,v[i]));
+}
+addhelp(chop, "chop(v, n): Returns the first n terms of v, or all the terms if n > #v.");
+
+
+\\ Use setintersect
+intersect(v1,v2)=
+{
 	my(i=1,j=1,v=[]);
 	while(i<=#v1&&j<=#v2,
 		if(v1[i]==v2[j],
@@ -19,12 +50,12 @@ intersect(v1,v2)={
 			if(v1[i]>v2[j],j++,i++)
 		)
 	);
-	v
-};
+	v;
+}
 addhelp(intersect, "intersect(v1,v2): Intersection of the sorted sets v1 and v2.");
 
 
-\\ Replaced by matpermanent
+\\ Use matpermanent
 matperm(M:mat)=
 {
 	my(n:small=matsize(M)[1],innerSums=vectorv(n));
@@ -42,6 +73,7 @@ matperm(M:mat)=
 addhelp(matperm, "matperm(M): permanent of the matrix M.");
 
 
+\\ Is this actually a duplicate? Does it belong here?
 primezeta(s)=
 {
 	if (type(s) == "t_COMPLEX" || s <= 1,
@@ -54,6 +86,7 @@ primezeta(s)=
 addhelp(primezeta, "primezeta(s): Returns the prime zeta function of s, the sum of p^-s over all primes p.");
 
 
+\\ Use sumdigits
 dsumTable=[1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10,11,3,4,5,6,7,8,9,10,11,12,4,5,6,7,8,9,10,11,12,13,5,6,7,8,9,10,11,12,13,14,6,7,8,9,10,11,12,13,14,15,7,8,9,10,11,12,13,14,15,16,8,9,10,11,12,13,14,15,16,17,9,10,11,12,13,14,15,16,17,18];
 dsum(n:int)=
 {
@@ -68,6 +101,7 @@ dsum(n:int)=
 addhelp(dsum, "dsum(n): Digit sum of n. Sloane's A007953.");
 
 
+\\ Use forprime
 \\ Really bad performance here: >= 32 bits per number in sieve, about 100 times
 \\ the size of a basic wheel mod 6
 forbigprime(from,to,ff)=
@@ -119,6 +153,7 @@ forbigprime(from,to,ff)=
 addhelp(forbigprime, "forbigprime(X=a,b,seq): the sequence is evaluated, X running over the primes between a and b.");
 
 
+\\ Use polgraeffe
 graeffe(f:pol)=
 {
 	my(d=poldegree(f),g=vector(d\2+1,i,polcoeff(f,2*i-2)),h=vector((d+1)\2,i,polcoeff(f,2*i-1)));
@@ -837,15 +872,6 @@ digits(x)=
 }
 addhelp(digits, "digits(n): Number of decimal digits in n. Sloane's A055642.");
 */
-
-\\ 2 ^ -(decimal_precision * log(10)/log (2) / 32) * 32 - 1)
-\\ precision(2. >> (32 * ceil(precision(1.) * 0.103810252965230073370947482171543443)), 9)
-eps()=
-{
-	\\precision(2. >> (32 * ceil(default(realprecision) * 38539962 / 371253907)), 9);
-	2.>>bitprecision(1.);
-}
-addhelp(eps,"Returns machine epsilon for the current precision.");
 
 
 \\ ***************************************************************************************************

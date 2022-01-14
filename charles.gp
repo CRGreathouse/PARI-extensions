@@ -153,6 +153,35 @@ addhelp(ways, "ways(v, n): Given an increasing vector v of positive integers, re
 \\ ***************************************************************************************************
 
 
+eps(v[..])=
+{
+	my(p);
+	p=if(#v,
+		vecmin(apply(bitprecision, v))
+	,
+		oo
+	);
+	
+	if(p==oo, p=bitprecision(1.));
+	
+	2.>>p;
+}
+addhelp(eps, "eps(...): Returns machine epsilon for the current precision. If one or more arguments are given, use the worst-case precision from all.");
+
+
+parprod(f,start,end,x=1,perThread=1000)=
+{
+	my(chunks=default(nbthreads)*perThread\1,offset=start-1,g,s=1);
+	if(type(f) != "t_CLOSURE" || arity(f)!=1, error("must be a function of arity 1"));
+	if(type(x)=="t_INTMOD", s=Mod(1,x.mod));	\\ Are there any other special cases to look out for?
+	end\=1;
+	chunks=min(end-start+1,chunks);
+	g=eval(Str("n->my(x=",s,"); forstep(k=n+",offset,",",end,",",chunks,", x*=f(k)); x"));
+	vecprod(parvector(chunks,n,g(n)))*x;
+}
+addhelp(parprod, "parprod(f,start,end,{x=1},{perThread=1000}): Computes the product of x*f(start)*f(starrt+1)*...*f(end-1)*f(end). Attempts to use perThread independent calculations per thread; if perThread < 1 then the calculation will not be fully parallelized. If perThread times the number of threads is >= end-start+1, then calculations will not be batched.");
+
+
 polygonArea(v:vec)={
        if(type(v)!="t_VEC", error("Not a vector!"));
        if(#v<6 || #v%2, error("Need an even number of coordinates representing at least 3 points."));
@@ -173,15 +202,6 @@ cons(x:real)={
 addhelp(cons, "cons(x): Converts a constant into a sequence of decimal digits.");
 
 
-dotproduct(a:vec, b:vec)={
-	if(#a != #b,
-		error("dotproduct: vectors are not the same size")
-	);
-	sum(i=1,#a,a[i]*b[i])
-};
-addhelp(dotproduct, "dotproduct(a, b): Returns the dot product of vectors a and b.");
-
-
 gammainv(x:real)={
 	if(x<5040,return(solve(y=1,8,gamma(y)-x)));
 	my(L=log(x));
@@ -193,6 +213,25 @@ addhelp(gammainv, "gammainv(x): Inverse gamma function.");
 \\ ***************************************************************************************************
 \\ *	                                    Polynomials                                              *
 \\ ***************************************************************************************************
+
+Mahler(P)=
+{
+	if(type(P)!="t_POL", error("Not an integer polynomial in Mahler."));
+	for(i=0,poldegree(P),if(type(polcoeff(P,i))!="t_INT", error("Not an integer polynomial in Mahler.")));
+	\\if(!polisirreducible(P), error("Must be irreducible in Mahler"));
+	
+	abs(pollead(P))*vecprod(select(z->z>1, abs(polroots(P))));
+}
+addhelp(Mahler, "Mahler(P): Mahler measure of the polynomial P. Mahler(P) = 1 if and only if P is a product of cyclotomic polynomials and x^k for some k (Kronecker's theorem).");
+
+
+Fekete(p,x='x)=
+{
+	if(type(p)!="t_INT" || !isprime(p), error("must be a prime"));
+	Pol(vector(p,a,kronecker(a,p)),x);
+}
+addhelp(Fekete, "Fekete(p,{x='x}): Fekete polynomial at (prime) p.");
+
 
 isRicePoly(P:pol, verbose:bool=1)={
 	if(type(P)!="t_POL", error("Must be a polynomial"));
@@ -602,7 +641,49 @@ addhelp(rsp, "rsp(b, {flag=0}): Generates a random b-bit semiprime. The bits of 
 
 
 \\ ***************************************************************************************************
-\\ *                               Operations on generic lists                                       *
+\\ *                                      Linear algebra
+\\ ***************************************************************************************************
+
+definiteness(M)=
+{
+	my(tM=type(M));
+	if(tM=="t_QFI" || tM=="t_QFR",
+		\\ If b is odd (hence tM == "t_QFR"), definiteness(Mat(Qfb(a,b,c))) will fail because the matrix is not integral. So don't use main routine definiteness(Mat(M)) if possible.
+		M=Vec(M);
+		tM="t_VEC";
+	);
+	if(tM=="t_VEC" && #M==3,
+		my(a=M[1],b=M[2],c=M[3],D=b^2-4*a*c);
+		if(D>0, return(0)); \\ indefinite
+		if(D==0,
+			warning("not implemented: discriminant 0"); \\ indefinite?
+			return(definiteness(Mat(call(Qfb,M)))); \\ will fail if b is odd
+		);
+		if(sign(a) != sign(c), error("this shouldn't happen"));
+		return(2*sign(a));
+	);
+	\\if(type(M)=="t_QFI", M=Mat(M));
+	if(tM!="t_MAT", error("bad type"));
+	
+	my(ms=matsize(M));
+	if(call(cmp, ms), error("must be a square matrix"));
+	for(i=2,ms[1], for(j=1,i-1, if(M[i,j]!=M[j,i], error("must be symmetric matrix"))));
+	
+	my(p=charpoly(M),d=poldegree(p),k,s,neg,pos);
+	while(polcoeff(p,k)==0, k++); \\ assume p is not the zero polynomial!
+	s=sign(polcoeff(p,k));
+	for(i=k+1,d,
+		my(t=sign(polcoeff(p,i)));
+		if(!t,next);
+		if(t==s, pos++, neg++);
+	);
+	if(pos==0, -2, 2)/if(pos+neg==d, 1, 2);
+}
+addhelp(definiteness, "definiteness(M): Returns a value indicating the definiteness of the symmetric matrix M. 2 is positive definite, 1 is positive indefinite (but not positive definite), 0 is indefinite, -1 is negative semidefinite (but not negative definite), and -2 is negative definite. You can also pass in a binary quadratic form, either as a Qfb or a vector of coefficients.");
+
+
+\\ ***************************************************************************************************
+\\ *                                Operations on generic lists
 \\ ***************************************************************************************************
 
 ternarySearch(f, left, right)={
@@ -617,28 +698,88 @@ ternarySearch(f, left, right)={
 addhelp(ternarySearch, "ternarySearch(f, left, right): Assuming f is unimodal, find left <= x <= right such that f(x) is maximal.");
 
 
-chop(v:vec,n:int)={
-	if(#v<n,v,vector(n,i,v[i]))
-	\\ vecextract?
-};
-addhelp(chop, "chop(v, n): Returns the first n terms of v, or all the terms if n > #v.");
+sumsetmod(x:vec,y:vec,m:int)=
+{
+	my(v=List(),s=vectorsmall(m),ct);
+	for(i=1,#x,
+		for(j=1,#y,
+			my(t=(x[i]+y[j])%m+1);
+			if(s[t]==0,
+				s[t]=1;
+				if(ct++==m, return([0..m-1]))
+			)
+		)
+	);
+	for(i=1,m,
+		if(s[i], listput(v,i-1))
+	);
+	s=0;
+	Vec(v);
+}
 
 
-Aitken(v:vec)={
-	vector(#v-2, i, (v[i+2]*v[i]-v[i+1]^2)/(v[i+2]-2*v[i+1]+v[i]))
-};
+Aitken(v:vec)=
+{
+	if(type(v) != "t_VEC", error("must be vector"));
+	if(#v<3, error("need at least three terms"));
+	my(v=vector(#v-2,i, my(t=v[i+2]-v[i+1]); v[i+2] - t^2/(t-(v[i+1]-v[i]))),b=vecmin(apply(bitprecision, v)));
+	bitprecision(v, b/2);
+}
 addhelp(Aitken, "Aitken(v): Applies Aitken's delta-squared process to v. The precision of v needs to be at least twice the desired precision to get meaningful results.");
 
 
-LIP(X=0,Y)={
-	my(n=#Y);
-	if(type(X)!="t_VEC",X=vector(n,i,i));	\\ Default to X = [1,2,3,...]
-	if (#X!=n, error("Vectors must be the same size!"));
-	sum(j=1,n,
-		Y[j]*prod(k=1,n,if(j==k,1,(x-X[k])/(X[j]-X[k])))
-	)
-};
-addhelp(LIP, "LIP(X,Y): Gives the Lagrange interpolating polynomial for X=[x1,x2,...] and Y=[y1,y2,...]. If X is omitted, use [1,2,...].");
+vecreduce(v, f, flag=0)=
+{
+	my(in=vectorsmall(#v,i,1),u=List());
+	if(flag==0,
+		for(i=1,#v,
+			my(x=v[i]);
+			for(j=1,#v,
+				if(f(x,v[j]),
+					in[i]=0;
+					next(2)
+				)
+			)
+		)
+	, flag==1,
+		for(i=1,#v,
+			my(x=v[i]);
+			for(j=1,#v,
+				if(i!=j && f(x,v[j]),
+					in[i]=0;
+					next(2)
+				)
+			)
+		)
+	, flag==2,
+		for(i=2,#v,
+			my(x=v[i]);
+			for(j=1,i-1,
+				if(f(x,v[j]),
+					in[i]=0;
+					next(2)
+				)
+			)
+		)
+	, flag==3,
+		for(i=1,#v-1,
+			my(x=v[i]);
+			for(j=i+1,#v,
+				if(f(x,v[j]),
+					in[i]=0;
+					next(2)
+				)
+			)
+		)
+	,
+		error("Bad value in flag")
+	);
+	for(i=1,#in,
+		if(in[i], listput(u,v[i]))
+	);
+	Vec(u);
+}
+addhelp(vecreduce, "vecreduce(v, f, {flag = 0}): Given a vector v and a binary relation f on v X v, return those elements x in v such that there is no y in v with f(x, y) true. Optional flag: 0 as usual, 1 means do not check f(x, x), 2 means only check f(x, y) with y < x, 3 means only check f(x, y) with y > x.");
 
 
 isperiodic(v:vec)={
