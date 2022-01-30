@@ -17,10 +17,13 @@ Priority classification (first column): [subjective and debatable]
 
 2  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
 
-3  add a 'variable' as an optional last argument in content, denominator,
-   numerator, as is done in divrem (cf. 2.6.2)
-
 **************************   Personal priorities  ***************************
+
+3  Faster forfactored
+
+3  Bit map structure that's reasonably efficient in space and time
+
+2  Faster forprimestep (right now, timing is similar to forprime)
 
 2  Let sqrt work on INTMOD objects with a composite modulus.
 
@@ -38,4 +41,4 @@ Priority classification (first column): [subjective and debatable]
    factorizations as input?
 
 2  Script (function?) to deal 'nicely' with recurrence relations, finding Binet
-   forms and searching for cycles (using cyclotomic junk above).
+   forms and searching for cycles (using poliscyclo).
