@@ -214,6 +214,16 @@ addhelp(gammainv, "gammainv(x): Inverse gamma function.");
 \\ *	                                    Polynomials                                              *
 \\ ***************************************************************************************************
 
+nice(x)=x; \\ lazy workaround
+
+
+Faulhaber(e:small,a='x)=
+{
+	substpol(sum(i=0,e,binomial(e+1,i)*bernfrac(i)*'x^(e+1-i))/(e+1) + 'x^e, 'x, a);
+}
+addhelp(Faulhaber, "Faulhaber(e,{a='x}): Returns the polynomial for the sum 1^e + 2^e + ... + x^e, evaluated at a.");
+
+
 Mahler(P)=
 {
 	if(type(P)!="t_POL", error("Not an integer polynomial in Mahler."));
@@ -685,6 +695,25 @@ addhelp(definiteness, "definiteness(M): Returns a value indicating the definiten
 \\ ***************************************************************************************************
 \\ *                                Operations on generic lists
 \\ ***************************************************************************************************
+
+lsf(X,Y,n)=my(M=matrix(#X,n+1,i,j,X[i]^(j-1))); Polrev(matsolve(M~*M,M~*Y~));
+addhelp(lsf, "lsf(X, Y, n): Given variable lists X and Y (both with the same number of elements), generate the least-square fit with degree n.");
+
+
+powerfit(X,Y)=
+{
+	if(#X != #Y, error("dimensions of X and Y must be equal"));
+	my(x=List(),y=List(),s,P,k,e);
+	for(i=1,#X, if(X[i]>0 && Y[i]>0, listput(x,log(X[i])); listput(y,log(Y[i])), s++));
+	if(s>0, warning("Trimmed "s" value(s) that were <= 0."));
+	P=lsf(Vec(x),Vec(y),1);
+	k=exp(polcoeff(P,0));
+	e=polcoeff(P,1);
+	print("y ~ k*x^e with k = ",k," and e = ", e);
+	[k,e];
+}
+addhelp(powerfit, "powerfit(X, Y): Given variable lists X and Y (both with the same number of elements), generate a fit of the form y ~ kx^e and return [k, e].")
+
 
 ternarySearch(f, left, right)={
 	my(e=2*eps());\\left+right));
@@ -1694,4 +1723,3 @@ Psi(x, B)={
 addhelp(Psi, "Psi(x, B): Calculates or estimates the count of B-smooth number up to x. Psi(1000, 10) counts the number of numbers up to 1000 which have no prime factor greater than 10.");
 
 default(timer, timervalue);
-
