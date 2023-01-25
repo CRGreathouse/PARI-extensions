@@ -880,7 +880,7 @@ addhelp(findrec, "findrec(v): Tries to find a homogeneous linear recurrence rela
 
 rec(v[..])={
 	if(#v==1 && type(v[1])=="t_VEC", v=v[1]);
-	if(#v==1 && type(v[1])=="t_POL", v[1]=eval(Str(variable(v[1]),"->",v[1])));
+	if(#v==1 && type(v[1])=="t_POL", v=vector(2*poldegree(v[1])+3,n,subst(v[1],variable(v[1]),n)); print(v));
 	if(#v==1 && type(v[1])=="t_CLOSURE", v=vector(100,n,v[1](n)); print(v));
 	if (#v < 3,
 		warning(Str("findrec: Not enough information to determine if the sequence is a recurrence relation: matrix is underdetermined. Give more terms and try again."));
@@ -888,7 +888,7 @@ rec(v[..])={
 	);
 	if (v==vector(#v),
 		print1("Recurrence relation is a(n) = 0.");
-		return([0]~);
+		return([]~);
 	);
 	my(c=findrec(v),d=#c,gf=-Pol(Ser(c)*'x-1),poly=Pol(concat(-1,c)),f=factor(poly),roots=polroots(poly),init=1,s);
 	print1("Recurrence relation is a(n) = ");
@@ -947,7 +947,7 @@ addhelp(rec, "rec(v): Given a sequence, find a linear recurrence, if possible, a
 /* Third argument, verbose, is deprecated. Use rec() if you want verbosity. */
 findrecd(v:vec, d:int, verbose:bool=1)=
 {
-	my(M,c);
+	my(M,c,res);
 	if (#v < 2*d,
 		warning(Str("findrec: Not enough information to determine if the sequence is a "d"-coefficient recurrence relation; matrix is underdetermined. Give more terms or reduce d and try again."));
 		return
@@ -955,7 +955,15 @@ findrecd(v:vec, d:int, verbose:bool=1)=
 	M = matrix(d,d,x,y,v[d+x-y]);
 	\\print(M" * c = "vector(d,i,v[d+i])~);
 	if(matdet(M) == 0, return(0));	\\ Non-invertible matrix, no solutions for this d
-	c = matsolve(M,vector(d,i,v[d+i])~);
+	res = vectorv(d,i,v[d+i]);
+	if(d>30,
+		my(p=randomprime(2^32));
+		c = matsolvemod(M,p,res);
+		for(n=2*d+1,#v,
+			if(Mod(v[n],p) != sum(i=1,d,v[n-i] * c[i]), return(0))
+		);
+	);
+	c = matsolve(M,res);
 	for(n=2*d+1,#v,
 		if(v[n] != sum(i=1,d,v[n-i] * c[i]),return(0))
 	);
