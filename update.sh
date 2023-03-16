@@ -1,15 +1,30 @@
 #!/usr/bin/sh
 
 showChanges() {
+	same=$(git rev-parse $oldHEAD:CHANGES $newHEAD:CHANGES | uniq | wc -l)
+	commits=$(git rev-list $newHEAD ^$oldHEAD --pretty=oneline --count)
+	git range-diff $oldHEAD $newHEAD
+	if [ "$commits" -eq 1 ]; then
+		cv="1 commit"
+	else
+		cv="$commits commits"
+	fi
 	if [ "$same" -eq 1 ]; then
 		# There are no changes in the CHANGES file
-		echo "Nothing documented in CHANGES"
+		if [ "$commits" -gt 1 ]; then
+			echo "Nothing documented in CHANGES; $cv; last commit was"
+			git rev-list --format=%s --max-count=1 $newHEAD | tail +2
+		elif [ "$commits" -eq 1 ]; then
+			echo "Nothing documented in CHANGES; 1 commit:"
+			git rev-list --format=%s --max-count=1 $newHEAD | tail +2
+		else
+			echo "Nothing documented in CHANGES; no changes"
+		fi
 	else
 		# There are changes in the CHANGES file
-		echo "Documented changes:"
+		echo "Documented changes between $oldHEAD and $newHEAD ($cv):"
 		git diff $oldHEAD $newHEAD -- CHANGES
 	fi
-	echo "Number of commits: $commits"
 }
 
 # Check tune.h
@@ -33,15 +48,21 @@ newHEAD=$(git rev-parse HEAD)
 
 # If there are no updates, exit.
 if [ "$newHEAD" = "$oldHEAD" ]; then
-	last=$(git show -s --pretty=format:"%ah, %ar" $newHEAD)
-	echo "  [no changes since $last]"
+	last=$(git show -s --format="%cd, %cr" $newHEAD)
+	original=$(git show -s --pretty=format:"%ah, %ar" $newHEAD)
+	branch=$(git branch --show)
+	echo "  [no changes to $branch since $last]"
+	if [ "$last" != "$original" ]; then
+		echo "  [rebased from $original]"
+	fi
 	exit 0
 fi
 
 # Show changes and number of commits
-same=$(git rev-parse $oldHEAD:CHANGES $newHEAD:CHANGES | uniq | wc -l)
-commits=$(git rev-list $newHEAD ^$oldHEAD --pretty=oneline --count)
 showChanges
+
+# Elevate while the user is paying attention!
+sudo true
 
 # Try to make, catching errors
 make all
@@ -77,6 +98,7 @@ if [ "$err" -ne 0 ]; then
 fi
 
 # Show the user the changes and number of commits again.
-echo "Updated successfully. Documented changes:"
-git diff $oldHEAD $newHEAD -- CHANGES
+echo "Updated successfully."
+#git diff $oldHEAD $newHEAD -- CHANGES
+showChanges
 echo "Number of commits: $commits"
