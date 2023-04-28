@@ -4,6 +4,7 @@ import re
 import subprocess
 from typing import List
 from array import array
+import argparse
 
 # Set these to the locations of these files on your system.
 src = '../../pari/src/' # '../src'
@@ -11,6 +12,10 @@ whatnow = f'{src}/gp/whatnow.h'
 paridesc = f'{src}/desc/pari.desc'
 gp2c = '/usr/local/bin/gp2c'
 
+parser = argparse.ArgumentParser(description='Show GP functions')
+parser.add_argument('--format', choices=['1', 'comma'], default='1', help='1 (one function per line), comma (comma-separated list)')
+parser.add_argument('--show', choices=['good', 'bad', 'removed', 'obsolete', 'current', 'all'], default='good', help='good (current functions which are not obsolete), obsolete (current functions which are slated to be removed), removed (functions no longer available), bad (removed or obsolete functions), current (all available functions, whether obsolete or not), all (all functions, including those removed)')
+args = parser.parse_args()
 
 def array_minus(a: list, b: list) -> list:
     return list(set(a) - set(b))
@@ -82,6 +87,12 @@ def get_obsolete() -> List[str]:
     return sorted(obsolete)
 
 
+def show(out, fmt):
+    if fmt == '1':
+       print('\n'.join(out))
+    elif fmt == 'comma':
+        print(', '.join(out))
+
 func = get_functions()
 removed = get_removed()
 obsolete = get_obsolete()
@@ -92,6 +103,23 @@ removed = list(set(removed) - set(func))
 bad = sorted(list(set(removed) | set(obsolete)))
 good = sorted(list(set(func) - set(obsolete)))
 
-print(f"Good functions: {', '.join(good)}")
-#print(f"Bad functions: {', '.join(bad)}")
-print(f"In total there are {len(good)} good, {len(removed)} removed, and {len(obsolete)} obsolete functions.")
+if args.show == 'good':
+    show(good, args.format)
+elif args.show == 'bad':
+    show(bad, args.format)
+elif args.show == 'removed':
+    show(removed, args.format)
+elif args.show == 'obsolete':
+    show(obsolete, args.format)
+elif args.show == 'current':
+    show(func, args.format)
+elif args.show == 'all':
+    if args.format == '1':
+        all = sorted(list(set(good) | set(bad)))
+        show(all, '1')
+    else:
+        for s in ['good', 'bad', 'removed', 'obsolete']:
+            print(f"{s}:")
+            show(s, args.format)
+
+#print(f"In total there are {len(good)} good, {len(removed)} removed, and {len(obsolete)} obsolete functions.")
