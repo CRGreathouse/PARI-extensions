@@ -6,6 +6,97 @@ default(timer, 0);
 \\ *					Working space
 \\ ***************************************************************************************************
 
+sumset(X,Y)=if(X==Y,setbinop((a,b)->a+b,X),setbinop((a,b)->a+b,X,Y));
+
+strtouint(s)=
+{
+	my(t=Set(Vec(s)));
+	if(#t<2,
+		if(#t==0, error("the empty string is not a valid integer"));
+		if(t[1]<"0" || t[1]>"9", error("invalid characters"));
+		return(eval(s))
+	);
+	if(vecmin(t)<"0" || vecmax(t)>"9", error("invalid characters"));
+	eval(s);
+}
+
+
+readb(name)=
+{
+	my(v=List(),F,line,offset=oo);
+	name = Str(name);
+	while(#name < 6, name = Str(0,name));
+	name = Str("b"name".txt");
+	F=fileopen(name, "r");
+	while(line = filereadstr(n),
+		if(Vec(line)[1]=="#" || #line==0, next);
+		my(t=strsplit(line," "));
+		if(#t<2, error("bad b-file line: ", line));
+		if(offset===oo,
+			offset=strtouint(t[1]);
+		,
+			if(offset++ != strtouint(t[1]), error("expected offset ", offset, ", but got ", strtouint(t[1])));
+			
+		);
+		listput(v,strtouint(t[2]))
+	);
+	Vec(v);
+}
+
+
+bfile(name, v, offset=1, limit=1000)={
+	my(cur=offset-1,F);
+	name = Str(name);
+	while(#name < 6, name = Str(0,name));
+	name = Str("b"name".txt");
+	F=fileopen(name, "w");
+	for(i=1,#v,
+		if (#Str(v[i]) > limit,
+			print("Next term has ",#Str(v[i])," digits; exiting.");
+			break
+		);
+		my(s=Str(cur++, " ", v[i]));
+		filewrite(F, s);
+	);
+	fileclose(F);
+}
+addhelp(bfile, "bfile(name, v, offset=1): Creates a b-file with the values of v for A-number name (given as a number or a filename).");
+
+forOEIS(f)=
+{
+	my(F = fileopen("../stripped"),line);
+	while (line = filereadstr(F),
+		my(v=strsplit(line, ","));
+		if(#v<3, next);
+		v=v[2..#v-1];
+		v=iferr(apply(s->eval(s),v),E, next);
+		f(v);
+	);
+	fileclose(F);
+}
+addhelp(forOEIS, "forOEIS(f): Run the function f over each sequence in the OEIS. f is called with a vector containing initial terms of each succesive sequence.");
+
+
+isperiodic(v:vec)={
+	\\ k is the period
+	for(k=1,(#v+1)\2,
+		for(i=k+1,#v,if(v[i]!=v[i-k], next(2)));
+		return(k)
+	);
+	print("Not periodic with period <= ",(#v+1)\2);
+	0
+};
+
+isadmissible(v:vec)=
+{
+	forprime(p=2,#v,
+		if(#Set(v%p)==p, return(0))
+	);
+	1;
+}
+addhelp(isadmissible, "isadmissible(v): Is the set v admissible? Returns true if there are less than p residue classes mod p for all primes p.");
+
+
 /*
 time(ff,lim,sz=0)={
 	my(tEmpty,tNull,tFunc,timeRange,appx,gg);
@@ -1065,6 +1156,24 @@ print("mu = "mu);
 	len
 };
 addhelp(findCycle, "findCycle(ff, startAt): Finds the length of the first cycle that startAt, ff(startAt), ff(ff(startAt)), ... enters into. Prints the prefix length (steps taken before the cycle begins).");
+
+
+ever(ff:closure,startAt,val=0)={
+	my(power=1,len=1,tortoise=startAt,hare=ff(startAt));
+	while (tortoise != hare,
+		if (hare == val, return(1));
+		if (power == len,
+			tortoise = hare;
+			power <<= 1;
+			len = 0
+		);
+		hare = ff(hare);
+		len++
+	);
+
+	0;
+};
+addhelp(ever, "ever(ff, startAt, {val=0}): If the mapping startAt, ff(startAt), ... is ever equal to val, return 1. If it enters a cycle, return 0. Otherwise, loop forever.");
 
 
 LinearRecurrence(sig:vec, initial:vec, terms:small)={
