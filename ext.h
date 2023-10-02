@@ -27,7 +27,6 @@ long prp(GEN n, GEN b);
 long sprp(GEN n, GEN b);
 GEN sopf(GEN n);
 GEN sopfr(GEN n);
-GEN primorial(GEN n);
 GEN gpf(GEN n);
 GEN lpf(GEN n);
 long isFibonacci(GEN n);

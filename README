@@ -90,8 +90,6 @@ nice(o): Reformats the object o 'nicely' when possible. Currently chokes on
 normd(a,b): Amount of the normal distribution between a and b standard
     deviations. Plus/minus infinity coded as [+1]/[-1].
 oddres(n): Returns the greatest odd number dividing n.
-primorial(n): Returns the product of each prime less than or equal to n.
-    Sloane's A034386.
 prp(n,b=2): Is n a b-probable prime?
 rad(n): Radical of n, the largest squarefree number dividing n. Sloane's
     A007947.

@@ -2,8 +2,6 @@
 #include "extprv.h"
 
 static GEN mulNii(void* a, GEN x, GEN y);
-static GEN prodtree(GEN A, long start, long stop);
-static GEN prodtree_small(GEN A, long start, long stop);
 static ulong ucomposite(long n);
 
 /******************************************************************************/
@@ -98,7 +96,7 @@ issemiprime(GEN n)
 
 // FIXME: Handle the case of small primelimit
 /*
-P=primorial(661)/2;
+P=661#/2;
 v=vector(10^4);i=0;forstep(n=2^64-1,1,-2,if(1==gcd(n,P),v[i++]=n;if(i==#v,return(#v))))
 #
 sum(i=1,#v,issemi(v[i]))
@@ -420,7 +418,7 @@ GP;addhelp(gpf, "gpf(n): The greatest prime factor of a number. Sloane's A006530
 */
 /**
  * @brief Greatest prime factor of a given number.
- * 
+ *
  * @param n Number of which to find the greatest prime factor
  * @return GEN Greatest prime factor
  */
@@ -441,199 +439,6 @@ gpf(GEN n)
 
   ret = gel(f, len);
   if (equalii(ret, gen_m1)) ret = gen_1;
-  return gerepileuptoint(ltop, ret);
-}
-
-
-static GEN
-prodtree(GEN A, long start, long stop)
-{
-  pari_sp ltop = avma;
-  long diff = stop - start;
-  if (diff >= 8)
-  {
-    diff >>= 1;
-    GEN leftprod = gerepileuptoint(ltop, prodtree(A, start, start + diff));
-    pari_sp btop = avma;
-    GEN rightprod = gerepileuptoint(btop, prodtree(A, start + diff + 1, stop));
-    return gerepileuptoint(ltop, mulii(leftprod, rightprod));
-  }
-
-  GEN ret, a, b, c, d;
-  switch (diff)
-  {
-    case 7:
-      a = mulss(A[start], A[start + 7]);
-      b = mulss(A[start + 1], A[start + 6]);
-      c = mulss(A[start + 2], A[start + 5]);
-      d = mulss(A[start + 3], A[start + 4]);
-      ret = mulii(mulii(a, b), mulii(c, d));
-      break;
-    case 6:
-      a = mulss(A[start], A[start + 3]);
-      b = mulss(A[start + 1], A[start + 2]);
-      c = mulss(A[start + 4], A[start + 6]);
-      ret = mulii(mulii(a, b), mulis(c, A[start + 5]));
-      break;
-    case 5:
-      a = mulss(A[start], A[start + 5]);
-      b = mulss(A[start + 1], A[start + 4]);
-      ret = mulii(mulis(a, A[start + 2]), mulis(b, A[start + 3]));
-      break;
-    case 4:
-      a = mulss(A[start], A[start + 2]);
-      b = mulss(A[start + 3], A[start + 4]);
-      ret = mulii(mulis(a, A[start + 1]), b);
-      break;
-    case 3:
-      a = mulss(A[start], A[start + 3]);
-      b = mulss(A[start + 1], A[start + 2]);
-      ret = mulii(a, b);
-      break;
-    default:
-      pari_err_BUG("prodtree passed small argument");
-      __builtin_unreachable();
-  }
-  return gerepileuptoint(ltop, ret);
-}
-
-
-/**
- * @brief Given a vecsmall, returns the product of the elements at (1-based)
- * indices from start to stop. Assumes all members are at most
- * sqrt(ULONG_MAX); verifying this is the responsibility of the caller.
- *
- * @param A The vecsmall you wish to multiply
- * @param start First index
- * @param stop Last index
- * @return GEN Product
- */
-static GEN
-prodtree_small(GEN A, long start, long stop)
-{
-  pari_sp ltop = avma;
-  long diff = stop - start;
-  if (diff >= 8)
-  {
-    diff >>= 1;
-    GEN leftprod = gerepileuptoint(ltop, prodtree(A, start, start + diff));
-    pari_sp btop = avma;
-    GEN rightprod = gerepileuptoint(btop, prodtree(A, start + diff + 1, stop));
-    return gerepileuptoint(ltop, mulii(leftprod, rightprod));
-  }
-
-  GEN ret;
-  long a, b, c, d;
-  switch (diff)
-  {
-    case 7:
-      a = A[start] * A[start + 7];
-      b = A[start + 1] * A[start + 6];
-      c = A[start + 2] * A[start + 5];
-      d = A[start + 3] * A[start + 4];
-      ret = mulii(mulss(a, b), mulss(c, d));
-      break;
-    case 6:
-      a = A[start] * A[start + 3];
-      b = A[start + 1] * A[start + 2];
-      c = A[start + 4] * A[start + 6];
-      ret = mulii(mulss(a, b), mulss(c, A[start + 5]));
-      break;
-    case 5:
-      a = A[start] * A[start + 5];
-      b = A[start + 1] * A[start + 4];
-      ret = mulii(mulss(a, A[start + 2]), mulss(b, A[start + 3]));
-      break;
-    case 4:
-      a = A[start] * A[start + 2];
-      b = A[start + 3] * A[start + 4];
-      ret = mulis(mulss(a, A[start + 1]), b);
-      break;
-    case 3:
-      a = A[start] * A[start + 3];
-      b = A[start + 1] * A[start + 2];
-      ret = mulss(a, b);
-      break;
-    default:
-      pari_err_BUG("prodtree_small passed small argument");
-      __builtin_unreachable();
-  }
-  return gerepileuptoint(ltop, ret);
-}
-
-
-/*
-GP;install("primorial","G","primorial","./auto.gp.so");
-GP;addhelp(primorial, "primorial(n): Returns the product of each prime less than or equal to n. Sloane's A034386.");
-*/
-/**
- * @brief Primorial, that is, product of the primes up to the given number.
- * 
- * @param n Number up to which primes are multiplied
- * @return GEN Product of primes
-*/
-GEN
-primorial(GEN n)
-{
-  static const ulong smallpr[] = {
-    1UL, 1UL, 2UL, 6UL, 6UL, 30UL, 30UL, 210UL, 210UL, 210UL, 210UL, 2310UL,
-    2310UL, 30030UL, 30030UL, 30030UL, 30030UL, 510510UL, 510510UL, 9699690UL,
-    9699690UL, 9699690UL, 9699690UL, 223092870UL, 223092870UL, 223092870UL,
-    223092870UL, 223092870UL, 223092870UL
-#ifdef LONG_IS_64BIT
-    , 6469693230UL, 6469693230UL, 200560490130UL, 200560490130UL,
-    200560490130UL, 200560490130UL, 200560490130UL, 200560490130UL,
-    7420738134810UL, 7420738134810UL, 7420738134810UL, 7420738134810UL,
-    304250263527210UL, 304250263527210UL, 13082761331670030UL,
-    13082761331670030UL, 13082761331670030UL, 13082761331670030UL,
-    614889782588491410UL, 614889782588491410UL, 614889782588491410UL,
-    614889782588491410UL, 614889782588491410UL, 614889782588491410UL
-#endif
-  };
-
-  pari_sp ltop = avma;
-  ulong nn;
-  GEN ret;
-  if (typ(n) == t_REAL)
-  {
-    if (signe(n) < 1) return gen_1;
-    nn = itou_or_0(floorr(n));
-    set_avma(ltop);
-  }
-  else if (typ(n) == t_INT)
-  {
-    if (signe(n) < 1) return gen_1;
-    nn = itou_or_0(n);
-  }
-  else
-  {
-    pari_err_TYPE("primorial", n);
-    __builtin_unreachable();
-  }
-
-  if (nn == 0) pari_err_OVERFLOW("primorial [wordsize only please]");
-
-#ifdef LONG_IS_64BIT
-  if (nn < 53)
-#else
-  if (nn < 29)
-#endif
-    return utoipos(smallpr[nn]);
-
-  ulong primeCount = uprimepi(nn);
-  GEN pr = primes_zv(primeCount);
-#ifdef LONG_IS_64BIT
-  if (primeCount < 4294967295)
-#else
-  if (primeCount < 6543)
-#endif
-  {
-    ret = prodtree_small(pr, 1, primeCount);
-  }
-  else
-  {
-    ret = prodtree(pr, 1, primeCount);
-  }
   return gerepileuptoint(ltop, ret);
 }
 
@@ -672,7 +477,7 @@ GP;addhelp(lpf, "lpf(n): The least prime factor of a number. Sloane's A020639.")
 */
 /**
  * @brief Least prime factor of a given number.
- * 
+ *
  * @param n Number of which to find the least prime factor
  * @return GEN Least prime factor
  */
@@ -817,7 +622,7 @@ GP;addhelp(composite, "composite(n): Returns the n-th composite. Sloane's A00280
 */
 /**
  * @brief Returns the n-th composite number.
- * 
+ *
  * @param n Index
  * @return GEN Composite number
  */
