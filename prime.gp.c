@@ -16,7 +16,7 @@ GP;addhelp(issemi, "issemi(n): Is n a semiprime? Sloane's A064911; characteristi
 */
 /**
  * @brief Test if the number is semiprime.
- * 
+ *
  * @param n Number to test
  * @return long 1 if the number is semiprime and 0 otherwise
  */
@@ -54,9 +54,7 @@ issemiprime(GEN n)
     pari_printf(
       "issemi: Number is a composite with no small prime factors; using general factoring mechanisms.");
 
-  GEN fac = Z_factor_until(
-    n, shifti(
-         n, -1)); // Find a nontrivial factor -- returns just the factored part
+  GEN fac = Z_factor_until(n, shifti(n, -1)); // Find a nontrivial factor -- returns just the factored part
   GEN expo = gel(fac, 2);
   GEN pr = gel(fac, 1);
   long len = glength(expo);
@@ -91,8 +89,7 @@ issemiprime(GEN n)
   }
 
   pari_err_BUG(pari_sprintf(
-    "Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...",
-    fac, n));
+    "Z_factor_until returned an unexpected value %Ps at n = %Ps, exiting...", fac, n));
   __builtin_unreachable();
   set_avma(ltop);
   return NEVER_USED;
@@ -139,20 +136,23 @@ uissemiprime(ulong n)
 {
 #define CUTOFF 1000
 #ifdef LONG_IS_64BIT
-#if CUTOFF <= 2642245
-#define CUTOFF_CUBE CUTOFF* CUTOFF* CUTOFF
+  #if CUTOFF <= 2642245
+    #define CUTOFF_CUBE CUTOFF* CUTOFF* CUTOFF
+  #else
+    #define CUTOFF_CUBE 18446744073709551615UL
+  #endif
 #else
-#define CUTOFF_CUBE 18446744073709551615UL
-#endif
-#else
-#if CUTOFF <= 1625UL
-#define CUTOFF_CUBE CUTOFF* CUTOFF* CUTOFF
-#else
-#define CUTOFF_CUBE 4294967295UL
-#endif
+  #if CUTOFF <= 1625UL
+    #define CUTOFF_CUBE CUTOFF* CUTOFF* CUTOFF
+  #else
+    #define CUTOFF_CUBE 4294967295UL
+  #endif
 #endif
 #if CUTOFF < 661
-#error uissemiprime misconfigured, needs more primes to use uisprime_661.
+  #error uissemiprime misconfigured, needs more primes to use uisprime_661, set CUTOFF higher or use uisprime.
+#endif
+#if CUTOFF > 65537
+  #error uissemiprime misconfigured, can't use NEXT_PRIME_VIADIFF in case maxprimelim is too small, use set CUTOFF lower or NEXT_PRIME_VIADIFF_CHECK instead.
 #endif
 
   // Remove even numbers. Half of random inputs are caught here.
