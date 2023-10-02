@@ -152,7 +152,7 @@ uissemiprime(ulong n)
   #error uissemiprime misconfigured, needs more primes to use uisprime_661, set CUTOFF higher or use uisprime.
 #endif
 #if CUTOFF > 65537
-  #error uissemiprime misconfigured, can't use NEXT_PRIME_VIADIFF in case maxprimelim is too small, use set CUTOFF lower or NEXT_PRIME_VIADIFF_CHECK instead.
+  #error uissemiprime misconfigured, cannot use NEXT_PRIME_VIADIFF in case maxprimelim is too small, use set CUTOFF lower or NEXT_PRIME_VIADIFF_CHECK instead.
 #endif
 
   // Remove even numbers. Half of random inputs are caught here.
