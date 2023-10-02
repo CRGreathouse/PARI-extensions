@@ -18,7 +18,7 @@ for a beter method.
 */
 /**
  * @brief Prime zeta function: sum p^-s over all primes p.
- * 
+ *
  * @param s Complex exponent
  * @param prec Precision in words
  * @return GEN Sum of p^-s over all primes p
@@ -84,7 +84,7 @@ primezeta_real(GEN s)
   // Determine the number of iterations needed
   // The precision here is probably overkill but the extra time is irrelevant.
   GEN t = shiftr(mulrr(rtor(s, DEFAULTPREC), dbltor(M_LN2)), 1 - precision(s));
-  GEN iter = gdivent(mplambertW(shiftr(t, 1 - prec)), t);
+  GEN iter = gdivent(mplambertW(shiftr(t, 1 - prec), DEFAULTPREC), t);
   ulong k, mx = itou(iter);
 
   GEN accum = real_0(prec);
